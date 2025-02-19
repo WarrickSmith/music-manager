@@ -1,6 +1,10 @@
-# Music Manager Project Development Plan (Extended)
+# Music Manager Project Development Plan
 
-This document is an extended version of the Music Manager development plan, enhanced with additional details from the "Comprehensive Project Development Plan Overhaul for Modern Web Stack Implementation." It integrates Appwrite for backend services, adheres to functional programming paradigms in JavaScript, uses npm as the package manager, and employs a modern UI design with shadcn/UI for Next.js 15+. Phases 4 and 5 are reversed so that the Admin Dashboard is established before the Competitor Dashboard, and the UI is refined for a modern, colorful experience.
+This document outlines a comprehensive, Markdown-formatted project development plan for the "Music Manager" application. The plan is structured in logical phases with clear deliverables, verification steps, and integrated improvements to support secure, maintainable, and high-quality code.
+
+## Overview
+
+Music Manager is an application designed for Ice Skaters to upload and manage music files provided by Competitors for each competition grade. With two primary user roles – Competitor and Admin – the application supports file management, user administration, and competition scheduling. The technology stack is based on Next.js 15 (latest) with SHADCN components and TypeScript, leveraging Firebase for backend and storage. Emphasis is placed on mobile responsiveness, robust error handling, and secure data practices.
 
 ---
 
@@ -49,16 +53,6 @@ This document is an extended version of the Music Manager development plan, enha
     description?: string
   }
 
-  interface User {
-    $id: string
-    email: string
-    fullName: string
-    firstName: string
-    lastName: string
-    role: 'admin' | 'competitor'
-    createdAt: string
-  }
-
   interface MusicFile {
     $id: string
     originalName: string
@@ -90,7 +84,7 @@ This document is an extended version of the Music Manager development plan, enha
        --src-dir \
        --import-alias "@/*"
      ```
-   - Enable Turbopack
+   - Enable Turbopack (if desired) for faster local development builds (noting Turbopack is in beta).
    - Maintain a functional programming approach (pure functions, React hooks, etc.).
 
 2. **Component Library Setup**
@@ -131,103 +125,52 @@ This document is an extended version of the Music Manager development plan, enha
 
 ## Phase 2: Appwrite Configuration and Setup
 
+- Appwrite Server and Client API details are in the ./Docs directory.
+
 1. **Appwrite SDK Installation**
    ```bash
    npm install appwrite
    ```
 2. **Appwrite Project Setup**
 
-   - Create or configure a new Appwrite project from the Appwrite console or CLI.
+   - Appwrite will be used in hybrid mode withe both the Client (Web) and Server (Node.js) SDK's installed. Use Client or Server API code where relevant in the project.
+
    - Copy the Project ID and Endpoint to `.env.local`:
      ```
      NEXT_PUBLIC_APPWRITE_ENDPOINT="https://cloud.appwrite.io/v1"
      NEXT_PUBLIC_APPWRITE_PROJECT_ID="your-project-id"
+     APPWRITE_SECRET_KEY="your-project-secret-key"
      ```
 
-3. **Appwrite Client Initialization**
+3. **Database Collections**
 
-   ```typescript name=src/lib/appwrite-config.ts
-   import { Client, Account, Databases, Storage, ID } from 'appwrite'
-
-   const client = new Client()
-     .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT as string)
-     .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID as string)
-
-   export const account = new Account(client)
-   export const databases = new Databases(client)
-   export const storage = new Storage(client)
-   export { ID } // For document ID generation
-   ```
-
-4. **Database Collections**
-
-   - Create Collections for `Users`, `Competitions`, `Grades`, and `MusicFiles`.
+   - Create Collections for `Competitions`, `Grades`, and `MusicFiles`.
    - Configure each collection’s permissions. For example, only Admins can create or update Competition records, but both Admins and Competitors can read them.
 
-5. **Roles & Permissions**
-   - In Appwrite, define roles (e.g., `admin`, `competitor`) to reflect the roles stored in your application’s `User` collection.
+4. **Roles & Permissions**
+   - In Appwrite, define roles as Labels for use with role based routing in Next.js App Router (e.g., `admin`, `competitor`).
    - Secure endpoints and storage accordingly.
 
 ---
 
 ## Phase 3: Authentication and User Management
 
-1. **Functional Auth Approach**
-
-   - Use React hooks and a global AuthContext for user session management, encouraging functional patterns:
-
-     ```typescript name=src/providers/AuthProvider.tsx
-     import React, { createContext, useEffect, useState } from 'react'
-     import { account } from '@/lib/appwrite-config'
-
-     interface AuthState {
-       status: 'loading' | 'authenticated' | 'unauthenticated'
-       user: any
-     }
-
-     export const AuthContext = createContext<AuthState | null>(null)
-
-     export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
-       children,
-     }) => {
-       const [authState, setAuthState] = useState<AuthState>({
-         status: 'loading',
-         user: null,
-       })
-
-       useEffect(() => {
-         const checkSession = async () => {
-           try {
-             const currentUser = await account.get()
-             setAuthState({ status: 'authenticated', user: currentUser })
-           } catch {
-             setAuthState({ status: 'unauthenticated', user: null })
-           }
-         }
-         checkSession()
-       }, [])
-
-       return (
-         <AuthContext.Provider value={authState}>
-           {children}
-         </AuthContext.Provider>
-       )
-     }
-     ```
-
-2. **User Creation and Roles**
-
-   - On initial user sign-up, if no users exist yet, mark the new user as `admin`; otherwise, assign `competitor`.
-   - Store user details (firstName, lastName, email, role) in a custom Appwrite `Users` collection for trackable roles.
-
-3. **Login and Profile**
-
-   - Leverage Appwrite’s `account.createEmailSession` or OAuth sessions.
-   - Provide a circular Login/Logout button in a global header. If authenticated, it logs out the user; if not, it routes to a login page.
-
-4. **Error Handling**
-   - Use shadcn/UI toasts for invalid credentials or session errors.
-   - Validate user input (Zod/React Hook Form) and give detailed form error messages.
+- **User Creation and Landing Page:**
+  - Develop a main application page with options to create (register) a new user and log in.
+  - Use a separate from for Login and Registration.
+  - User registration form collects first name, last name, email, and password with proper validation.
+  - The Main landing page will have the title 'Music Manager' with a modern music related icon beside it.
+  - When creating a new user, concatenate the First and Last names as fullname for creating the User in Appwrite authentication.
+  - Check when creating users. If the user is the very first user created, they will get the 'admin' role (label), otherwise the user is created with the 'competitor' default role (Label).
+  - **Login and Role-Based Routing:**
+  - Implement authentication using Appwrite Authentication.
+  - After login, check the user role (Label) from appwrite and route:
+    - Competitor → Competitor Dashboard (create a temporary default dashboard page)
+    - Admin → Admin Dashboard (create a temporary default dashboard page)
+- **Global Navigation:**
+  - Include a circular, state-dependent global Login/Logout button accessible on all pages that indicates the current login state. If clicked then log the user out and route to the login page. If already logged out, just route to the login page.
+- **Error Handling:**
+  - Provide clear, user friendly, error messages and loading states throughout the authentication flow, using the forms and toasts where appropriate.
 
 ---
 
