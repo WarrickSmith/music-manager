@@ -1,0 +1,199 @@
+Install Appwrite:
+
+Web SDK Install:
+npm install appwrite@14.0.1
+
+
+
+Define Appwrite service:
+
+Create a new file app/appwrite.js and add the following code to it, replace <PROJECT_ID> with your project ID env-local reference.
+
+import { Client, Account } from 'appwrite';
+
+export const client = new Client();
+
+client
+    .setEndpoint('https://cloud.appwrite.io/v1')
+    .setProject('<PROJECT_ID>'); // Replace with your project ID
+
+export const account = new Account(client);
+export { ID } from 'appwrite';
+
+
+Create a login page:
+
+"use client";
+import { useState } from "react";
+import { account, ID } from "./appwrite";
+
+const LoginPage = () => {
+  const [loggedInUser, setLoggedInUser] = useState(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+
+  const login = async (email, password) => {
+    const session = await account.createEmailPasswordSession(email, password);
+    setLoggedInUser(await account.get());
+  };
+
+  const register = async () => {
+    await account.create(ID.unique(), email, password, name);
+    login(email, password);
+  };
+
+  const logout = async () => {
+    await account.deleteSession("current");
+    setLoggedInUser(null);
+  };
+
+  if (loggedInUser) {
+    return (
+      <div>
+        <p>Logged in as {loggedInUser.name}</p>
+        <button type="button" onClick={logout}>
+          Logout
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <p>Not logged in</p>
+      <form>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <button type="button" onClick={() => login(email, password)}>
+          Login
+        </button>
+        <button type="button" onClick={register}>
+          Register
+        </button>
+      </form>
+    </div>
+  );
+};
+
+export default LoginPage;
+
+
+
+
+Account Management Examples:
+
+Signup
+You can use the Appwrite Client SDKs to create an account using email and password.
+import { Client, Account, ID } from "appwrite";
+
+const client = new Client()
+    .setProject('<PROJECT_ID>'); // Your project ID
+
+const account = new Account(client);
+
+const promise = account.create('[USER_ID]', 'email@example.com', '');
+
+promise.then(function (response) {
+    console.log(response); // Success
+}, function (error) {
+    console.log(error); // Failure
+});
+
+
+
+
+Login
+After an account is created, users can be logged in using the Create Email Session route.
+
+import { Client, Account } from "appwrite";
+
+const client = new Client()
+    .setProject('<PROJECT_ID>'); // Your project ID
+
+const account = new Account(client);
+
+const promise = account.createEmailPasswordSession('email@example.com', 'password');
+
+promise.then(function (response) {
+    console.log(response); // Success
+}, function (error) {
+    console.log(error); // Failure
+});
+
+
+Labels
+Labels are a good way to categorize a user to grant them access to resources. 
+Here is an example of a User created with an 'admin' label.
+
+import { Client, Account, Users } from 'appwrite';
+
+// Initialize Appwrite Client
+const client = new Client()
+    .setEndpoint('https://your-appwrite-endpoint')
+    .setProject('your-project-id');
+
+const account = new Account(client);
+const users = new Users(client);
+
+async function createUserWithLabel(email, password, name, label = 'admin') {
+    try {
+        // First create the account
+        const newAccount = await account.create(
+            'unique()', // Unique ID, let Appwrite generate it
+            email,
+            password,
+            name
+        );
+
+        // Then assign the label using the user's ID
+        const updatedUser = await users.updateLabels(
+            newAccount.$id,
+            [label]  // Array of labels
+        );
+
+        return updatedUser;
+    } catch (error) {
+        console.error('Error creating user with label:', error);
+        throw error;
+    }
+}
+
+// Example usage in a signup form component
+async function handleSignup(formData) {
+    try {
+        const user = await createUserWithLabel(
+            formData.email,
+            formData.password,
+            formData.name,
+            'admin'  // or any other label you want to assign
+        );
+        
+        // After successful creation, you might want to log them in
+        const session = await account.createEmailSession(
+            formData.email,
+            formData.password
+        );
+
+        return { user, session };
+    } catch (error) {
+        console.error('Signup failed:', error);
+        throw error;
+    }
+}
