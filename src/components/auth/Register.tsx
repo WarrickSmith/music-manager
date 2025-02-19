@@ -12,6 +12,7 @@ interface RegisterProps {
 interface RegisterFormData {
   email: string
   password: string
+  confirmPassword: string
   firstName: string
   lastName: string
 }
@@ -20,6 +21,7 @@ export default function Register({ onRegistered }: RegisterProps) {
   const [formData, setFormData] = useState<RegisterFormData>({
     email: '',
     password: '',
+    confirmPassword: '',
     firstName: '',
     lastName: '',
   })
@@ -32,6 +34,18 @@ export default function Register({ onRegistered }: RegisterProps) {
     setError('')
 
     try {
+      // Validate passwords match
+      if (formData.password !== formData.confirmPassword) {
+        setError('Passwords do not match')
+        return
+      }
+
+      // Validate password length
+      if (formData.password.length < 8) {
+        setError('Password must be at least 8 characters long')
+        return
+      }
+
       const response = await fetch('/api/register', {
         method: 'POST',
         headers: {
@@ -116,10 +130,25 @@ export default function Register({ onRegistered }: RegisterProps) {
           <Input
             id="password"
             type="password"
-            placeholder="Enter your password"
+            placeholder="Enter your password (min. 8 characters)"
             value={formData.password}
             onChange={(e) =>
               setFormData({ ...formData, password: e.target.value })
+            }
+            required
+            minLength={8}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="confirmPassword">Confirm Password</Label>
+          <Input
+            id="confirmPassword"
+            type="password"
+            placeholder="Confirm your password"
+            value={formData.confirmPassword}
+            onChange={(e) =>
+              setFormData({ ...formData, confirmPassword: e.target.value })
             }
             required
           />
