@@ -27,9 +27,6 @@ export async function POST(request: Request) {
     // Set the appropriate label using server SDK
     await users.updateLabels(user.$id, [role])
 
-    // Create session for the new user
-    await account.createEmailPasswordSession(email, password)
-
     // Get the updated user to include the role in the response
     const updatedUser = await users.get(user.$id)
 

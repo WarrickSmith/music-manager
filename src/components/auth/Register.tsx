@@ -1,10 +1,13 @@
 'use client'
 
 import { useState, FormEvent } from 'react'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+
+interface RegisterProps {
+  onRegistered: () => void
+}
 
 interface RegisterFormData {
   email: string
@@ -13,8 +16,7 @@ interface RegisterFormData {
   lastName: string
 }
 
-export default function Register() {
-  const router = useRouter()
+export default function Register({ onRegistered }: RegisterProps) {
   const [formData, setFormData] = useState<RegisterFormData>({
     email: '',
     password: '',
@@ -47,14 +49,10 @@ export default function Register() {
         throw new Error(data.error || 'Registration failed')
       }
 
-      const { user } = await response.json()
+      await response.json()
 
-      // Redirect based on the user's role
-      if (user.labels && user.labels.includes('admin')) {
-        router.push('/admin')
-      } else {
-        router.push('/competitor')
-      }
+      // Call the callback to switch to login form
+      onRegistered()
     } catch (err) {
       setError(
         err instanceof Error

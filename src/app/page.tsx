@@ -107,7 +107,7 @@ export default function Home() {
               </div>
             ) : (
               <div>
-                <Register />
+                <Register onRegistered={() => setShowLogin(true)} />
                 <p className="text-center mt-4">
                   Already have an account?{' '}
                   <button
