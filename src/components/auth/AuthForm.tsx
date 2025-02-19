@@ -4,7 +4,7 @@ import { useState, FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
-import { account, ID } from '@/lib/appwrite-config'
+import { account } from '@/lib/appwrite-config'
 
 interface User {
   $id: string
@@ -43,10 +43,24 @@ export default function AuthForm() {
     setError('')
 
     try {
-      await account.create(ID.unique(), email, password, name)
-      await account.createEmailPasswordSession(email, password)
-      const user = await account.get()
-      setLoggedInUser(user)
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          name,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Registration failed')
+      }
+
+      const data = await response.json()
+      setLoggedInUser(data.user)
     } catch (err) {
       setError('Failed to register. Please try again.')
       console.error(err)
