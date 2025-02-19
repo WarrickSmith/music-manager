@@ -16,28 +16,33 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Check if user is already logged in
-    const checkSession = async () => {
-      try {
-        const user = await account.get()
-        setIsLoggedIn(true)
+    // By default, assume not logged in
+    setIsLoggedIn(false)
+    setIsLoading(false)
 
-        // Redirect to appropriate dashboard based on role
-        if (user.labels?.includes('admin')) {
-          router.push('/admin')
-        } else {
-          router.push('/competitor')
+    // Only attempt to get user data if we have an Appwrite cookie
+    const cookies = document.cookie
+    if (cookies.includes('a_session_')) {
+      const checkSession = async () => {
+        try {
+          const user = await account.get()
+          setIsLoggedIn(true)
+
+          // Redirect to appropriate dashboard based on role
+          if (user.labels?.includes('admin')) {
+            router.push('/admin')
+          } else {
+            router.push('/competitor')
+          }
+        } catch (error) {
+          // Invalid or expired session
+          console.error('Session check error:', error)
+          setIsLoggedIn(false)
         }
-      } catch (error) {
-        // No active session, show login form
-        console.error('Session check error:', error)
-        setIsLoggedIn(false)
-      } finally {
-        setIsLoading(false)
       }
-    }
 
-    checkSession()
+      checkSession()
+    }
   }, [router])
 
   if (isLoading) {
