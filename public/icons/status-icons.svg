@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="72" height="24" viewBox="0 0 72 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <g id="logged-out" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M6 20C6 16.13 8.63 13 12 13C15.37 13 18 16.13 18 20"/></g>
+  <g id="logged-in" transform="translate(24 0)" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M6 20C6 16.13 8.63 13 12 13C15.37 13 18 16.13 18 20"/><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/></g>
+  <g id="logged-in-admin" transform="translate(48 0)" fill="currentColor"><circle cx="12" cy="8" r="4"/><path d="M6 20C6 16.13 8.63 13 12 13C15.37 13 18 16.13 18 20"/><path d="M7 7L17 7M12 2L12 12" stroke="currentColor" stroke-width="2"/></g>
+</svg>
