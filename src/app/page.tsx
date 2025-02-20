@@ -2,10 +2,10 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Image from 'next/image'
 import Login from '@/components/auth/Login'
 import Register from '@/components/auth/Register'
 import { useAuth } from '@/context/AuthContext'
+import { MusicIcon } from '@/components/ui/icons'
 
 export default function Home() {
   const router = useRouter()
@@ -36,13 +36,7 @@ export default function Home() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-4 mb-4">
-            <Image
-              src="/next.svg"
-              alt="Music Icon"
-              width={40}
-              height={40}
-              priority
-            />
+            <MusicIcon className="w-10 h-10" />
             <h1 className="text-4xl font-bold">Music Manager</h1>
           </div>
           <p className="text-gray-600">
