@@ -7,7 +7,7 @@ import {
   useState,
   ReactNode,
 } from 'react'
-import { account } from '@/lib/appwrite-config'
+import { getAccount } from '@/lib/appwrite-config'
 import { Models } from 'appwrite'
 
 interface AuthContextType {
@@ -28,6 +28,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkAuth = async () => {
     try {
+      // Only check auth if we have an active session
+      const account = getAccount()
       const currentUser = await account.get()
       setUser(currentUser)
     } catch (error) {
@@ -40,6 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
+      const account = getAccount()
       await account.deleteSession('current')
       setUser(null)
     } catch (error) {
@@ -48,7 +51,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
-    checkAuth()
+    // Don't automatically check auth on mount
+    setLoading(false)
   }, [])
 
   const value = {

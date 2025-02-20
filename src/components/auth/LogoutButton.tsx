@@ -2,13 +2,14 @@
 
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
-import { account } from '@/lib/appwrite-config'
+import { getAccount } from '@/lib/appwrite-config'
 
 export default function LogoutButton() {
   const router = useRouter()
 
   const handleLogout = async () => {
     try {
+      const account = getAccount()
       await account.deleteSession('current')
       router.push('/') // Always redirect to home page after logout
     } catch (error) {

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
-import { account } from '@/lib/appwrite-config'
+import { getAccount } from '@/lib/appwrite-config'
 import { useAuth } from '@/context/AuthContext'
 
 interface LoginFormData {
@@ -29,6 +29,7 @@ export default function Login() {
     setError('')
 
     try {
+      const account = getAccount()
       // Create session
       await account.createEmailPasswordSession(
         formData.email,

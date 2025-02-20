@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { ID, Query } from 'appwrite'
-import { account, users } from '@/lib/appwrite-config'
+import { getAccount, users } from '@/lib/appwrite-config'
 
 interface AppwriteError {
   code: number
@@ -13,6 +13,7 @@ export async function POST(request: Request) {
     const { email, password, name } = await request.json()
 
     // Create user account using client SDK
+    const account = getAccount()
     const user = await account.create(ID.unique(), email, password, name)
 
     // Check if this is the first user
