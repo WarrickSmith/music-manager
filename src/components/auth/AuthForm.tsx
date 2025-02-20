@@ -4,7 +4,7 @@ import { useState, FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
-import { account } from '@/lib/appwrite-config'
+import { getAccount } from '@/lib/appwrite-config'
 
 interface User {
   $id: string
@@ -26,6 +26,7 @@ export default function AuthForm() {
     setError('')
 
     try {
+      const account = getAccount()
       await account.createEmailPasswordSession(email, password)
       const user = await account.get()
       setLoggedInUser(user)
@@ -71,6 +72,7 @@ export default function AuthForm() {
 
   const logout = async () => {
     try {
+      const account = getAccount()
       await account.deleteSession('current')
       setLoggedInUser(null)
     } catch (err) {
