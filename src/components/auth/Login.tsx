@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { account } from '@/lib/appwrite-config'
+import { useAuth } from '@/context/AuthContext'
 
 interface LoginFormData {
   email: string
@@ -14,6 +15,7 @@ interface LoginFormData {
 
 export default function Login() {
   const router = useRouter()
+  const { checkAuth } = useAuth()
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: '',
@@ -27,13 +29,16 @@ export default function Login() {
     setError('')
 
     try {
-      // Create session and get user data
+      // Create session
       await account.createEmailPasswordSession(
         formData.email,
         formData.password
       )
 
-      // Get user data to check role
+      // Update auth context
+      await checkAuth()
+
+      // Get fresh user data to check role
       const user = await account.get()
 
       // Check user's role and redirect accordingly

@@ -2,33 +2,37 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { account } from '@/lib/appwrite-config'
-import LogoutButton from '@/components/auth/LogoutButton'
+import { useAuth } from '@/context/AuthContext'
 
 export default function CompetitorDashboard() {
   const router = useRouter()
+  const { user, loading } = useAuth()
 
   useEffect(() => {
-    // Check if user is logged in and has competitor role
-    const checkAuth = async () => {
-      try {
-        const user = await account.get()
-        if (!user.labels?.includes('competitor')) {
-          router.push('/')
-        }
-      } catch (error) {
-        // If there's an error (no session), redirect to login
-        console.error('Authentication error:', error)
+    if (!loading) {
+      // If not loading and either no user or not competitor, redirect
+      if (!user || !user.labels?.includes('competitor')) {
         router.push('/')
       }
     }
+  }, [user, loading, router])
 
-    checkAuth()
-  }, [router])
+  // Show loading state while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    )
+  }
+
+  // Only render dashboard if user is competitor
+  if (!user?.labels?.includes('competitor')) {
+    return null
+  }
 
   return (
     <div className="min-h-screen">
-      <LogoutButton />
       <div className="container mx-auto p-8">
         <h1 className="text-3xl font-bold mb-6">Competitor Dashboard</h1>
         <p className="text-gray-600">
