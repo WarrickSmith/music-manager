@@ -6,6 +6,7 @@ import Login from '@/components/auth/Login'
 import Register from '@/components/auth/Register'
 import { useAuth } from '@/context/AuthContext'
 import { MusicIcon } from '@/components/ui/icons'
+import { RiUserAddLine, RiLoginBoxLine } from 'react-icons/ri'
 
 export default function Home() {
   const router = useRouter()
@@ -59,26 +60,28 @@ export default function Home() {
             {showLoginForm ? (
               <div>
                 <Login />
-                <p className="text-center mt-4">
-                  Don&apos;t have an account?{' '}
+                <p className="text-center mt-4 flex items-center justify-center gap-1">
+                  Don&apos;t have an account?
                   <button
                     onClick={() => setShowLoginForm(false)}
-                    className="text-primary font-medium hover:text-primary/80 transition-colors px-2 py-1 rounded-lg hover:bg-primary/10"
+                    className="text-primary font-medium hover:text-primary/80 transition-colors px-2 py-1 rounded-lg hover:bg-primary/10 inline-flex items-center gap-1.5"
                   >
                     Register here
+                    <RiUserAddLine className="w-4 h-4" />
                   </button>
                 </p>
               </div>
             ) : (
               <div>
                 <Register onRegistered={() => setShowLoginForm(true)} />
-                <p className="text-center mt-4">
-                  Already have an account?{' '}
+                <p className="text-center mt-4 flex items-center justify-center gap-1">
+                  Already have an account?
                   <button
                     onClick={() => setShowLoginForm(true)}
-                    className="text-primary font-medium hover:text-primary/80 transition-colors px-2 py-1 rounded-lg hover:bg-primary/10"
+                    className="text-primary font-medium hover:text-primary/80 transition-colors px-2 py-1 rounded-lg hover:bg-primary/10 inline-flex items-center gap-1.5"
                   >
                     Login here
+                    <RiLoginBoxLine className="w-4 h-4" />
                   </button>
                 </p>
               </div>
