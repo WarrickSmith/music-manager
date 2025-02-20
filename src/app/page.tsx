@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import Login from '@/components/auth/Login'
@@ -9,8 +9,7 @@ import { useAuth } from '@/context/AuthContext'
 
 export default function Home() {
   const router = useRouter()
-  const { user, loading } = useAuth()
-  const [showLogin, setShowLogin] = useState(true)
+  const { user, loading, showLoginForm, setShowLoginForm } = useAuth()
 
   useEffect(() => {
     if (user) {
@@ -54,13 +53,13 @@ export default function Home() {
         {/* Auth Forms */}
         {!user && (
           <div className="mt-8">
-            {showLogin ? (
+            {showLoginForm ? (
               <div>
                 <Login />
                 <p className="text-center mt-4">
                   Don&apos;t have an account?{' '}
                   <button
-                    onClick={() => setShowLogin(false)}
+                    onClick={() => setShowLoginForm(false)}
                     className="text-blue-500 hover:underline"
                   >
                     Register here
@@ -69,11 +68,11 @@ export default function Home() {
               </div>
             ) : (
               <div>
-                <Register onRegistered={() => setShowLogin(true)} />
+                <Register onRegistered={() => setShowLoginForm(true)} />
                 <p className="text-center mt-4">
                   Already have an account?{' '}
                   <button
-                    onClick={() => setShowLogin(true)}
+                    onClick={() => setShowLoginForm(true)}
                     className="text-blue-500 hover:underline"
                   >
                     Login here

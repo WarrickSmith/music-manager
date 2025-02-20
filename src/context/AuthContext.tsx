@@ -13,6 +13,8 @@ import { Models } from 'appwrite'
 interface AuthContextType {
   user: Models.User<Models.Preferences> | null
   loading: boolean
+  showLoginForm: boolean
+  setShowLoginForm: (show: boolean) => void
   logout: () => Promise<void>
   checkAuth: () => Promise<void>
 }
@@ -22,6 +24,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<Models.User<Models.Preferences> | null>(null)
   const [loading, setLoading] = useState(true)
+  const [showLoginForm, setShowLoginForm] = useState(true)
 
   const checkAuth = async () => {
     try {
@@ -51,6 +54,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = {
     user,
     loading,
+    showLoginForm,
+    setShowLoginForm,
     logout,
     checkAuth,
   }

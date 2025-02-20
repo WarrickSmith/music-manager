@@ -6,15 +6,17 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 
 export function GlobalNav() {
-  const { user, logout } = useAuth()
+  const { user, logout, setShowLoginForm } = useAuth()
   const router = useRouter()
 
   const handleAuthClick = async () => {
     if (user) {
       await logout()
-      router.push('/auth/login')
+      router.replace('/')
     } else {
-      router.push('/auth/login')
+      // Show login form and navigate to home
+      setShowLoginForm(true)
+      router.replace('/')
     }
   }
 
