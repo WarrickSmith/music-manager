@@ -33,6 +33,7 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
   - Next.js 15+ with TypeScript
   - shadcn/UI components for UI consistency
   - Appwrite for Database, Storage, Authentication, and real-time capabilities
+  - React Icons for icons
   - Functional programming approach (React hooks, pure functions, immutable state)
 
 - **Data Model**  

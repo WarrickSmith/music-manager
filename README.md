@@ -9,6 +9,7 @@ A browser-based platform where Competitors can upload music files for their comp
 - shadcn/UI components for UI consistency
 - Appwrite for Backend Services (Database, Storage, Authentication)
 - Tailwind CSS for styling
+- React Icons for icons
 
 ## Project Structure
 

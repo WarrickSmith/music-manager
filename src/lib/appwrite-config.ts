@@ -13,7 +13,14 @@ const serverClient = new ServerClient()
   .setKey(process.env.APPWRITE_SECRET_KEY as string)
 
 // Client-side exports
-export const account = new Account(client)
+let accountInstance: Account | null = null
+export const getAccount = () => {
+  if (!accountInstance) {
+    accountInstance = new Account(client)
+  }
+  return accountInstance
+}
+
 export const databases = new Databases(client)
 export const storage = new Storage(client)
 export { ID }
