@@ -4,6 +4,7 @@ import { useState, FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
+import { useAuth } from '@/context/AuthContext'
 
 interface RegisterProps {
   onRegistered: () => void
@@ -18,6 +19,7 @@ interface RegisterFormData {
 }
 
 export default function Register({ onRegistered }: RegisterProps) {
+  const { showSpinner, hideSpinner } = useAuth()
   const [formData, setFormData] = useState<RegisterFormData>({
     email: '',
     password: '',
@@ -32,6 +34,7 @@ export default function Register({ onRegistered }: RegisterProps) {
     e.preventDefault()
     setIsLoading(true)
     setError('')
+    showSpinner('Creating your account...')
 
     try {
       // Validate passwords match
@@ -76,6 +79,7 @@ export default function Register({ onRegistered }: RegisterProps) {
       console.error(err)
     } finally {
       setIsLoading(false)
+      hideSpinner()
     }
   }
 

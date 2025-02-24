@@ -4,7 +4,7 @@ import { useState, FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
-import { getAccount } from '@/lib/appwrite-config'
+import { useAuth } from '@/context/AuthContext'
 
 interface User {
   $id: string
@@ -13,6 +13,7 @@ interface User {
 }
 
 export default function AuthForm() {
+  const { logout, showSpinner, hideSpinner, checkAuth } = useAuth()
   const [loggedInUser, setLoggedInUser] = useState<User | null>(null)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -24,17 +25,23 @@ export default function AuthForm() {
     e.preventDefault()
     setIsLoading(true)
     setError('')
+    showSpinner('Logging in...')
 
     try {
-      const account = getAccount()
-      await account.createEmailPasswordSession(email, password)
-      const user = await account.get()
-      setLoggedInUser(user)
+      const user = await checkAuth()
+      if (user) {
+        setLoggedInUser({
+          $id: user.$id,
+          name: user.name,
+          email: user.email,
+        })
+      }
     } catch (err) {
       setError('Failed to login. Please check your credentials.')
       console.error(err)
     } finally {
       setIsLoading(false)
+      hideSpinner()
     }
   }
 
@@ -42,6 +49,7 @@ export default function AuthForm() {
     e.preventDefault()
     setIsLoading(true)
     setError('')
+    showSpinner('Creating your account...')
 
     try {
       const response = await fetch('/api/register', {
@@ -62,21 +70,25 @@ export default function AuthForm() {
 
       const data = await response.json()
       setLoggedInUser(data.user)
+      await checkAuth() // Update auth context after registration
     } catch (err) {
       setError('Failed to register. Please try again.')
       console.error(err)
     } finally {
       setIsLoading(false)
+      hideSpinner()
     }
   }
 
-  const logout = async () => {
+  const handleLogout = async () => {
+    showSpinner('Logging out...')
     try {
-      const account = getAccount()
-      await account.deleteSession('current')
+      await logout()
       setLoggedInUser(null)
     } catch (err) {
       console.error(err)
+    } finally {
+      hideSpinner()
     }
   }
 
@@ -84,7 +96,7 @@ export default function AuthForm() {
     return (
       <div className="text-center">
         <p className="mb-4">Welcome, {loggedInUser.name}!</p>
-        <Button onClick={logout} variant="outline">
+        <Button onClick={handleLogout} variant="outline">
           Logout
         </Button>
       </div>

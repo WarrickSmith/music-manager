@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/icons'
 
 export function GlobalNav() {
-  const { user, logout, setShowLoginForm } = useAuth()
+  const { user, logout, setShowLoginForm, showSpinner, hideSpinner } = useAuth()
   const router = useRouter()
 
   const authStatus = useMemo(() => {
@@ -22,8 +22,13 @@ export function GlobalNav() {
 
   const handleAuthClick = async () => {
     if (user) {
-      await logout()
-      router.replace('/')
+      showSpinner('Logging out...')
+      try {
+        await logout()
+        router.replace('/')
+      } finally {
+        hideSpinner()
+      }
     } else {
       // Show login form and navigate to home
       setShowLoginForm(true)

@@ -10,6 +10,7 @@ import {
 import { getAccount } from '@/lib/appwrite-config'
 import { Models } from 'appwrite'
 import { toast } from 'sonner'
+import Spinner from '@/components/ui/Spinner'
 
 interface AuthContextType {
   user: Models.User<Models.Preferences> | null
@@ -17,7 +18,9 @@ interface AuthContextType {
   showLoginForm: boolean
   setShowLoginForm: (show: boolean) => void
   logout: () => Promise<void>
-  checkAuth: () => Promise<void>
+  checkAuth: () => Promise<Models.User<Models.Preferences>>
+  showSpinner: (message: string) => void
+  hideSpinner: () => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -26,8 +29,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<Models.User<Models.Preferences> | null>(null)
   const [loading, setLoading] = useState(true)
   const [showLoginForm, setShowLoginForm] = useState(true)
+  const [spinnerMessage, setSpinnerMessage] = useState<string | null>(null)
+
+  const showSpinner = (message: string) => setSpinnerMessage(message)
+  const hideSpinner = () => setSpinnerMessage(null)
 
   const checkAuth = async () => {
+    showSpinner('Checking authentication...')
     try {
       // Only check auth if we have an active session
       const account = getAccount()
@@ -42,6 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } text-white rounded-lg shadow-lg p-4`,
         duration: 3000,
       })
+      return currentUser
     } catch (error) {
       console.error('Auth check error:', error)
       setUser(null)
@@ -49,12 +58,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         className: 'bg-red-500 text-white rounded-lg shadow-lg p-4',
         duration: 3000,
       })
+      throw error // Re-throw to handle in the component
     } finally {
       setLoading(false)
+      hideSpinner()
     }
   }
 
   const logout = async () => {
+    showSpinner('Logging out...')
     try {
       const account = getAccount()
       await account.deleteSession('current')
@@ -69,6 +81,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         className: 'bg-red-500 text-white rounded-lg shadow-lg p-4',
         duration: 3000,
       })
+    } finally {
+      hideSpinner()
     }
   }
 
@@ -84,9 +98,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setShowLoginForm,
     logout,
     checkAuth,
+    showSpinner,
+    hideSpinner,
   }
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+      {spinnerMessage && <Spinner message={spinnerMessage} />}
+    </AuthContext.Provider>
+  )
 }
 
 export function useAuth() {

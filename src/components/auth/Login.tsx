@@ -16,7 +16,7 @@ interface LoginFormData {
 
 export default function Login() {
   const router = useRouter()
-  const { checkAuth } = useAuth()
+  const { checkAuth, showSpinner, hideSpinner } = useAuth()
   const [formData, setFormData] = useState<LoginFormData>({
     email: '',
     password: '',
@@ -26,6 +26,7 @@ export default function Login() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+    showSpinner('Checking current session...')
 
     try {
       const account = getAccount()
@@ -52,6 +53,7 @@ export default function Login() {
         }
 
         // Different user trying to log in, delete current session
+        showSpinner('Switching user account...')
         await account.deleteSession('current')
         toast.info('Logging in as different user...', {
           className: 'bg-blue-500 text-white rounded-lg shadow-lg p-4',
@@ -62,6 +64,7 @@ export default function Login() {
       }
 
       // Create new session
+      showSpinner('Creating new login session...')
       await account.createEmailPasswordSession(
         formData.email,
         formData.password
@@ -71,9 +74,11 @@ export default function Login() {
       await checkAuth()
 
       // Get fresh user data to check role
+      showSpinner('Checking user role...')
       const user = await account.get()
 
       // Check user's role and redirect accordingly
+      showSpinner('Redirecting to dashboard...')
       if (user.labels && user.labels.includes('admin')) {
         router.push('/admin')
       } else {
@@ -87,6 +92,7 @@ export default function Login() {
       console.error(err)
     } finally {
       setIsLoading(false)
+      hideSpinner()
     }
   }
 
