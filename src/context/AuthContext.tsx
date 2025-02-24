@@ -9,6 +9,7 @@ import {
 } from 'react'
 import { getAccount } from '@/lib/appwrite-config'
 import { Models } from 'appwrite'
+import { toast } from 'sonner'
 
 interface AuthContextType {
   user: Models.User<Models.Preferences> | null
@@ -31,10 +32,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Only check auth if we have an active session
       const account = getAccount()
       const currentUser = await account.get()
+      console.log('Current user:', currentUser)
       setUser(currentUser)
+      // Show success toast on successful login
+      toast.success('Successfully logged in', {
+        className: `${
+          currentUser.labels?.includes('admin')
+            ? 'bg-amber-500'
+            : 'bg-emerald-500'
+        } text-white`,
+      })
     } catch (error) {
       console.error('Auth check error:', error)
       setUser(null)
+      toast.error('Authentication failed', {
+        className: 'bg-red-500 text-white',
+      })
     } finally {
       setLoading(false)
     }
@@ -45,8 +58,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const account = getAccount()
       await account.deleteSession('current')
       setUser(null)
+      toast.info('Successfully logged out', {
+        className: 'bg-blue-500 text-white',
+      })
     } catch (error) {
       console.error('Logout error:', error)
+      toast.error('Failed to logout', {
+        className: 'bg-red-500 text-white',
+      })
     }
   }
 

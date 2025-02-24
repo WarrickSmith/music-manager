@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { getAccount } from '@/lib/appwrite-config'
 import { useAuth } from '@/context/AuthContext'
+import { toast } from 'sonner'
 
 interface LoginFormData {
   email: string
@@ -21,12 +22,10 @@ export default function Login() {
     password: '',
   })
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState('')
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    setError('')
 
     try {
       const account = getAccount()
@@ -49,7 +48,9 @@ export default function Login() {
         router.push('/competitor')
       }
     } catch (err) {
-      setError('Failed to login. Please check your credentials.')
+      toast.error('Failed to login. Please check your credentials.', {
+        className: 'bg-red-500 text-white',
+      })
       console.error(err)
     } finally {
       setIsLoading(false)
@@ -101,12 +102,6 @@ export default function Login() {
             required
           />
         </div>
-
-        {error && (
-          <p className="text-destructive text-sm bg-destructive/10 p-3 rounded-lg">
-            {error}
-          </p>
-        )}
 
         <Button
           type="submit"
