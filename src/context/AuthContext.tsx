@@ -39,13 +39,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           currentUser.labels?.includes('admin')
             ? 'bg-amber-500'
             : 'bg-emerald-500'
-        } text-white`,
+        } text-white rounded-lg shadow-lg p-4`,
+        duration: 3000,
       })
     } catch (error) {
       console.error('Auth check error:', error)
       setUser(null)
       toast.error('Authentication failed', {
-        className: 'bg-red-500 text-white',
+        className: 'bg-red-500 text-white rounded-lg shadow-lg p-4',
+        duration: 3000,
       })
     } finally {
       setLoading(false)
@@ -58,12 +60,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await account.deleteSession('current')
       setUser(null)
       toast.info('Successfully logged out', {
-        className: 'bg-blue-500 text-white',
+        className: 'bg-blue-500 text-white rounded-lg shadow-lg p-4',
+        duration: 3000,
       })
     } catch (error) {
       console.error('Logout error:', error)
       toast.error('Failed to logout', {
-        className: 'bg-red-500 text-white',
+        className: 'bg-red-500 text-white rounded-lg shadow-lg p-4',
+        duration: 3000,
       })
     }
   }

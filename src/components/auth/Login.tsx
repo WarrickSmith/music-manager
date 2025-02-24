@@ -37,7 +37,8 @@ export default function Login() {
         // If the current user's email matches login attempt
         if (currentUser.email === formData.email) {
           toast.info('You are already logged in with this account', {
-            className: 'bg-blue-500 text-white',
+            className: 'bg-blue-500 text-white rounded-lg shadow-lg p-4',
+            duration: 3000,
           })
 
           // Update auth context and redirect
@@ -53,7 +54,8 @@ export default function Login() {
         // Different user trying to log in, delete current session
         await account.deleteSession('current')
         toast.info('Logging in as different user...', {
-          className: 'bg-blue-500 text-white',
+          className: 'bg-blue-500 text-white rounded-lg shadow-lg p-4',
+          duration: 3000,
         })
       } catch {
         // No active session, proceed with login
@@ -79,7 +81,8 @@ export default function Login() {
       }
     } catch (err) {
       toast.error('Failed to login. Please check your credentials.', {
-        className: 'bg-red-500 text-white',
+        className: 'bg-red-500 text-white rounded-lg shadow-lg p-4',
+        duration: 3000,
       })
       console.error(err)
     } finally {

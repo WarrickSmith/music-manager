@@ -33,7 +33,15 @@ export default function RootLayout({
         <AuthProvider>
           <GlobalNav />
           {children}
-          <Toaster position="top-right" richColors />
+          <Toaster
+            position="top-right"
+            richColors
+            expand={true}
+            gap={8}
+            offset={16}
+            closeButton={true}
+            theme="light"
+          />
         </AuthProvider>
       </body>
     </html>
