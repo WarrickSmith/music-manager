@@ -20,8 +20,9 @@ export default function CompetitorDashboard() {
   // Show loading state while checking auth
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p>Loading...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+        <div className="w-16 h-16 border-4 border-t-4 border-t-primary border-gray-200 rounded-full animate-spin" />
+        <p className="text-gray-600">Verifying competitor access...</p>
       </div>
     )
   }
