@@ -4,7 +4,7 @@ This document outlines a comprehensive, Markdown-formatted project development p
 
 ## Overview
 
-Music Manager is an application designed for Ice Skaters to upload and manage music files provided by Competitors for each competition grade. With two primary user roles – Competitor and Admin – the application supports file management, user administration, and competition scheduling. The technology stack is based on Next.js 15 (latest) with SHADCN components and TypeScript, leveraging Firebase for backend and storage. Emphasis is placed on mobile responsiveness, robust error handling, and secure data practices.
+Music Manager is an application designed for Ice Skaters to upload and manage music files provided by Competitors for each competition grade. With two primary user roles – Competitor and Admin – the application supports file management, user administration, and competition scheduling. The technology stack is based on Next.js 15 (latest) with SHADCN components and TypeScript, leveraging Appwrite for backend and storage. Emphasis is placed on mobile responsiveness, robust error handling, and secure data practices.
 
 ---
 
