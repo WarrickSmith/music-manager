@@ -32,7 +32,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Only check auth if we have an active session
       const account = getAccount()
       const currentUser = await account.get()
-      console.log('Current user:', currentUser)
       setUser(currentUser)
       // Show success toast on successful login
       toast.success('Successfully logged in', {

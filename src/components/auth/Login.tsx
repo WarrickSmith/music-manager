@@ -29,7 +29,37 @@ export default function Login() {
 
     try {
       const account = getAccount()
-      // Create session
+
+      // First, check if there's an active session
+      try {
+        const currentUser = await account.get()
+
+        // If the current user's email matches login attempt
+        if (currentUser.email === formData.email) {
+          toast.info('You are already logged in with this account', {
+            className: 'bg-blue-500 text-white',
+          })
+
+          // Update auth context and redirect
+          await checkAuth()
+          if (currentUser.labels && currentUser.labels.includes('admin')) {
+            router.push('/admin')
+          } else {
+            router.push('/competitor')
+          }
+          return
+        }
+
+        // Different user trying to log in, delete current session
+        await account.deleteSession('current')
+        toast.info('Logging in as different user...', {
+          className: 'bg-blue-500 text-white',
+        })
+      } catch {
+        // No active session, proceed with login
+      }
+
+      // Create new session
       await account.createEmailPasswordSession(
         formData.email,
         formData.password
