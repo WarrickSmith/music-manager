@@ -1,12 +1,17 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
+import { UserManagement } from '@/components/admin/UserManagement'
+import { CompetitionManagement } from '@/components/admin/CompetitionManagement'
+
+type Tab = 'users' | 'competitions'
 
 export default function AdminDashboard() {
   const router = useRouter()
   const { user, loading } = useAuth()
+  const [activeTab, setActiveTab] = useState<Tab>('users')
 
   useEffect(() => {
     if (!loading) {
@@ -33,14 +38,48 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <div className="container mx-auto p-8">
-        <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
-        <p className="text-gray-600">
-          Welcome to the admin dashboard. This page will be expanded in Phase 4
-          to include user management, competition management, and other
-          administrative features.
-        </p>
+        <div className="flex flex-col gap-8">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
+            <p className="text-muted-foreground">
+              Manage users, competitions, and grades
+            </p>
+          </div>
+
+          {/* Tabs */}
+          <div className="border-b">
+            <div className="flex gap-4">
+              <button
+                className={`pb-2 px-1 ${
+                  activeTab === 'users'
+                    ? 'border-b-2 border-primary font-semibold'
+                    : 'text-muted-foreground'
+                }`}
+                onClick={() => setActiveTab('users')}
+              >
+                Users
+              </button>
+              <button
+                className={`pb-2 px-1 ${
+                  activeTab === 'competitions'
+                    ? 'border-b-2 border-primary font-semibold'
+                    : 'text-muted-foreground'
+                }`}
+                onClick={() => setActiveTab('competitions')}
+              >
+                Competitions
+              </button>
+            </div>
+          </div>
+
+          {/* Tab Content */}
+          <div>
+            {activeTab === 'users' && <UserManagement />}
+            {activeTab === 'competitions' && <CompetitionManagement />}
+          </div>
+        </div>
       </div>
     </div>
   )
