@@ -24,6 +24,83 @@ interface SetupResult {
   error?: unknown
 }
 
+interface Attribute {
+  key: string
+  type: 'string' | 'integer' | 'boolean'
+  size?: number
+  required: boolean
+}
+
+interface AppwriteAttribute {
+  key: string
+  type: string
+  size?: number
+  required: boolean
+  status: string
+  array: boolean
+}
+
+interface AppwriteAttributeList {
+  total: number
+  attributes: AppwriteAttribute[]
+}
+
+async function ensureAttributes(
+  databaseId: string,
+  collectionId: string,
+  attributes: Attribute[],
+  results: string[]
+) {
+  // Get existing attributes and safely cast to our expected type
+  const response = await databases.listAttributes(databaseId, collectionId)
+  const attributeList = response as unknown as AppwriteAttributeList
+  const existingKeys = new Set(
+    attributeList.attributes?.map((attr) => attr.key) || []
+  )
+
+  // Create missing attributes
+  for (const attr of attributes) {
+    if (!existingKeys.has(attr.key)) {
+      switch (attr.type) {
+        case 'string':
+          await databases.createStringAttribute(
+            databaseId,
+            collectionId,
+            attr.key,
+            attr.size || 255,
+            attr.required
+          )
+          results.push(
+            `Created string attribute '${attr.key}' in collection '${collectionId}'`
+          )
+          break
+        case 'integer':
+          await databases.createIntegerAttribute(
+            databaseId,
+            collectionId,
+            attr.key,
+            attr.required
+          )
+          results.push(
+            `Created integer attribute '${attr.key}' in collection '${collectionId}'`
+          )
+          break
+        case 'boolean':
+          await databases.createBooleanAttribute(
+            databaseId,
+            collectionId,
+            attr.key,
+            attr.required
+          )
+          results.push(
+            `Created boolean attribute '${attr.key}' in collection '${collectionId}'`
+          )
+          break
+      }
+    }
+  }
+}
+
 export async function setupAppwrite(): Promise<SetupResult> {
   const results: string[] = []
   try {
@@ -39,7 +116,17 @@ export async function setupAppwrite(): Promise<SetupResult> {
     // Set up competitions collection
     try {
       await databases.getCollection(DATABASE_ID, 'competitions')
-      results.push('Competitions collection already exists')
+      results.push('Competitions collection exists, checking attributes...')
+      await ensureAttributes(
+        DATABASE_ID,
+        'competitions',
+        [
+          { key: 'name', type: 'string', size: 255, required: true },
+          { key: 'year', type: 'integer', required: true },
+          { key: 'active', type: 'boolean', required: true },
+        ],
+        results
+      )
     } catch {
       await databases.createCollection(
         DATABASE_ID,
@@ -47,35 +134,34 @@ export async function setupAppwrite(): Promise<SetupResult> {
         'Competitions Collection',
         [Permission.read(Role.any()), Permission.write(Role.any())]
       )
-
-      // Add attributes
-      await databases.createStringAttribute(
+      results.push('Competitions collection created')
+      await ensureAttributes(
         DATABASE_ID,
         'competitions',
-        'name',
-        255,
-        true
+        [
+          { key: 'name', type: 'string', size: 255, required: true },
+          { key: 'year', type: 'integer', required: true },
+          { key: 'active', type: 'boolean', required: true },
+        ],
+        results
       )
-      await databases.createIntegerAttribute(
-        DATABASE_ID,
-        'competitions',
-        'year',
-        true
-      )
-      await databases.createBooleanAttribute(
-        DATABASE_ID,
-        'competitions',
-        'active',
-        true
-      )
-
-      results.push('Competitions collection created with attributes')
     }
 
     // Set up grades collection
     try {
       await databases.getCollection(DATABASE_ID, 'grades')
-      results.push('Grades collection already exists')
+      results.push('Grades collection exists, checking attributes...')
+      await ensureAttributes(
+        DATABASE_ID,
+        'grades',
+        [
+          { key: 'name', type: 'string', size: 255, required: true },
+          { key: 'category', type: 'string', size: 255, required: true },
+          { key: 'segment', type: 'string', size: 255, required: true },
+          { key: 'competitionId', type: 'string', size: 255, required: true },
+        ],
+        results
+      )
     } catch {
       await databases.createCollection(
         DATABASE_ID,
@@ -83,69 +169,50 @@ export async function setupAppwrite(): Promise<SetupResult> {
         'Grades Collection',
         [Permission.read(Role.any()), Permission.write(Role.any())]
       )
-
-      // Add attributes
-      await databases.createStringAttribute(
+      results.push('Grades collection created')
+      await ensureAttributes(
         DATABASE_ID,
         'grades',
-        'name',
-        255,
-        true
+        [
+          { key: 'name', type: 'string', size: 255, required: true },
+          { key: 'category', type: 'string', size: 255, required: true },
+          { key: 'segment', type: 'string', size: 255, required: true },
+          { key: 'competitionId', type: 'string', size: 255, required: true },
+        ],
+        results
       )
-      await databases.createStringAttribute(
-        DATABASE_ID,
-        'grades',
-        'category',
-        255,
-        true
-      )
-      await databases.createStringAttribute(
-        DATABASE_ID,
-        'grades',
-        'segment',
-        255,
-        true
-      )
-      await databases.createStringAttribute(
-        DATABASE_ID,
-        'grades',
-        'competitionId',
-        255,
-        true
-      )
-
-      results.push('Grades collection created with attributes')
     }
 
     // Set up music_files collection
     try {
       await databases.getCollection(DATABASE_ID, 'musicfiles')
-      results.push('Music files collection already exists')
+      results.push('Music files collection exists, checking attributes...')
+      await ensureAttributes(
+        DATABASE_ID,
+        'musicfiles',
+        [
+          { key: 'competitionId', type: 'string', size: 255, required: true },
+          { key: 'fileId', type: 'string', size: 255, required: true },
+        ],
+        results
+      )
     } catch {
       await databases.createCollection(
         DATABASE_ID,
         'musicfiles',
-        'Music Files',
+        'Music Files Collection',
         [Permission.read(Role.any()), Permission.write(Role.any())]
       )
-
-      // Add attributes
-      await databases.createStringAttribute(
+      results.push('Music files collection created')
+      await ensureAttributes(
         DATABASE_ID,
         'musicfiles',
-        'competitionId',
-        255,
-        true
+        [
+          { key: 'competitionId', type: 'string', size: 255, required: true },
+          { key: 'fileId', type: 'string', size: 255, required: true },
+        ],
+        results
       )
-      await databases.createStringAttribute(
-        DATABASE_ID,
-        'musicfiles',
-        'fileId',
-        255,
-        true
-      )
-
-      results.push('Music files collection created with attributes')
     }
 
     // Set up storage bucket
