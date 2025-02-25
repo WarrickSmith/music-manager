@@ -1,4 +1,4 @@
-import { databases } from '@/lib/appwrite-config'
+import { databases, storage } from '@/lib/appwrite-config'
 import { Query } from 'appwrite'
 import { NextRequest, NextResponse } from 'next/server'
 
@@ -7,7 +7,8 @@ export async function GET() {
   try {
     const response = await databases.listDocuments(
       process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
-      'competitions'
+      'competitions',
+      [Query.orderDesc('year'), Query.orderDesc('$createdAt')]
     )
     return NextResponse.json({ competitions: response.documents })
   } catch (error) {
@@ -27,7 +28,11 @@ export async function POST(request: NextRequest) {
       process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
       'competitions',
       'unique()',
-      body
+      {
+        name: body.name,
+        year: body.year,
+        active: body.active ?? true,
+      }
     )
     return NextResponse.json({ competition: response })
   } catch (error) {
@@ -81,7 +86,40 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    // First delete all grades associated with this competition
+    // 1. Get all music files associated with this competition
+    const musicFiles = await databases.listDocuments(
+      process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
+      'music_files',
+      [Query.equal('competitionId', competitionId)]
+    )
+
+    // 2. Delete files from storage
+    await Promise.all(
+      musicFiles.documents.map(async (file) => {
+        try {
+          await storage.deleteFile(
+            process.env.NEXT_PUBLIC_APPWRITE_STORAGE_BUCKET_ID as string,
+            file.fileId
+          )
+        } catch (err) {
+          console.error(`Failed to delete file ${file.fileId}:`, err)
+          // Continue with other deletions even if one fails
+        }
+      })
+    )
+
+    // 3. Delete music file records
+    await Promise.all(
+      musicFiles.documents.map((file) =>
+        databases.deleteDocument(
+          process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
+          'music_files',
+          file.$id
+        )
+      )
+    )
+
+    // 4. Delete all grades associated with this competition
     const grades = await databases.listDocuments(
       process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
       'grades',
@@ -98,7 +136,7 @@ export async function DELETE(request: NextRequest) {
       )
     )
 
-    // Then delete the competition
+    // 5. Finally delete the competition
     await databases.deleteDocument(
       process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
       'competitions',

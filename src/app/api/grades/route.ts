@@ -18,7 +18,11 @@ export async function GET(request: NextRequest) {
     const response = await databases.listDocuments(
       process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
       'grades',
-      [Query.equal('competitionId', competitionId)]
+      [
+        Query.equal('competitionId', competitionId),
+        Query.orderAsc('category'),
+        Query.orderAsc('name'),
+      ]
     )
     return NextResponse.json({ grades: response.documents })
   } catch (error) {
@@ -34,11 +38,25 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+    const { competitionId, name, category, segment } = body
+
+    if (!competitionId || !name || !category) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      )
+    }
+
     const response = await databases.createDocument(
       process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
       'grades',
       'unique()',
-      body
+      {
+        name,
+        category,
+        segment: segment || null,
+        competitionId,
+      }
     )
     return NextResponse.json({ grade: response })
   } catch (error) {
