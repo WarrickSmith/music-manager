@@ -148,39 +148,35 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    // 1. Delete all grades associated with this competition
-    // Increase the limit to ensure we get all grades (default is 25 max is 100)
-    const grades = await databases.listDocuments(
-      process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
-      'grades',
-      [
-        Query.equal('competitionId', competitionId),
-        Query.limit(100), // Increased limit to ensure all grades are retrieved
-      ]
-    )
+    const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string
+
+    // 1. Delete all grades associated with this competition using pagination
+    const { deleteAllDocuments } = await import('@/lib/utils')
+
+    const deletedGradesCount = await deleteAllDocuments(databaseId, 'grades', [
+      Query.equal('competitionId', competitionId),
+    ])
 
     console.log(
-      `Found ${grades.documents.length} grades to delete for competition ${competitionId}`
+      `Deleted ${deletedGradesCount} grades for competition ${competitionId}`
     )
 
-    await Promise.all(
-      grades.documents.map((grade) =>
-        databases.deleteDocument(
-          process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
-          'grades',
-          grade.$id
-        )
-      )
-    )
+    // 2. Delete any music files associated with this competition
+    // This will be implemented when music files are added
+    // Example:
+    // await deleteAllDocuments(
+    //   databaseId,
+    //   'music_files',
+    //   [Query.equal('competitionId', competitionId)]
+    // )
 
-    // 2. Delete the competition
-    await databases.deleteDocument(
-      process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
-      'competitions',
-      competitionId
-    )
+    // 3. Delete the competition
+    await databases.deleteDocument(databaseId, 'competitions', competitionId)
 
-    return NextResponse.json({ success: true })
+    return NextResponse.json({
+      success: true,
+      deletedGrades: deletedGradesCount,
+    })
   } catch (error: unknown) {
     console.error('Failed to delete competition:', error)
     const appwriteError = error as AppwriteError

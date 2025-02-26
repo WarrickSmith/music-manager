@@ -2,10 +2,10 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import Login from '@/components/auth/Login'
 import Register from '@/components/auth/Register'
 import { useAuth } from '@/context/AuthContext'
-import { MusicIcon } from '@/components/ui/icons'
 import { RiUserAddLine, RiLoginBoxLine } from 'react-icons/ri'
 
 export default function Home() {
@@ -28,7 +28,13 @@ export default function Home() {
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin">
-            <MusicIcon className="w-8 h-8 text-primary" />
+            <Image
+              src="/logo.png"
+              alt="Music Manager Logo"
+              width={32}
+              height={32}
+              className="w-8 h-8"
+            />
           </div>
           <p className="text-muted-foreground">Loading...</p>
         </div>
@@ -42,8 +48,14 @@ export default function Home() {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center gap-4 mb-6">
-            <div className="bg-primary/10 p-4 rounded-2xl">
-              <MusicIcon className="w-12 h-12 text-primary" />
+            <div className="p-2 rounded-2xl">
+              <Image
+                src="/logo.png"
+                alt="Music Manager Logo"
+                width={48}
+                height={48}
+                className="w-12 h-12"
+              />
             </div>
             <h1 className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">
               Music Manager

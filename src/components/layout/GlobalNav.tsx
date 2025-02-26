@@ -4,12 +4,8 @@ import { useAuth } from '@/context/AuthContext'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { useMemo } from 'react'
-import {
-  UserIcon,
-  UserLoggedInIcon,
-  AdminIcon,
-  MusicIcon,
-} from '@/components/ui/icons'
+import Image from 'next/image'
+import { UserIcon, UserLoggedInIcon, AdminIcon } from '@/components/ui/icons'
 
 export function GlobalNav() {
   const { user, logout, setShowLoginForm, showSpinner, hideSpinner } = useAuth()
@@ -40,8 +36,14 @@ export function GlobalNav() {
     <nav className="sticky top-0 z-50 w-full border-b bg-card shadow-sm">
       <div className="container flex h-16 items-center">
         <div className="flex items-center gap-3">
-          <div className="bg-primary/10 p-2 rounded-lg">
-            <MusicIcon className="h-6 w-6 text-primary" />
+          <div className="p-1 rounded-lg">
+            <Image
+              src="/logo.png"
+              alt="Music Manager Logo"
+              width={32}
+              height={32}
+              className="h-8 w-auto"
+            />
           </div>
           <span className="font-bold text-lg bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">
             Music Manager

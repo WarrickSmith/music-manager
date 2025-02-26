@@ -1,12 +1,12 @@
 import { databases } from '@/lib/appwrite-config'
 import { Query } from 'appwrite'
 import { NextRequest, NextResponse } from 'next/server'
+import { processAllDocuments } from '@/lib/utils'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const { sourceCompetitionId, ...newCompetitionData } = body
-
     if (!sourceCompetitionId) {
       return NextResponse.json(
         { error: 'Missing source competition ID' },
@@ -26,37 +26,41 @@ export async function POST(request: NextRequest) {
       }
     )
 
-    // 2. Get grades from source competition
-    // Increase the limit to ensure we get all grades (default is 25 max is 100)
-    const sourceGrades = await databases.listDocuments(
-      process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
-      'grades',
-      [
-        Query.equal('competitionId', sourceCompetitionId),
-        Query.limit(100), // Increased limit to ensure all grades are retrieved
-      ]
-    )
+    // 2. Clone all grades to new competition using pagination
+    const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string
+    let gradesCopied = 0
 
-    // 3. Clone all grades to new competition
-    if (sourceGrades.documents.length > 0) {
-      await Promise.all(
-        sourceGrades.documents.map((grade) =>
-          databases.createDocument(
-            process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
-            'grades',
-            'unique()',
-            {
+    await processAllDocuments(
+      async (offset, limit) => {
+        return await databases.listDocuments(databaseId, 'grades', [
+          Query.equal('competitionId', sourceCompetitionId),
+          Query.limit(limit),
+          Query.offset(offset),
+        ])
+      },
+      async (grades) => {
+        await Promise.all(
+          grades.map((grade) =>
+            databases.createDocument(databaseId, 'grades', 'unique()', {
               name: grade.name,
               category: grade.category,
               segment: grade.segment,
               competitionId: newCompetition.$id,
-            }
+            })
           )
         )
-      )
-    }
+        gradesCopied += grades.length
+      }
+    )
 
-    return NextResponse.json({ competition: newCompetition })
+    console.log(
+      `Cloned ${gradesCopied} grades to new competition ${newCompetition.$id}`
+    )
+
+    return NextResponse.json({
+      competition: newCompetition,
+      gradesCopied,
+    })
   } catch (error) {
     console.error('Failed to clone competition:', error)
     return NextResponse.json(
