@@ -81,11 +81,13 @@ export async function deleteAllDocuments(
  * @param userId The ID of the user being deleted
  * @returns The number of related documents deleted
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function deleteUserWithRelatedData(userId: string): Promise<{
   deletedFiles: number
   // Add more counts for future related collections
 }> {
-  const databaseId = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string
+  // Currently this function is a placeholder until music files are implemented
+  
   const result = {
     deletedFiles: 0,
     // Add more counts for future related collections
@@ -95,7 +97,7 @@ export async function deleteUserWithRelatedData(userId: string): Promise<{
   // Once music files are implemented, uncomment and adapt this code
   /*
   result.deletedFiles = await deleteAllDocuments(
-    databaseId,
+    process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
     'music_files', 
     [Query.equal('userId', userId)]
   );

@@ -13,6 +13,14 @@ import {
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
 import { Competition, Grade } from '@/types/competition'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog'
 
 interface CompetitionManagementProps {
   onSwitchTab: (tab: 'users' | 'competitions') => void
@@ -30,6 +38,20 @@ export function CompetitionManagement({
   const [selectedCompetition, setSelectedCompetition] =
     useState<Competition | null>(null)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
+
+  // Competition deletion state
+  const [deleteCompetitionDialogOpen, setDeleteCompetitionDialogOpen] =
+    useState(false)
+  const [competitionToDelete, setCompetitionToDelete] = useState<string | null>(
+    null
+  )
+  const [competitionNameToDelete, setCompetitionNameToDelete] =
+    useState<string>('')
+
+  // Grade deletion state
+  const [deleteGradeDialogOpen, setDeleteGradeDialogOpen] = useState(false)
+  const [gradeToDelete, setGradeToDelete] = useState<string | null>(null)
+  const [gradeNameToDelete, setGradeNameToDelete] = useState<string>('')
 
   // API functions
   const fetchGradesList = async (competitionId: string) => {
@@ -254,20 +276,36 @@ export function CompetitionManagement({
     }
   }
 
-  const deleteCompetition = async (competitionId: string) => {
-    if (window.confirm('Are you sure you want to delete this competition?')) {
-      try {
-        setError(null)
-        await deleteExistingCompetition(competitionId)
-        await fetchCompetitions()
-        if (selectedCompetition?.$id === competitionId) {
-          setSelectedCompetition(null)
-          setGrades([])
-        }
-      } catch (err) {
-        setError('Failed to delete competition')
-        console.error(err)
+  const handleDeleteCompetition = (competition: Competition) => {
+    setCompetitionToDelete(competition.$id)
+    setCompetitionNameToDelete(competition.name)
+    setDeleteCompetitionDialogOpen(true)
+  }
+
+  const confirmDeleteCompetition = async () => {
+    if (!competitionToDelete) return
+
+    try {
+      setError(null)
+      await deleteExistingCompetition(competitionToDelete)
+      await fetchCompetitions()
+      if (selectedCompetition?.$id === competitionToDelete) {
+        setSelectedCompetition(null)
+        setGrades([])
       }
+    } catch (err) {
+      setError('Failed to delete competition')
+      console.error(err)
+    } finally {
+      setDeleteCompetitionDialogOpen(false)
+      setCompetitionToDelete(null)
+    }
+  }
+
+  const deleteCompetition = async (competitionId: string) => {
+    const competition = competitions.find((c) => c.$id === competitionId)
+    if (competition) {
+      handleDeleteCompetition(competition)
     }
   }
 
@@ -299,18 +337,34 @@ export function CompetitionManagement({
     }
   }
 
-  const deleteGrade = async (gradeId: string) => {
-    if (window.confirm('Are you sure you want to delete this grade?')) {
-      try {
-        setError(null)
-        await deleteExistingGrade(gradeId)
-        if (selectedCompetition) {
-          await fetchGrades(selectedCompetition.$id)
-        }
-      } catch (err) {
-        setError('Failed to delete grade')
-        console.error(err)
+  const handleDeleteGrade = (grade: Grade) => {
+    setGradeToDelete(grade.$id)
+    setGradeNameToDelete(grade.name)
+    setDeleteGradeDialogOpen(true)
+  }
+
+  const confirmDeleteGrade = async () => {
+    if (!gradeToDelete) return
+
+    try {
+      setError(null)
+      await deleteExistingGrade(gradeToDelete)
+      if (selectedCompetition) {
+        await fetchGrades(selectedCompetition.$id)
       }
+    } catch (err) {
+      setError('Failed to delete grade')
+      console.error(err)
+    } finally {
+      setDeleteGradeDialogOpen(false)
+      setGradeToDelete(null)
+    }
+  }
+
+  const deleteGrade = async (gradeId: string) => {
+    const grade = grades.find((g) => g.$id === gradeId)
+    if (grade) {
+      handleDeleteGrade(grade)
     }
   }
 
@@ -332,6 +386,62 @@ export function CompetitionManagement({
         competitions={competitions}
         onCreateCompetition={handleCreateCompetition}
       />
+
+      {/* Competition Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteCompetitionDialogOpen}
+        onOpenChange={setDeleteCompetitionDialogOpen}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete the competition &quot;
+              {competitionNameToDelete}&quot;? This action cannot be undone and
+              will remove all associated grades.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteCompetitionDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmDeleteCompetition}>
+              Delete Competition
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Grade Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteGradeDialogOpen}
+        onOpenChange={setDeleteGradeDialogOpen}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete the grade &quot;
+              {gradeNameToDelete}&quot;? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteGradeDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmDeleteGrade}>
+              Delete Grade
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Competition Management</h2>
         <div className="space-x-2">

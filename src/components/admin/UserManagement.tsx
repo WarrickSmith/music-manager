@@ -12,6 +12,14 @@ import {
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/context/AuthContext'
 import { Models } from 'appwrite'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog'
 
 interface User extends Models.User<Models.Preferences> {
   selected?: boolean
@@ -74,15 +82,18 @@ const bulkDeleteUsers = async (userIds: string[]) => {
 
 export function UserManagement() {
   const [users, setUsers] = useState<User[]>([])
-
-  // Fetch users when component mounts
-  useEffect(() => {
-    fetchUsers()
-  }, [])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedUsers, setSelectedUsers] = useState<string[]>([])
   const { user: currentUser } = useAuth()
+
+  // Delete dialog state
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [userToDelete, setUserToDelete] = useState<string | null>(null)
+  const [userNameToDelete, setUserNameToDelete] = useState<string>('')
+
+  // Bulk delete dialog state
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false)
 
   // Function to fetch users
   const fetchUsers = async () => {
@@ -98,6 +109,11 @@ export function UserManagement() {
     }
   }
 
+  // Fetch users when component mounts
+  useEffect(() => {
+    fetchUsers()
+  }, [])
+
   // Function to change user role
   const changeUserRole = async (userId: string, newRole: string) => {
     try {
@@ -110,16 +126,53 @@ export function UserManagement() {
     }
   }
 
-  // Function to delete user
-  const deleteUser = async (userId: string) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
-      try {
-        await deleteUserById(userId)
-        await fetchUsers()
-      } catch (err) {
-        setError('Failed to delete user')
-        console.error(err)
-      }
+  // Function to handle delete user confirmation
+  const handleDeleteUser = (user: User) => {
+    setUserToDelete(user.$id)
+    setUserNameToDelete(user.name || user.email)
+    setDeleteDialogOpen(true)
+  }
+
+  // Function to confirm user deletion
+  const confirmDeleteUser = async () => {
+    if (!userToDelete) return
+
+    try {
+      await deleteUserById(userToDelete)
+      await fetchUsers()
+    } catch (err) {
+      setError('Failed to delete user')
+      console.error(err)
+    } finally {
+      setDeleteDialogOpen(false)
+      setUserToDelete(null)
+    }
+  }
+
+  // Function to delete user - now just opens the dialog
+  const deleteUser = (userId: string) => {
+    const user = users.find((u) => u.$id === userId)
+    if (user) {
+      handleDeleteUser(user)
+    }
+  }
+
+  // Function to handle bulk deletion dialog
+  const handleBulkDelete = () => {
+    setBulkDeleteDialogOpen(true)
+  }
+
+  // Function to confirm bulk deletion
+  const confirmBulkDelete = async () => {
+    try {
+      await bulkDeleteUsers(selectedUsers)
+      setSelectedUsers([])
+      await fetchUsers()
+    } catch (err) {
+      setError('Failed to delete selected users')
+      console.error(err)
+    } finally {
+      setBulkDeleteDialogOpen(false)
     }
   }
 
@@ -133,20 +186,6 @@ export function UserManagement() {
     } catch (err) {
       setError('Failed to change roles for selected users')
       console.error(err)
-    }
-  }
-
-  // Function to handle bulk deletion
-  const bulkDelete = async () => {
-    if (window.confirm('Are you sure you want to delete all selected users?')) {
-      try {
-        await bulkDeleteUsers(selectedUsers)
-        setSelectedUsers([])
-        await fetchUsers()
-      } catch (err) {
-        setError('Failed to delete selected users')
-        console.error(err)
-      }
     }
   }
 
@@ -166,6 +205,57 @@ export function UserManagement() {
 
   return (
     <div className="space-y-4">
+      {/* Single user delete confirmation dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete the user &quot;{userNameToDelete}
+              &quot;? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmDeleteUser}>
+              Delete User
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Bulk delete confirmation dialog */}
+      <Dialog
+        open={bulkDeleteDialogOpen}
+        onOpenChange={setBulkDeleteDialogOpen}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Bulk Deletion</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete {selectedUsers.length} selected
+              users? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setBulkDeleteDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={confirmBulkDelete}>
+              Delete Users
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">User Management</h2>
         <div className="space-x-2">
@@ -183,7 +273,7 @@ export function UserManagement() {
               >
                 Set as Admins
               </Button>
-              <Button variant="destructive" onClick={bulkDelete}>
+              <Button variant="destructive" onClick={handleBulkDelete}>
                 Delete Selected
               </Button>
             </>
