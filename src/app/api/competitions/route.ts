@@ -1,6 +1,13 @@
-import { databases, storage } from '@/lib/appwrite-config'
+import { databases } from '@/lib/appwrite-config'
 import { Query } from 'appwrite'
 import { NextRequest, NextResponse } from 'next/server'
+import { defaultGrades } from '@/lib/default-grades'
+
+interface AppwriteError extends Error {
+  type?: string
+  code?: number
+  response?: unknown
+}
 
 // List competitions
 export async function GET() {
@@ -11,11 +18,12 @@ export async function GET() {
       [Query.orderDesc('year'), Query.orderDesc('$createdAt')]
     )
     return NextResponse.json({ competitions: response.documents })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Failed to fetch competitions:', error)
 
     // Check for database not found error
-    if (error?.type === 'database_not_found') {
+    const appwriteError = error as AppwriteError
+    if (appwriteError?.type === 'database_not_found') {
       return NextResponse.json({ error: 'Database not found' }, { status: 404 })
     }
 
@@ -30,21 +38,68 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const response = await databases.createDocument(
+    const { name, year, sourceCompetitionId } = body
+
+    // Create the competition
+    const competition = await databases.createDocument(
       process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
       'competitions',
       'unique()',
       {
-        name: body.name,
-        year: body.year,
-        active: body.active ?? true,
+        name,
+        year,
+        active: true,
       }
     )
-    return NextResponse.json({ competition: response })
-  } catch (error) {
+
+    // Create grades based on source or defaults
+    if (sourceCompetitionId) {
+      // Clone grades from existing competition
+      const sourceGrades = await databases.listDocuments(
+        process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
+        'grades',
+        [Query.equal('competitionId', sourceCompetitionId)]
+      )
+
+      // Create cloned grades
+      await Promise.all(
+        sourceGrades.documents.map((grade) =>
+          databases.createDocument(
+            process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
+            'grades',
+            'unique()',
+            {
+              name: grade.name,
+              category: grade.category,
+              segment: grade.segment,
+              competitionId: competition.$id,
+            }
+          )
+        )
+      )
+    } else {
+      // Create default grades
+      await Promise.all(
+        defaultGrades.map((grade) =>
+          databases.createDocument(
+            process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
+            'grades',
+            'unique()',
+            {
+              ...grade,
+              competitionId: competition.$id,
+            }
+          )
+        )
+      )
+    }
+
+    return NextResponse.json({ competition })
+  } catch (error: unknown) {
     console.error('Failed to create competition:', error)
+    const appwriteError = error as AppwriteError
     return NextResponse.json(
-      { error: 'Failed to create competition' },
+      { error: 'Failed to create competition', details: appwriteError.message },
       { status: 500 }
     )
   }
@@ -70,10 +125,11 @@ export async function PATCH(request: NextRequest) {
       data
     )
     return NextResponse.json({ competition: response })
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Failed to update competition:', error)
+    const appwriteError = error as AppwriteError
     return NextResponse.json(
-      { error: 'Failed to update competition' },
+      { error: 'Failed to update competition', details: appwriteError.message },
       { status: 500 }
     )
   }
@@ -92,40 +148,7 @@ export async function DELETE(request: NextRequest) {
       )
     }
 
-    // 1. Get all music files associated with this competition
-    const musicFiles = await databases.listDocuments(
-      process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
-      'music_files',
-      [Query.equal('competitionId', competitionId)]
-    )
-
-    // 2. Delete files from storage
-    await Promise.all(
-      musicFiles.documents.map(async (file) => {
-        try {
-          await storage.deleteFile(
-            process.env.NEXT_PUBLIC_APPWRITE_STORAGE_BUCKET_ID as string,
-            file.fileId
-          )
-        } catch (err) {
-          console.error(`Failed to delete file ${file.fileId}:`, err)
-          // Continue with other deletions even if one fails
-        }
-      })
-    )
-
-    // 3. Delete music file records
-    await Promise.all(
-      musicFiles.documents.map((file) =>
-        databases.deleteDocument(
-          process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
-          'music_files',
-          file.$id
-        )
-      )
-    )
-
-    // 4. Delete all grades associated with this competition
+    // 1. Delete all grades associated with this competition
     const grades = await databases.listDocuments(
       process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
       'grades',
@@ -142,7 +165,7 @@ export async function DELETE(request: NextRequest) {
       )
     )
 
-    // 5. Finally delete the competition
+    // 2. Delete the competition
     await databases.deleteDocument(
       process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
       'competitions',
@@ -150,10 +173,11 @@ export async function DELETE(request: NextRequest) {
     )
 
     return NextResponse.json({ success: true })
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Failed to delete competition:', error)
+    const appwriteError = error as AppwriteError
     return NextResponse.json(
-      { error: 'Failed to delete competition' },
+      { error: 'Failed to delete competition', details: appwriteError.message },
       { status: 500 }
     )
   }

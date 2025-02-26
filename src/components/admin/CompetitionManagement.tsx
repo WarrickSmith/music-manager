@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { AppwriteSetupModal } from './AppwriteSetupModal'
+import { CreateCompetitionDialog } from './CreateCompetitionDialog'
 import {
   Table,
   TableHeader,
@@ -11,20 +12,7 @@ import {
   TableCell,
 } from '@/components/ui/table'
 import { Button } from '@/components/ui/button'
-import { Models } from 'appwrite'
-
-interface Competition extends Models.Document {
-  name: string
-  year: number
-  active: boolean
-}
-
-interface Grade extends Models.Document {
-  name: string
-  category: string
-  segment: string
-  competitionId: string
-}
+import { Competition, Grade } from '@/types/competition'
 
 interface CompetitionManagementProps {
   onSwitchTab: (tab: 'users' | 'competitions') => void
@@ -41,21 +29,13 @@ export function CompetitionManagement({
   const [showAppwriteSetup, setShowAppwriteSetup] = useState(false)
   const [selectedCompetition, setSelectedCompetition] =
     useState<Competition | null>(null)
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
 
   // API functions
   const fetchGradesList = async (competitionId: string) => {
     const response = await fetch(`/api/grades?competitionId=${competitionId}`)
     if (!response.ok) {
       throw new Error('Failed to fetch grades')
-    }
-    const data = await response.json()
-    return data.grades
-  }
-
-  const fetchMasterGradesList = async () => {
-    const response = await fetch('/api/grades/master')
-    if (!response.ok) {
-      throw new Error('Failed to fetch master grades')
     }
     const data = await response.json()
     return data.grades
@@ -209,6 +189,30 @@ export function CompetitionManagement({
   }, [selectedCompetition, fetchGrades])
 
   // Data mutation handlers
+  const handleCreateCompetition = async (data: {
+    name: string
+    year: number
+    sourceCompetitionId?: string
+  }) => {
+    try {
+      setError(null)
+      const newCompetition = {
+        name: data.name,
+        year: data.year,
+        active: true,
+      }
+
+      if (data.sourceCompetitionId) {
+        await cloneCompetition(data.sourceCompetitionId, newCompetition)
+      } else {
+        await createCompetition(newCompetition)
+      }
+    } catch (err) {
+      setError('Failed to create competition')
+      console.error(err)
+    }
+  }
+
   const createCompetition = async (
     data: Omit<Competition, '$id' | '$createdAt' | '$updatedAt'>
   ) => {
@@ -232,27 +236,6 @@ export function CompetitionManagement({
       await fetchCompetitions()
     } catch (err) {
       setError('Failed to clone competition')
-      console.error(err)
-    }
-  }
-
-  const importMasterGrades = async (competitionId: string) => {
-    try {
-      setError(null)
-      setLoadingGrades(true)
-      const masterGrades = await fetchMasterGradesList()
-      await Promise.all(
-        masterGrades.map(
-          (grade: Omit<Grade, '$id' | '$createdAt' | '$updatedAt'>) =>
-            createNewGrade({
-              ...grade,
-              competitionId,
-            })
-        )
-      )
-      await fetchGrades(competitionId)
-    } catch (err) {
-      setError('Failed to import master grades')
       console.error(err)
     }
   }
@@ -343,38 +326,18 @@ export function CompetitionManagement({
         onClose={handleModalClose}
         onSwitchTab={onSwitchTab}
       />
+      <CreateCompetitionDialog
+        open={showCreateDialog}
+        onClose={() => setShowCreateDialog(false)}
+        competitions={competitions}
+        onCreateCompetition={handleCreateCompetition}
+      />
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Competition Management</h2>
         <div className="space-x-2">
-          <Button
-            onClick={() => {
-              // TODO: Open create competition modal
-              const mockCompetition = {
-                name: 'New Competition',
-                year: new Date().getFullYear(),
-                active: true,
-              }
-              createCompetition(mockCompetition)
-            }}
-          >
+          <Button onClick={() => setShowCreateDialog(true)}>
             Create Competition
           </Button>
-          {selectedCompetition && (
-            <Button
-              variant="outline"
-              onClick={() => {
-                // TODO: Open clone competition modal
-                const mockClone = {
-                  name: `${selectedCompetition.name} (Clone)`,
-                  year: new Date().getFullYear(),
-                  active: true,
-                }
-                cloneCompetition(selectedCompetition.$id, mockClone)
-              }}
-            >
-              Clone Competition
-            </Button>
-          )}
         </div>
       </div>
 
@@ -475,28 +438,20 @@ export function CompetitionManagement({
                 : 'Select a competition to manage grades'}
             </h3>
             {selectedCompetition && (
-              <div className="space-x-2">
-                <Button
-                  onClick={() => {
-                    // TODO: Open create grade modal
-                    const mockGrade = {
-                      name: 'New Grade',
-                      category: 'Singles',
-                      segment: 'Short Program',
-                      competitionId: selectedCompetition.$id,
-                    }
-                    createGrade(mockGrade)
-                  }}
-                >
-                  Add Grade
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => importMasterGrades(selectedCompetition.$id)}
-                >
-                  Import Master Grades
-                </Button>
-              </div>
+              <Button
+                onClick={() => {
+                  // TODO: Open create grade modal
+                  const mockGrade = {
+                    name: 'New Grade',
+                    category: 'Singles',
+                    segment: 'Short Program',
+                    competitionId: selectedCompetition.$id,
+                  }
+                  createGrade(mockGrade)
+                }}
+              >
+                Add Grade
+              </Button>
             )}
           </div>
           <Table>
