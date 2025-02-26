@@ -27,10 +27,14 @@ export async function POST(request: NextRequest) {
     )
 
     // 2. Get grades from source competition
+    // Increase the limit to ensure we get all grades (default is 25 max is 100)
     const sourceGrades = await databases.listDocuments(
       process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
       'grades',
-      [Query.equal('competitionId', sourceCompetitionId)]
+      [
+        Query.equal('competitionId', sourceCompetitionId),
+        Query.limit(100), // Increased limit to ensure all grades are retrieved
+      ]
     )
 
     // 3. Clone all grades to new competition

@@ -149,13 +149,13 @@ export async function DELETE(request: NextRequest) {
     }
 
     // 1. Delete all grades associated with this competition
-    // Increase the limit to ensure we get all grades (default is 25)
+    // Increase the limit to ensure we get all grades (default is 25 max is 100)
     const grades = await databases.listDocuments(
       process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID as string,
       'grades',
       [
         Query.equal('competitionId', competitionId),
-        Query.limit(1000), // Increased limit to ensure all grades are retrieved
+        Query.limit(100), // Increased limit to ensure all grades are retrieved
       ]
     )
 
