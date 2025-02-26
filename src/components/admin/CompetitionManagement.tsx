@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { AppwriteSetupModal } from './AppwriteSetupModal'
 import {
   Table,
   TableHeader,
@@ -25,25 +26,23 @@ interface Grade extends Models.Document {
   competitionId: string
 }
 
-export function CompetitionManagement() {
+interface CompetitionManagementProps {
+  onSwitchTab: (tab: 'users' | 'competitions') => void
+}
+
+export function CompetitionManagement({
+  onSwitchTab,
+}: CompetitionManagementProps) {
   const [competitions, setCompetitions] = useState<Competition[]>([])
   const [grades, setGrades] = useState<Grade[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingGrades, setLoadingGrades] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showAppwriteSetup, setShowAppwriteSetup] = useState(false)
   const [selectedCompetition, setSelectedCompetition] =
     useState<Competition | null>(null)
 
   // API functions
-  const fetchCompetitionsList = async () => {
-    const response = await fetch('/api/competitions')
-    if (!response.ok) {
-      throw new Error('Failed to fetch competitions')
-    }
-    const data = await response.json()
-    return data.competitions
-  }
-
   const fetchGradesList = async (competitionId: string) => {
     const response = await fetch(`/api/grades?competitionId=${competitionId}`)
     if (!response.ok) {
@@ -67,8 +66,20 @@ export function CompetitionManagement() {
     try {
       setLoading(true)
       setError(null)
-      const competitions = await fetchCompetitionsList()
-      setCompetitions(competitions)
+      const response = await fetch('/api/competitions')
+      const data = await response.json()
+
+      if (response.status === 404 && data.error === 'Database not found') {
+        setShowAppwriteSetup(true)
+        setCompetitions([])
+        return
+      }
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch competitions')
+      }
+
+      setCompetitions(data.competitions)
     } catch (err) {
       setError('Failed to fetch competitions')
       console.error(err)
@@ -320,8 +331,18 @@ export function CompetitionManagement() {
     }
   }
 
+  const handleModalClose = () => {
+    setShowAppwriteSetup(false)
+    fetchCompetitions()
+  }
+
   return (
     <div className="space-y-8">
+      <AppwriteSetupModal
+        open={showAppwriteSetup}
+        onClose={handleModalClose}
+        onSwitchTab={onSwitchTab}
+      />
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Competition Management</h2>
         <div className="space-x-2">

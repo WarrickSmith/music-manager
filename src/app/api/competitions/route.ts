@@ -11,8 +11,14 @@ export async function GET() {
       [Query.orderDesc('year'), Query.orderDesc('$createdAt')]
     )
     return NextResponse.json({ competitions: response.documents })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to fetch competitions:', error)
+
+    // Check for database not found error
+    if (error?.type === 'database_not_found') {
+      return NextResponse.json({ error: 'Database not found' }, { status: 404 })
+    }
+
     return NextResponse.json(
       { error: 'Failed to fetch competitions' },
       { status: 500 }

@@ -77,7 +77,9 @@ export default function AdminDashboard() {
           {/* Tab Content */}
           <div>
             {activeTab === 'users' && <UserManagement />}
-            {activeTab === 'competitions' && <CompetitionManagement />}
+            {activeTab === 'competitions' && (
+              <CompetitionManagement onSwitchTab={setActiveTab} />
+            )}
           </div>
         </div>
       </div>
