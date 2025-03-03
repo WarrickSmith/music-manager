@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Music Manager
+
+## Overview
+
+Music Manager is an application designed for Ice Skaters to upload and manage music files provided by Competitors for each competition grade. With two primary user roles – Competitor and Admin – the application supports file management, user administration, and competition scheduling.
+
+## Technology Stack
+
+- Next.js 15+ with TypeScript
+- shadcn/UI components
+- Appwrite for backend and storage (server-side Node.js SDK)
+- Sonner for toast notifications
+- React Icons
 
 ## Getting Started
 
-First, run the development server:
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Set up environment variables in `.env.local`
+4. Run the development server: `npm run dev`
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Project Structure
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- `src/app`: Next.js App Router pages and layouts
+- `src/components`: Reusable UI components
+- `src/lib`: Utility functions and Appwrite configuration
+- `src/hooks`: Custom React hooks
+- `src/types`: TypeScript type definitions
+- `Docs`: Project documentation and Appwrite setup files
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Authentication and Role-based Access
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The application uses Appwrite for authentication and role-based access control. User roles are assigned as Labels in Appwrite, and the application uses role-based routing to direct users to the appropriate dashboard based on their role.
 
-## Learn More
+## Branching Strategy
 
-To learn more about Next.js, take a look at the following resources:
+- `main`: Production branch
+- `dev`: Development branch
+- `feature/*`: Feature branches
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Features
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Authentication and user management
+- Role-based access control (Admin, Competitor)
+- Music file upload and management
+- Competition and grade management
