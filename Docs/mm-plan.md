@@ -1,4 +1,4 @@
-# Music Manager Project Development Plan 
+# Music Manager Project Development Plan
 
 This document outlines a comprehensive project development plan for the "Music Manager" application, updated to reflect the use of Appwrite's server-side Node.js SDK for all operations, simplified authentication, and the `sonner` package for toast notifications. The plan is structured in logical phases with clear deliverables, verification steps, and integrated improvements to support secure, maintainable, and high-quality code.
 
@@ -38,9 +38,8 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
   - React Icons for icons
   - Functional programming approach (React hooks, pure functions, immutable state)
 
-- **Data Model**  
-  - The data model is defined in music-manager-data-model.md in the Docs directory  
-
+- **Data Model**
+  - The data model is defined in music-manager-data-model.md in the Docs directory
 
 ## Phase 1: Environment Setup and Project Scaffolding
 
@@ -76,6 +75,7 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
 3. **Environment Configuration**
 
    - Create a `.env.local` file for Appwrite environment variables, using `APPWRITE_SECRET_KEY` for the API key:
+
      ```
      # Server-side variables
      APPWRITE_ENDPOINT=
@@ -92,9 +92,11 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
      NEXT_PUBLIC_APPWRITE_PROJECT_ID=67b4344c000f4ea08aad
 
      ```
+
    - Add `.env.local` to `.gitignore` to avoid committing sensitive data.
 
 4. **Appwrite SDK Installation**
+
    - Install only the server-side Node.js SDK:
      ```bash
      npm install node-appwrite
@@ -118,7 +120,7 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
 
 1. **Appwrite SDK Configuration**
 
-   - Configure the server-side Appwrite Node.js SDK exclusively, using the API key 
+   - Configure the server-side Appwrite Node.js SDK exclusively, using the API key
 
 2. **Database Collections**
 
@@ -126,6 +128,7 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
    - The Docs directory has a setup-appwrite.ts script that can be used in the project and run from package.json using npm run from the terminal.
 
 3. **Roles & Permissions**
+
    - In Appwrite, define roles as Labels for use with existing role-based routing in Next.js App Router (e.g., `admin`, `competitor`).
    - Secure endpoints and storage accordingly via server-side operations.
 
@@ -138,31 +141,34 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
 
 1. **Server-Side Authentication Handling**
 
-   - Implement authentication entirely server-side using the Appwrite Node.js SDK with the API key. 
-   - Implement Role-based routing for Competitors and Admins in the Next.js application each with their own landing page (Dashboard0 once logged in.
+   - Implement authentication entirely server-side using the Appwrite Node.js SDK with the API key.
+   - Implement Role-based routing for Competitors and Admins in the Next.js application each with their own landing page (Dashboard) once logged in. Role based routing should use the users 'Label' for Role.
    - the Docs directory has a Next.js Server side authentication code example appwrite-ss-auth.md.
 
-3. **User Creation and Landing Page:**
-   - Develop a main application page with options to create (register) a new user and log in, using server-side API calls.
+2. **User Creation and Landing Page:**
+
+   - Update the main application page connecting the options to create (register) a new user and log in, using server-side API calls.
    - Use separate forms for Login and Registration.
-   - User registration form collects first name, last name, email, and password with proper validation.
-   - The Main landing page will have the title 'Music Manager' with a modern music-related icon beside it.
+   - User registration form collects first name, last name, email, and password with proper validation. The first name and last name are to be stored as Appwrite User Preferences.
+   - Upon registering, the users role should be created as an Appwrite 'Label'. The very first user ever created in the database will have the 'admin' role, every subsequent user created will have the 'competitor' role by default. These will be able to be managed through the Admin dashboard in a later plan phase.
    - The landing page should not trigger an authentication check until a user logs in.
 
-4. **Login and Role-Based Routing:**
+3. **Login and Role-Based Routing:**
+
    - Authentication is handled server-side with the Appwrite Node.js SDK. Post-login redirection leverages role-based routing:
      - Competitor → Competitor Dashboard
      - Admin → Admin Dashboard
 
-5. **Global Navigation:**
-   - Include a circular, state-dependent global Login/Logout button accessible on all pages that indicates the current login state.
+4. **Global Navigation:**
 
-6. **Error Handling:**
+   - Update the Global Nave login/logout icon button to either logout if logged in (redirecting on logout to the main application landing page) and if logged out, redirect to the login form (may be managed by state). The login/logout icon should change colour when logged in with Purple for Admin and Green for a competitor and blue when logged out.
+
+5. **Error Handling:**
    - Provide clear, user-friendly error messages and loading states using the `sonner` package for toast notifications:
      ```typescript
-     import { toast } from 'sonner';
-     toast.error('Failed to create user');
-     toast.success('User created successfully');
+     import { toast } from 'sonner'
+     toast.error('Failed to create user')
+     toast.success('User created successfully')
      ```
 
 ---
@@ -172,34 +178,35 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
 1. **Server-Side Admin Operations**
 
    - Implement all admin operations using the server-side Appwrite Node.js SDK:
+
      ```typescript
      // src/app/api/admin/users/[userId]/route.ts
-     import { NextResponse } from 'next/server';
-     import { users } from '@/lib/appwrite/server';
+     import { NextResponse } from 'next/server'
+     import { users } from '@/lib/appwrite/server'
 
      export async function PATCH(
        request: Request,
        { params }: { params: { userId: string } }
      ) {
        try {
-         const { active, role } = await request.json();
-         const { userId } = params;
+         const { active, role } = await request.json()
+         const { userId } = params
 
          if (typeof active !== 'undefined') {
-           await users.updateStatus(userId, active ? 'active' : 'blocked');
+           await users.updateStatus(userId, active ? 'active' : 'blocked')
          }
 
          if (role) {
-           await users.updateLabels(userId, [role]);
+           await users.updateLabels(userId, [role])
          }
 
-         return NextResponse.json({ success: true });
+         return NextResponse.json({ success: true })
        } catch (error) {
-         console.error('Error updating user:', error);
+         console.error('Error updating user:', error)
          return NextResponse.json(
            { success: false, message: 'Failed to update user' },
            { status: 500 }
-         );
+         )
        }
      }
      ```
@@ -238,9 +245,9 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
 8. **Admin Error Handling**
    - Use `sonner` for success/failure toasts:
      ```typescript
-     import { toast } from 'sonner';
-     toast.success('Competition created successfully');
-     toast.error('Failed to delete user');
+     import { toast } from 'sonner'
+     toast.success('Competition created successfully')
+     toast.error('Failed to delete user')
      ```
    - Confirm destructive operations with modal dialogs.
 
@@ -251,27 +258,33 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
 1. **Server-Side File Operations**
 
    - Implement all music file management (upload, download, delete) server-side using the Node.js SDK Storage service. Real-time upload progress tracking is no longer required:
+
      ```typescript
      // src/app/api/music/upload/route.ts
-     import { NextResponse } from 'next/server';
-     import { databases, storage } from '@/lib/appwrite/server';
-     import { ID } from 'node-appwrite';
+     import { NextResponse } from 'next/server'
+     import { databases, storage } from '@/lib/appwrite/server'
+     import { ID } from 'node-appwrite'
 
      export async function POST(request: Request) {
        try {
-         const formData = await request.formData();
-         const file = formData.get('file') as File;
-         const competitionId = formData.get('competitionId') as string;
-         const gradeId = formData.get('gradeId') as string;
-         const userId = formData.get('userId') as string;
+         const formData = await request.formData()
+         const file = formData.get('file') as File
+         const competitionId = formData.get('competitionId') as string
+         const gradeId = formData.get('gradeId') as string
+         const userId = formData.get('userId') as string
 
-         const fileName = await formatFileName(competitionId, gradeId, userId, file.name);
+         const fileName = await formatFileName(
+           competitionId,
+           gradeId,
+           userId,
+           file.name
+         )
 
          const uploadedFile = await storage.createFile(
            process.env.APPWRITE_BUCKET_ID || '',
            ID.unique(),
            file
-         );
+         )
 
          const fileDoc = await databases.createDocument(
            process.env.APPWRITE_DATABASE_ID || '',
@@ -287,32 +300,34 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
              userId,
              uploadedAt: new Date().toISOString(),
              size: file.size,
-             status: 'active'
+             status: 'active',
            }
-         );
+         )
 
-         return NextResponse.json({ success: true, file: fileDoc });
+         return NextResponse.json({ success: true, file: fileDoc })
        } catch (error) {
-         console.error('Error uploading music file:', error);
+         console.error('Error uploading music file:', error)
          return NextResponse.json(
            { success: false, message: 'Failed to upload file' },
            { status: 500 }
-         );
+         )
        }
      }
      ```
+
    - Refer to https://appwrite.io/docs/references/cloud/server-nodejs/storage for Storage API details.
 
 2. **Functional File Upload Hook**
 
    - Update the hook to interact with server-side API routes without progress tracking:
+
      ```typescript
      // src/hooks/useFileUpload.ts
-     import { useState } from 'react';
+     import { useState } from 'react'
 
      export const useFileUpload = () => {
-       const [isUploading, setIsUploading] = useState(false);
-       const [error, setError] = useState<Error | null>(null);
+       const [isUploading, setIsUploading] = useState(false)
+       const [error, setError] = useState<Error | null>(null)
 
        const uploadFile = async (
          file: File,
@@ -320,33 +335,33 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
          gradeId: string,
          userId: string
        ) => {
-         setIsUploading(true);
-         setError(null);
+         setIsUploading(true)
+         setError(null)
 
          try {
-           const formData = new FormData();
-           formData.append('file', file);
-           formData.append('competitionId', competitionId);
-           formData.append('gradeId', gradeId);
-           formData.append('userId', userId);
+           const formData = new FormData()
+           formData.append('file', file)
+           formData.append('competitionId', competitionId)
+           formData.append('gradeId', gradeId)
+           formData.append('userId', userId)
 
            const response = await fetch('/api/music/upload', {
              method: 'POST',
-             body: formData
-           });
+             body: formData,
+           })
 
-           if (!response.ok) throw new Error('Upload failed');
-           return await response.json();
+           if (!response.ok) throw new Error('Upload failed')
+           return await response.json()
          } catch (err) {
-           setError(err instanceof Error ? err : new Error('Unknown error'));
-           throw err;
+           setError(err instanceof Error ? err : new Error('Unknown error'))
+           throw err
          } finally {
-           setIsUploading(false);
+           setIsUploading(false)
          }
-       };
+       }
 
-       return { uploadFile, isUploading, error };
-     };
+       return { uploadFile, isUploading, error }
+     }
      ```
 
 3. **Competitor Dashboard Features**
@@ -370,9 +385,9 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
 6. **UI/UX**
    - Use `sonner` for feedback on file operations:
      ```typescript
-     import { toast } from 'sonner';
-     toast.success('File uploaded successfully');
-     toast.error('Upload failed');
+     import { toast } from 'sonner'
+     toast.success('File uploaded successfully')
+     toast.error('Upload failed')
      ```
 
 ---
@@ -392,6 +407,7 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
    - Leverage Next.js 15+ server components for server-side data fetching.
 
 4. **Server-Side Rendering with Next.js**
+
    - Use Server Components with the Node.js SDK for secure operations.
 
 5. **Advanced UI Patterns**
