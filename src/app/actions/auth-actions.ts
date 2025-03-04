@@ -6,7 +6,6 @@ import {
   logout,
   getCurrentUser,
 } from '@/lib/auth/auth-service'
-import { redirect } from 'next/navigation'
 
 export async function loginAction(formData: FormData) {
   try {
@@ -81,7 +80,11 @@ export async function registerAction(formData: FormData) {
 export async function logoutAction() {
   try {
     await logout()
-    redirect('/login')
+    // Return success instead of redirecting
+    return {
+      success: true,
+      redirectTo: '/login',
+    }
   } catch (error) {
     console.error('Logout action error:', error)
     return {

@@ -36,10 +36,16 @@ export default function Navbar({ user }: NavbarProps) {
   const handleLogout = async () => {
     setIsLoggingOut(true)
     try {
-      await logoutAction()
-      toast.success('Logged out successfully')
-      closeUserMenu() // Close menu after logout action
-      router.push('/login')
+      const result = await logoutAction()
+      if (result.success) {
+        toast.success('Logged out successfully')
+        closeUserMenu() // Close menu after logout action
+        if (result.redirectTo) {
+          router.push(result.redirectTo)
+        }
+      } else {
+        toast.error(result.error || 'Logout failed')
+      }
     } catch (error) {
       console.error('Logout error:', error)
       toast.error('Logout failed')
