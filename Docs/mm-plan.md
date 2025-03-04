@@ -158,6 +158,8 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
    - Authentication is handled server-side with the Appwrite Node.js SDK. Post-login redirection leverages role-based routing:
      - Competitor → Competitor Dashboard
      - Admin → Admin Dashboard
+     - For asynchronous events like login, logout and register, the application will show a spinner with some text describing the event. The spinner should be center in the screen and behind the spinner should be blurred out.
+     - A sonner toast should be displayed in the bottom right side of the screen for each event, such as logged in, logged out and errors. Multiple toast's should push older toasts up the screen.
 
 4. **Global Navigation:**
 
