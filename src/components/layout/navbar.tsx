@@ -28,11 +28,17 @@ export default function Navbar({ user }: NavbarProps) {
     setIsUserMenuOpen(!isUserMenuOpen)
   }
 
+  // Close menu when selecting an option
+  const closeUserMenu = () => {
+    setIsUserMenuOpen(false)
+  }
+
   const handleLogout = async () => {
     setIsLoggingOut(true)
     try {
       await logoutAction()
       toast.success('Logged out successfully')
+      closeUserMenu() // Close menu after logout action
       router.push('/login')
     } catch (error) {
       console.error('Logout error:', error)
@@ -42,13 +48,12 @@ export default function Navbar({ user }: NavbarProps) {
     }
   }
 
-  // Determine button color based on role
-  const buttonColorClass =
-    userRole === 'admin'
-      ? 'text-purple-600 hover:bg-purple-50'
-      : userRole === 'competitor'
-      ? 'text-green-600 hover:bg-green-50'
-      : 'text-blue-600 hover:bg-blue-50'
+  // Determine button color based on user status - explicitly set blue when logged out
+  const buttonColorClass = !user
+    ? 'text-blue-600 hover:bg-blue-50'
+    : userRole === 'admin'
+    ? 'text-purple-600 hover:bg-purple-50'
+    : 'text-green-600 hover:bg-green-50'
 
   return (
     <nav className="w-full py-4 px-6 bg-gradient-to-r from-blue-50 to-purple-50 border-b border-blue-100 sticky top-0 z-50 shadow-sm backdrop-blur-md">
@@ -64,6 +69,7 @@ export default function Navbar({ user }: NavbarProps) {
               alt="Music Manager Logo"
               width={36}
               height={36}
+              priority
               className="rounded-md relative"
             />
           </div>
@@ -128,6 +134,7 @@ export default function Navbar({ user }: NavbarProps) {
                   <>
                     <Link
                       href="/login"
+                      onClick={closeUserMenu}
                       className="flex items-center gap-2 px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 transition-colors"
                     >
                       <FaUser className="w-4 h-4" />
@@ -135,6 +142,7 @@ export default function Navbar({ user }: NavbarProps) {
                     </Link>
                     <Link
                       href="/register"
+                      onClick={closeUserMenu}
                       className="flex items-center gap-2 px-4 py-2 text-sm text-green-600 hover:bg-green-50 transition-colors"
                     >
                       <FaUser className="w-4 h-4" />

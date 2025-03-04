@@ -49,6 +49,7 @@ export default function LoginPage() {
               alt="Music Manager Logo"
               width={56}
               height={56}
+              priority
               className="rounded-lg shadow-sm"
             />
             <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
