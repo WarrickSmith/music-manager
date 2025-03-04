@@ -1,7 +1,5 @@
 import { toast } from 'sonner'
 
-type ToastType = 'success' | 'error' | 'info' | 'warning' | 'login' | 'logout'
-
 interface ToastOptions {
   description?: string
   duration?: number
