@@ -5,33 +5,64 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
+import { registerAction } from '@/app/actions/auth-actions'
+import LoadingOverlay from '@/components/ui/loading-overlay'
 
 export default function RegisterPage() {
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
   const [passwordError, setPasswordError] = useState('')
+  const router = useRouter()
 
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const validateForm = (formData: FormData): boolean => {
+    const password = formData.get('password') as string
+    const confirmPassword = formData.get('confirmPassword') as string
 
     // Check if passwords match
     if (password !== confirmPassword) {
       setPasswordError('Passwords do not match')
-      return
+      return false
+    }
+
+    // Check password length
+    if (password.length < 8) {
+      setPasswordError('Password must be at least 8 characters')
+      return false
     }
 
     setPasswordError('')
+    return true
+  }
 
-    // Registration functionality will be implemented in Phase 3
-    console.log('Register attempt with:', {
-      firstName,
-      lastName,
-      email,
-      password,
-    })
+  const handleRegister = async (formData: FormData) => {
+    // Client-side validation
+    if (!validateForm(formData)) {
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      // Remove confirmPassword as it's not needed for the server action
+      formData.delete('confirmPassword')
+
+      const result = await registerAction(formData)
+
+      if (result.success) {
+        toast.success(result.message || 'Registration successful!')
+        if (result.redirectTo) {
+          router.push(result.redirectTo)
+        }
+      } else {
+        toast.error(result.error || 'Registration failed')
+      }
+    } catch (error) {
+      console.error('Registration error:', error)
+      toast.error('An unexpected error occurred')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -59,7 +90,10 @@ export default function RegisterPage() {
           <h2 className="text-2xl font-semibold mb-6 text-center bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
             Create Account
           </h2>
-          <form onSubmit={handleRegister} className="space-y-5">
+
+          {isLoading && <LoadingOverlay message="Creating your account..." />}
+
+          <form action={handleRegister} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label
@@ -85,8 +119,8 @@ export default function RegisterPage() {
                 </label>
                 <Input
                   id="firstName"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
+                  name="firstName"
+                  type="text"
                   required
                   className="rounded-md border-purple-200 focus-visible:ring-purple-400 transition-all bg-white/90"
                   placeholder="John"
@@ -102,8 +136,8 @@ export default function RegisterPage() {
                 </label>
                 <Input
                   id="lastName"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
+                  name="lastName"
+                  type="text"
                   required
                   className="rounded-md border-purple-200 focus-visible:ring-purple-400 transition-all bg-white/90"
                   placeholder="Doe"
@@ -135,9 +169,8 @@ export default function RegisterPage() {
               </label>
               <Input
                 id="email"
+                name="email"
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
                 required
                 className="rounded-md border-purple-200 focus-visible:ring-purple-400 transition-all bg-white/90"
                 placeholder="your.email@example.com"
@@ -168,13 +201,16 @@ export default function RegisterPage() {
               </label>
               <Input
                 id="password"
+                name="password"
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
                 required
+                minLength={8}
                 className="rounded-md border-purple-200 focus-visible:ring-purple-400 transition-all bg-white/90"
                 placeholder="••••••••"
               />
+              <p className="text-xs text-gray-500">
+                Password must be at least 8 characters
+              </p>
             </div>
 
             <div className="space-y-2">
@@ -200,9 +236,8 @@ export default function RegisterPage() {
               </label>
               <Input
                 id="confirmPassword"
+                name="confirmPassword"
                 type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 className="rounded-md border-purple-200 focus-visible:ring-purple-400 transition-all bg-white/90"
                 placeholder="••••••••"
@@ -214,14 +249,13 @@ export default function RegisterPage() {
               )}
             </div>
 
-            <div className="pt-2">
-              <Button
-                type="submit"
-                className="w-full rounded-md shadow-sm hover:shadow-md transition-all bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium py-5"
-              >
-                Register
-              </Button>
-            </div>
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="w-full mt-4 rounded-md shadow-sm hover:shadow-md transition-all bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium py-5"
+            >
+              {isLoading ? 'Creating Account...' : 'Register'}
+            </Button>
           </form>
 
           <div className="text-center mt-6 bg-purple-50 p-4 rounded-lg border border-purple-100">
@@ -230,7 +264,7 @@ export default function RegisterPage() {
               href="/login"
               className="inline-flex items-center justify-center px-4 py-2 bg-blue-100 text-blue-700 rounded-full font-medium hover:bg-blue-200 transition-colors text-sm"
             >
-              <span>Login Now</span>
+              <span>Login</span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"

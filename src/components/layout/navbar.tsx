@@ -4,13 +4,51 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { FaUser, FaSignOutAlt, FaMusic } from 'react-icons/fa'
 import { useState } from 'react'
+import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
+import { logoutAction } from '@/app/actions/auth-actions'
 
-export default function Navbar() {
+type NavbarProps = {
+  user?: {
+    $id: string
+    name: string
+    email: string
+    labels: string[]
+  } | null
+}
+
+export default function Navbar({ user }: NavbarProps) {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const router = useRouter()
+
+  const userRole = user?.labels?.includes('admin') ? 'admin' : 'competitor'
 
   const toggleUserMenu = () => {
     setIsUserMenuOpen(!isUserMenuOpen)
   }
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true)
+    try {
+      await logoutAction()
+      toast.success('Logged out successfully')
+      router.push('/login')
+    } catch (error) {
+      console.error('Logout error:', error)
+      toast.error('Logout failed')
+    } finally {
+      setIsLoggingOut(false)
+    }
+  }
+
+  // Determine button color based on role
+  const buttonColorClass =
+    userRole === 'admin'
+      ? 'text-purple-600 hover:bg-purple-50'
+      : userRole === 'competitor'
+      ? 'text-green-600 hover:bg-green-50'
+      : 'text-blue-600 hover:bg-blue-50'
 
   return (
     <nav className="w-full py-4 px-6 bg-gradient-to-r from-blue-50 to-purple-50 border-b border-blue-100 sticky top-0 z-50 shadow-sm backdrop-blur-md">
@@ -35,44 +73,75 @@ export default function Navbar() {
         </Link>
 
         <div className="flex items-center gap-4">
-          <Link
-            href="/dashboard"
-            className="hidden md:flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
-          >
-            <FaMusic className="w-4 h-4" />
-            <span>My Music</span>
-          </Link>
+          {user && (
+            <Link
+              href={userRole === 'admin' ? '/admin/dashboard' : '/dashboard'}
+              className="hidden md:flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+            >
+              <FaMusic className="w-4 h-4" />
+              <span>My Music</span>
+            </Link>
+          )}
 
           <div className="relative">
             <button
               onClick={toggleUserMenu}
-              className="p-2.5 rounded-full bg-white hover:bg-blue-50 transition-colors duration-200 flex items-center justify-center border border-blue-100 shadow-sm hover:shadow-md"
+              className={`p-2.5 rounded-full bg-white transition-colors duration-200 flex items-center justify-center border border-blue-100 shadow-sm hover:shadow-md ${buttonColorClass}`}
+              aria-label={user ? 'User menu' : 'Login'}
             >
-              <FaUser className="w-5 h-5 text-gradient-to-r from-blue-600 to-purple-600" />
+              {isLoggingOut ? (
+                <div className="w-5 h-5 border-2 border-t-current border-r-transparent border-b-current border-l-transparent rounded-full animate-spin"></div>
+              ) : (
+                <FaUser className="w-5 h-5" />
+              )}
             </button>
 
             {isUserMenuOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-blue-100 py-2 z-50">
-                <div className="px-4 py-2 border-b border-blue-50">
-                  <p className="text-sm font-medium text-gray-700">User Name</p>
-                  <p className="text-xs text-gray-500 truncate">
-                    user@example.com
-                  </p>
-                </div>
-                <Link
-                  href="/profile"
-                  className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 transition-colors"
-                >
-                  <FaUser className="w-4 h-4 text-blue-500" />
-                  <span>Profile</span>
-                </Link>
-                <Link
-                  href="/logout"
-                  className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                >
-                  <FaSignOutAlt className="w-4 h-4" />
-                  <span>Logout</span>
-                </Link>
+                {user ? (
+                  <>
+                    <div className="px-4 py-2 border-b border-blue-50">
+                      <p className="text-sm font-medium text-gray-700">
+                        {user.name}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {user.email}
+                      </p>
+                      <p className="text-xs font-medium mt-1 capitalize">
+                        {userRole === 'admin' ? (
+                          <span className="text-purple-600">Admin</span>
+                        ) : (
+                          <span className="text-green-600">Competitor</span>
+                        )}
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      disabled={isLoggingOut}
+                      className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      <FaSignOutAlt className="w-4 h-4" />
+                      <span>Logout</span>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      href="/login"
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 transition-colors"
+                    >
+                      <FaUser className="w-4 h-4" />
+                      <span>Login</span>
+                    </Link>
+                    <Link
+                      href="/register"
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-green-600 hover:bg-green-50 transition-colors"
+                    >
+                      <FaUser className="w-4 h-4" />
+                      <span>Register</span>
+                    </Link>
+                  </>
+                )}
               </div>
             )}
           </div>

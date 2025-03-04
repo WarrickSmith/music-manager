@@ -5,15 +5,35 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
+import { loginAction } from '@/app/actions/auth-actions'
+import LoadingOverlay from '@/components/ui/loading-overlay'
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    // Login functionality will be implemented in Phase 3
-    console.log('Login attempt with:', { email, password })
+  const handleLogin = async (formData: FormData) => {
+    setIsLoading(true)
+
+    try {
+      const result = await loginAction(formData)
+
+      if (result.success) {
+        toast.success('Logged in successfully')
+        if (result.redirectTo) {
+          router.push(result.redirectTo)
+        }
+      } else {
+        toast.error(result.error || 'Login failed')
+      }
+    } catch (error) {
+      console.error('Login error:', error)
+      toast.error('An unexpected error occurred')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -41,7 +61,10 @@ export default function LoginPage() {
           <h2 className="text-2xl font-semibold mb-6 text-center bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
             Welcome Back!
           </h2>
-          <form onSubmit={handleLogin} className="space-y-5">
+
+          {isLoading && <LoadingOverlay message="Logging in..." />}
+
+          <form action={handleLogin} className="space-y-5">
             <div className="space-y-2">
               <label
                 htmlFor="email"
@@ -66,9 +89,8 @@ export default function LoginPage() {
               </label>
               <Input
                 id="email"
+                name="email"
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
                 required
                 className="rounded-md border-blue-200 focus-visible:ring-blue-400 transition-all bg-white/90"
                 placeholder="your.email@example.com"
@@ -99,9 +121,8 @@ export default function LoginPage() {
               </label>
               <Input
                 id="password"
+                name="password"
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
                 required
                 className="rounded-md border-blue-200 focus-visible:ring-blue-400 transition-all bg-white/90"
                 placeholder="••••••••"
@@ -111,9 +132,10 @@ export default function LoginPage() {
             <div className="pt-2">
               <Button
                 type="submit"
+                disabled={isLoading}
                 className="w-full rounded-md shadow-sm hover:shadow-md transition-all bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-5"
               >
-                Login
+                {isLoading ? 'Logging in...' : 'Login'}
               </Button>
             </div>
           </form>
