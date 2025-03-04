@@ -741,7 +741,7 @@ export async function deleteCompetition(competitionId: string) {
 
 - Grade listing for selected competition
 - Grade creation interface
-- Grade editing functionality
+- Grade editing functionality inline, row highlighted when in edit mode.
 - Grade deletion with confirmation
 
 **Technical Implementation:**
