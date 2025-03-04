@@ -24,6 +24,7 @@ This brief provides instructions for implementing a specific step from the Phase
    - Implements proper error handling with user-friendly messages
    - Is responsive on both desktop and mobile devices
    - Follows the project's functional programming approach
+   - Creates modern, stylish and colourful interfaces
 
 4. The implementation should be delivered as working code that can be integrated into the existing project structure without breaking other components.
 
