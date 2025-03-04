@@ -1,147 +1,124 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import Link from 'next/link'
+import { loginAction } from '@/app/actions/auth-actions'
+import { showToast } from '@/components/ui/toast'
+import LoadingOverlay from '@/components/ui/loading-overlay'
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [formState, setFormState] = useState({ email: '', password: '' })
+  const [loading, setLoading] = useState(false)
+  const router = useRouter()
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Login functionality will be implemented in Phase 3
-    console.log('Login attempt with:', { email, password })
+    setLoading(true)
+
+    try {
+      // Create FormData object to match the expected format in loginAction
+      const formData = new FormData()
+      formData.append('email', formState.email)
+      formData.append('password', formState.password)
+
+      const result = await loginAction(formData)
+      if (result.success) {
+        showToast.login('Logged in successfully')
+        if (result.redirectTo) {
+          router.push(result.redirectTo)
+        }
+      } else {
+        showToast.error(result.error || 'Login failed')
+      }
+    } catch (error) {
+      console.error('Login error:', error)
+      showToast.error('An unexpected error occurred')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormState({ ...formState, [name]: value })
   }
 
   return (
-    <div className="flex flex-col items-center justify-center py-10 px-4 bg-gradient-to-b from-blue-500/10 to-purple-500/10 min-h-screen w-full absolute inset-0">
-      <div className="w-full max-w-md">
-        <div className="flex justify-center mb-10 animate-fade-in">
-          <Link
-            href="/"
-            className="flex items-center gap-3 transition-transform hover:scale-105"
+    <div className="container max-w-md mx-auto p-6 space-y-8">
+      {loading && <LoadingOverlay message="Signing in..." />}
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-blue-600 mb-2">Welcome Back</h1>
+        <p className="text-gray-600">Sign in to your Music Manager account</p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="space-y-2">
+          <label
+            htmlFor="email"
+            className="block text-sm font-medium text-gray-700"
           >
-            <Image
-              src="/mm-logo.png"
-              alt="Music Manager Logo"
-              width={56}
-              height={56}
-              className="rounded-lg shadow-sm"
-            />
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Music Manager
-            </h1>
-          </Link>
+            Email
+          </label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            required
+            placeholder="your@email.com"
+            value={formState.email}
+            onChange={handleChange}
+            className="w-full"
+          />
         </div>
 
-        <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg border border-blue-100 p-8 transition-all hover:shadow-xl">
-          <h2 className="text-2xl font-semibold mb-6 text-center bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-            Welcome Back!
-          </h2>
-          <form onSubmit={handleLogin} className="space-y-5">
-            <div className="space-y-2">
-              <label
-                htmlFor="email"
-                className="text-sm font-medium flex items-center gap-2 text-gray-700"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="text-blue-500"
-                >
-                  <rect width="20" height="16" x="2" y="4" rx="2" />
-                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-                </svg>
-                <span>Email</span>
-              </label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="rounded-md border-blue-200 focus-visible:ring-blue-400 transition-all bg-white/90"
-                placeholder="your.email@example.com"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label
-                htmlFor="password"
-                className="text-sm font-medium flex items-center gap-2 text-gray-700"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="text-blue-500"
-                >
-                  <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                </svg>
-                <span>Password</span>
-              </label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="rounded-md border-blue-200 focus-visible:ring-blue-400 transition-all bg-white/90"
-                placeholder="••••••••"
-              />
-            </div>
-
-            <div className="pt-2">
-              <Button
-                type="submit"
-                className="w-full rounded-md shadow-sm hover:shadow-md transition-all bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-5"
-              >
-                Login
-              </Button>
-            </div>
-          </form>
-
-          <div className="text-center mt-6 bg-blue-50 p-4 rounded-lg border border-blue-100">
-            <p className="text-gray-600 mb-2">Don&apos;t have an account?</p>
-            <Link
-              href="/register"
-              className="inline-flex items-center justify-center px-4 py-2 bg-purple-100 text-purple-700 rounded-full font-medium hover:bg-purple-200 transition-colors text-sm"
+        <div className="space-y-2">
+          <div className="flex justify-between">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700"
             >
-              <span>Register Now</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="ml-1"
-              >
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-            </Link>
+              Password
+            </label>
+            <a href="#" className="text-sm text-blue-600 hover:underline">
+              Forgot password?
+            </a>
           </div>
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            required
+            placeholder="Enter your password"
+            value={formState.password}
+            onChange={handleChange}
+            className="w-full"
+          />
         </div>
+
+        <Button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5"
+        >
+          Sign In
+        </Button>
+      </form>
+
+      <div className="text-center mt-8">
+        <p className="text-sm text-gray-600">
+          Don&apos;t have an account?{' '}
+          <Link
+            href="/register"
+            className="font-medium text-blue-600 hover:underline"
+          >
+            Register
+          </Link>
+        </p>
       </div>
     </div>
   )

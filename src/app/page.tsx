@@ -13,6 +13,7 @@ export default function Home() {
             alt="Music Manager Logo"
             width={64}
             height={64}
+            priority
             className="rounded-lg shadow-md"
           />
           <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
