@@ -179,72 +179,47 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
 
 1. **Server-Side Admin Operations**
 
-   - Implement all admin operations using the server-side Appwrite Node.js SDK:
+   - Implement all admin operations using the server-side Appwrite Node.js SDK and Server Actions.
+   - The Docs directory has Appwrite Node.js server-side database API examples in appwrite-database-server-api.md.
+   - Leverage Role based routing and auth already in place from Phase 3.
+   - Dashboard to have seperate TABS for Music [File management], [User Management], [Competition and Grade Management] and [Admin User profile management].
 
-     ```typescript
-     // src/app/api/admin/users/[userId]/route.ts
-     import { NextResponse } from 'next/server'
-     import { users } from '@/lib/appwrite/server'
+2. **Admin Dashboard Features**
 
-     export async function PATCH(
-       request: Request,
-       { params }: { params: { userId: string } }
-     ) {
-       try {
-         const { active, role } = await request.json()
-         const { userId } = params
-
-         if (typeof active !== 'undefined') {
-           await users.updateStatus(userId, active ? 'active' : 'blocked')
-         }
-
-         if (role) {
-           await users.updateLabels(userId, [role])
-         }
-
-         return NextResponse.json({ success: true })
-       } catch (error) {
-         console.error('Error updating user:', error)
-         return NextResponse.json(
-           { success: false, message: 'Failed to update user' },
-           { status: 500 }
-         )
-       }
-     }
-     ```
-
-2. **Functional State Management**
-
-   - Use React Query or SWR for data fetching and cache management, interacting with server-side API routes.
-
-3. **Admin Dashboard Features**
-
-   - Manage user roles, see all competitions, create new competitions, and manage Grades via server-side operations.
+   - Manage user roles, see all competitions, create new competitions, delete competitions, and manage Grades (CRUD) via server-side operations.
+   - Creating a new competition will initially create associated grades from a default list of grades. There are default template grade Documents in the grades collection created by the setup-appwrite.ts script at project initiation. It may be better to remove this from the script and just create the default grades for a new competition directly from the Docs/default-grades.ts file as there will need to be a way to maintian the default grades after initial setup..
    - Provide bulk updates or deletions for user accounts and associated data.
    - Provide a data view of MusicFile submissions.
    - Dashboard should display active and inactive competitions separately.
+   - Use modern, colourfull, stylish design for forms and tables like the rest of the existing application.
 
-4. **User Management**
+3. **User Management**
 
    - Display a list of all users with role information.
    - Implement a toggle switch to disable/enable user accounts using the server-side `users.updateStatus` method.
    - Allow role changes (promote/demote between competitor and admin).
    - Include an option to delete users completely (with confirmation dialog).
 
-5. **Grade Template Utilities**
+4. **Grade Template Utilities**
 
-   - Use server-side utilities for competition and grade management (as in the original plan), leveraging the Node.js SDK.
+   - Use server-side utilities for competition and grade management leveraging the Node.js SDK.
 
-6. **Competition Management Structure**
+5. **Competition Management Structure**
 
    - Create a comprehensive Competition management interface with CRUD functionality via server-side API routes.
+   - Creating a new Competition will create associated default grades.
+   - Deleting a competition will delete all associated grades.
+   - Have the ability when creating a new competition to choose wether to use default grades or clone another existing competition from a drop down list.
+   - Have the ability to make a competition active/inactive. This will effect if it can be seen by a user in Phase 5.
 
-7. **Grade Management Within Competitions**
+6. **Grade Management Within Competitions**
 
    - Enable adding, editing, removing grades for each competition using server-side operations.
    - Support batch operations and cascading deletions.
+   - Have inline editing of a Grades details (edit cancel options)
 
-8. **Admin Error Handling**
+7. **Admin Error Handling**
+
    - Use `sonner` for success/failure toasts:
      ```typescript
      import { toast } from 'sonner'
@@ -253,69 +228,21 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
      ```
    - Confirm destructive operations with modal dialogs.
 
+8. **Admin Profile Management**
+
+   - Have a TAB for displaying Admin profile details and allowing editing of those details.
+
+9. **Music File Management**
+
+   - Have a TAB for Music file Management. This should be a placeholder page for functionality to be implemented in Phase 5.
+
 ---
 
 ## Phase 5: Competitor Dashboard Development
 
 1. **Server-Side File Operations**
 
-   - Implement all music file management (upload, download, delete) server-side using the Node.js SDK Storage service. Real-time upload progress tracking is no longer required:
-
-     ```typescript
-     // src/app/api/music/upload/route.ts
-     import { NextResponse } from 'next/server'
-     import { databases, storage } from '@/lib/appwrite/server'
-     import { ID } from 'node-appwrite'
-
-     export async function POST(request: Request) {
-       try {
-         const formData = await request.formData()
-         const file = formData.get('file') as File
-         const competitionId = formData.get('competitionId') as string
-         const gradeId = formData.get('gradeId') as string
-         const userId = formData.get('userId') as string
-
-         const fileName = await formatFileName(
-           competitionId,
-           gradeId,
-           userId,
-           file.name
-         )
-
-         const uploadedFile = await storage.createFile(
-           process.env.APPWRITE_BUCKET_ID || '',
-           ID.unique(),
-           file
-         )
-
-         const fileDoc = await databases.createDocument(
-           process.env.APPWRITE_DATABASE_ID || '',
-           process.env.APPWRITE_MUSIC_FILES_COLLECTION_ID || '',
-           ID.unique(),
-           {
-             originalName: file.name,
-             fileName,
-             storagePath: uploadedFile.$id,
-             downloadURL: getFileDownloadUrl(uploadedFile.$id),
-             competitionId,
-             gradeId,
-             userId,
-             uploadedAt: new Date().toISOString(),
-             size: file.size,
-             status: 'active',
-           }
-         )
-
-         return NextResponse.json({ success: true, file: fileDoc })
-       } catch (error) {
-         console.error('Error uploading music file:', error)
-         return NextResponse.json(
-           { success: false, message: 'Failed to upload file' },
-           { status: 500 }
-         )
-       }
-     }
-     ```
+   - Implement all music file management (upload, download, delete) server-side using the Node.js SDK Storage service and Server Actions.
 
    - Refer to https://appwrite.io/docs/references/cloud/server-nodejs/storage for Storage API details.
 
