@@ -4,9 +4,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { FaUser, FaSignOutAlt, FaMusic } from 'react-icons/fa'
 import { useState } from 'react'
-import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { logoutAction } from '@/app/actions/auth-actions'
+import { showToast } from '@/components/ui/toast'
 
 type NavbarProps = {
   user?: {
@@ -38,17 +38,17 @@ export default function Navbar({ user }: NavbarProps) {
     try {
       const result = await logoutAction()
       if (result.success) {
-        toast.success('Logged out successfully')
+        showToast.logout('Logged out successfully')
         closeUserMenu() // Close menu after logout action
         if (result.redirectTo) {
           router.push(result.redirectTo)
         }
       } else {
-        toast.error(result.error || 'Logout failed')
+        showToast.error(result.error || 'Logout failed')
       }
     } catch (error) {
       console.error('Logout error:', error)
-      toast.error('Logout failed')
+      showToast.error('Logout failed')
     } finally {
       setIsLoggingOut(false)
     }

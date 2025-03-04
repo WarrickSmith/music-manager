@@ -34,7 +34,16 @@ export default async function RootLayout({
       >
         <Navbar user={user} />
         <main className="min-h-screen">{children}</main>
-        <Toaster position="bottom-right" />
+        <Toaster
+          position="bottom-right"
+          closeButton
+          richColors
+          className="toast-container"
+          toastOptions={{
+            className: 'toast-base shadow-md border',
+            duration: 4000,
+          }}
+        />
       </body>
     </html>
   )
