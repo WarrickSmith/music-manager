@@ -183,11 +183,28 @@ export async function updateUserProfile({
     // Update phone number using the dedicated method
     if (phone) {
       try {
-        await users.updatePhone(userId, phone)
+        // Format phone number to ensure it starts with '+'
+        let formattedPhone = phone.trim()
+        if (!formattedPhone.startsWith('+')) {
+          formattedPhone = '+' + formattedPhone
+        }
+
+        // Validate phone number format
+        if (!/^\+[0-9]{1,14}$/.test(formattedPhone)) {
+          throw new Error(
+            'Phone number must start with + and contain up to 15 digits'
+          )
+        }
+
+        await users.updatePhone(userId, formattedPhone)
       } catch (phoneError) {
         console.error('Error updating phone:', phoneError)
-        // Continue even if phone update fails
-        // This allows other profile updates to succeed
+        // Throw the error to show the toast message
+        throw new Error(
+          phoneError instanceof Error
+            ? phoneError.message
+            : 'Phone number must be in international format (e.g., +14155552671)'
+        )
       }
     }
 

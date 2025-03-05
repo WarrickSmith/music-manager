@@ -219,10 +219,14 @@ export default function AdminProfileManagement() {
                   onChange={(e) =>
                     setFormData({ ...formData, phone: e.target.value })
                   }
-                  placeholder="Enter your phone number"
+                  placeholder="Enter phone number with country code (e.g., +14155552671)"
                   className="border-violet-200 focus-visible:ring-violet-500"
                   disabled={isSubmitting}
                 />
+                <p className="text-sm text-slate-500 mt-1">
+                  Must start with + followed by country code and number (max 15
+                  digits)
+                </p>
               </div>
 
               <div className="space-y-2">
