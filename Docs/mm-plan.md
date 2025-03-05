@@ -250,6 +250,8 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
 
    - A value for APPWRITE_BUCKET_ID already exists in the .env.local file so no .env.local valuse need to be implemented.
 
+   - application styling should follow the patterns already implemented in Phases 1 to 4.
+
 2. **Functional File Upload Hook**
 
    - Update the hook to interact with server-side API routes without progress tracking:
