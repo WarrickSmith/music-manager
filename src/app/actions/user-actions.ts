@@ -85,11 +85,9 @@ export async function updateUserRole(
 
 export async function updateUserStatus(userId: string, active: boolean) {
   try {
-    if (active) {
-      await users.updateStatus(userId, true)
-    } else {
-      await users.updateStatus(userId, false)
-    }
+    // The Appwrite SDK expects a boolean for updateStatus
+    // true = active, false = blocked
+    await users.updateStatus(userId, active)
 
     revalidatePath('/admin/dashboard')
     return true

@@ -217,7 +217,10 @@ export default function UserManagement() {
                             variant={user.isAdmin ? 'default' : 'outline'}
                             className={`w-24 justify-center ${
                               user.isAdmin
-                                ? 'bg-blue-500 hover:bg-blue-600'
+                                ? 'bg-purple-500 hover:bg-purple-600'
+                                : user.status === true ||
+                                  user.status === 'active'
+                                ? 'border-green-500 text-green-500'
                                 : ''
                             }`}
                           >
@@ -235,25 +238,34 @@ export default function UserManagement() {
                             className="border-blue-200 hover:bg-blue-50"
                           >
                             {user.isAdmin ? (
-                              <Shield className="h-4 w-4 text-blue-500" />
+                              <Shield className="h-4 w-4 text-purple-500" />
                             ) : (
-                              <ShieldAlert className="h-4 w-4 text-blue-500" />
+                              <ShieldAlert className="h-4 w-4 text-green-500" />
                             )}
                           </Button>
                         </div>
                       </TableCell>
                       <TableCell>
                         <Switch
-                          checked={user.status === 'active'}
+                          checked={
+                            user.status === true || user.status === 'active'
+                          }
                           onCheckedChange={() =>
                             handleStatusToggle(
                               user.$id,
-                              user.status === 'active'
+                              user.status === true || user.status === 'active'
                             )
                           }
                           aria-label={`User ${
-                            user.status === 'active' ? 'active' : 'inactive'
+                            user.status === true || user.status === 'active'
+                              ? 'active'
+                              : 'inactive'
                           }`}
+                          className={
+                            user.status === true || user.status === 'active'
+                              ? 'data-[state=checked]:bg-green-500'
+                              : ''
+                          }
                         />
                       </TableCell>
                       <TableCell className="text-right">
