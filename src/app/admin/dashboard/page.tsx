@@ -4,6 +4,7 @@ import { getCurrentUser } from '@/lib/auth/auth-service'
 import { Music, Trophy, Users, UserCog } from 'lucide-react'
 import CompetitionManagement from '@/components/dashboard/admin/competition-management'
 import UserManagement from '@/components/dashboard/admin/user-management'
+import AdminProfileManagement from '@/components/dashboard/admin/profile-management'
 
 export default async function AdminDashboardPage() {
   const user = await getCurrentUser()
@@ -85,16 +86,8 @@ export default async function AdminDashboardPage() {
 
           <TabsContent value="profile" className="mt-6">
             {/* Admin Profile Component */}
-            <div className="rounded-lg border border-violet-100 bg-white p-8 text-center shadow-sm">
-              <div className="rounded-full bg-violet-50 p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <UserCog className="h-8 w-8 text-violet-400" />
-              </div>
-              <h2 className="text-xl font-semibold mb-2 text-violet-700">
-                Admin Profile Management
-              </h2>
-              <p className="text-slate-500">
-                Coming Soon in Step 5 of the implementation plan
-              </p>
+            <div className="rounded-lg border border-violet-100 bg-white p-6 shadow-sm">
+              <AdminProfileManagement />
             </div>
           </TabsContent>
         </Tabs>
