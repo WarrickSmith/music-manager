@@ -9,7 +9,6 @@ import {
   Storage,
   Permission,
   Role,
-  ID,
   Teams,
 } from 'node-appwrite'
 
@@ -18,14 +17,12 @@ interface AppwriteError extends Error {
   code?: number
   response?: unknown
 }
-import { defaultGrades } from '../Docs/default-grades'
 
 // Setup options interface
 interface SetupOptions {
   database?: boolean
   collections?: boolean
   storage?: boolean
-  defaultGrades?: boolean
   indexes?: boolean
   teams?: boolean
   all?: boolean
@@ -581,62 +578,6 @@ async function setupStorage(
   }
 }
 
-// Import default grades
-async function importDefaultGrades(
-  { databases }: { databases: Databases },
-  results: string[],
-  errors: string[]
-): Promise<boolean> {
-  try {
-    const databaseId = process.env.APPWRITE_DATABASE_ID!
-    const gradesCollectionId = 'grades'
-
-    // Import default grades as templates without checking first
-    // This avoids the issue with querying for isTemplate before it exists
-    let importedCount = 0
-
-    for (const grade of defaultGrades) {
-      try {
-        await databases.createDocument(
-          databaseId,
-          gradesCollectionId,
-          ID.unique(),
-          {
-            ...grade,
-            isTemplate: true,
-            competitionId: 'template',
-            description: `Default template for ${grade.name} ${grade.category} ${grade.segment}`,
-          }
-        )
-        importedCount++
-      } catch (error: unknown) {
-        const appwriteError = error as AppwriteError
-        // If document already exists (409) or other non-fatal error, continue with next grade
-        if (appwriteError.code === 409) {
-          results.push(`Grade template for ${grade.name} already exists`)
-        } else {
-          console.error(`Error importing grade ${grade.name}:`, error)
-        }
-      }
-    }
-
-    if (importedCount > 0) {
-      results.push(
-        `Successfully imported ${importedCount} default grade templates`
-      )
-    } else {
-      results.push('No new grade templates were imported')
-    }
-    return true
-  } catch (error: unknown) {
-    const appwriteError = error as AppwriteError
-    const message = `Error importing default grades: ${appwriteError.message}`
-    errors.push(message)
-    console.error(message, error)
-    return false
-  }
-}
-
 // Setup teams
 async function setupTeams(
   { teams: teamsService }: { teams: Teams },
@@ -722,7 +663,6 @@ export async function setupAppwrite(
         database: true,
         collections: true,
         storage: true,
-        defaultGrades: true,
         indexes: true,
         teams: true,
       }
@@ -748,10 +688,6 @@ export async function setupAppwrite(
     // Skip index creation for now as it's causing issues
     if (options.indexes) {
       results.push('Skipping index creation due to compatibility issues')
-    }
-
-    if (options.defaultGrades) {
-      await importDefaultGrades({ databases }, results, errors)
     }
 
     // Log end time and duration
@@ -791,7 +727,6 @@ if (require.main === module) {
   if (args.includes('--database')) options.database = true
   if (args.includes('--collections')) options.collections = true
   if (args.includes('--storage')) options.storage = true
-  if (args.includes('--default-grades')) options.defaultGrades = true
   if (args.includes('--indexes')) options.indexes = true
   if (args.includes('--teams')) options.teams = true
 
