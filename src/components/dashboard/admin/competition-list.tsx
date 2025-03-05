@@ -91,9 +91,15 @@ export default function CompetitionList({
             <SelectValue placeholder="Select year" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all" className="text-indigo-800 font-medium">All Years</SelectItem>
+            <SelectItem value="all" className="text-indigo-800 font-medium">
+              All Years
+            </SelectItem>
             {uniqueYears.map((year) => (
-              <SelectItem key={year} value={year.toString()} className="text-indigo-800">
+              <SelectItem
+                key={year}
+                value={year.toString()}
+                className="text-indigo-800"
+              >
                 {year}
               </SelectItem>
             ))}

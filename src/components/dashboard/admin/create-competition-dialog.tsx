@@ -81,13 +81,20 @@ export default function CreateCompetitionDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px] border-indigo-100">
         <DialogHeader>
-          <DialogTitle className="text-indigo-700 text-xl font-semibold">Create New Competition</DialogTitle>
+          <DialogTitle className="text-indigo-700 text-xl font-semibold">
+            Create New Competition
+          </DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="grid grid-cols-4 gap-4">
             <div className="col-span-3">
-              <Label htmlFor="competition-name" className="text-indigo-700 font-medium">Competition Name</Label>
+              <Label
+                htmlFor="competition-name"
+                className="text-indigo-700 font-medium"
+              >
+                Competition Name
+              </Label>
               <Input
                 id="competition-name"
                 placeholder="Enter competition name"
@@ -101,7 +108,12 @@ export default function CreateCompetitionDialog({
             </div>
 
             <div>
-              <Label htmlFor="competition-year" className="text-indigo-700 font-medium">Year</Label>
+              <Label
+                htmlFor="competition-year"
+                className="text-indigo-700 font-medium"
+              >
+                Year
+              </Label>
               <Input
                 id="competition-year"
                 type="number"
@@ -118,7 +130,12 @@ export default function CreateCompetitionDialog({
           </div>
 
           <div className="flex items-center justify-between space-x-2">
-            <Label htmlFor="competition-active" className="text-indigo-700 font-medium">Active Competition</Label>
+            <Label
+              htmlFor="competition-active"
+              className="text-indigo-700 font-medium"
+            >
+              Active Competition
+            </Label>
             <Switch
               id="competition-active"
               checked={formData.active}
@@ -139,12 +156,22 @@ export default function CreateCompetitionDialog({
               className="space-y-2"
             >
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="default" id="default-grades" className="border-indigo-400 text-indigo-600" />
-                <Label htmlFor="default-grades" className="text-indigo-600">Use default grades</Label>
+                <RadioGroupItem
+                  value="default"
+                  id="default-grades"
+                  className="border-indigo-400 text-indigo-600"
+                />
+                <Label htmlFor="default-grades" className="text-indigo-600">
+                  Use default grades
+                </Label>
               </div>
 
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="clone" id="clone-grades" className="border-indigo-400 text-indigo-600" />
+                <RadioGroupItem
+                  value="clone"
+                  id="clone-grades"
+                  className="border-indigo-400 text-indigo-600"
+                />
                 <Label htmlFor="clone-grades" className="text-indigo-600">
                   Clone from existing competition
                 </Label>
@@ -165,7 +192,11 @@ export default function CreateCompetitionDialog({
                   </SelectTrigger>
                   <SelectContent>
                     {competitions.map((comp) => (
-                      <SelectItem key={comp.$id} value={comp.$id} className="text-indigo-700">
+                      <SelectItem
+                        key={comp.$id}
+                        value={comp.$id}
+                        className="text-indigo-700"
+                      >
                         {comp.name} ({comp.year})
                       </SelectItem>
                     ))}
@@ -185,8 +216,8 @@ export default function CreateCompetitionDialog({
             >
               Cancel
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={isSubmitting}
               className="bg-indigo-500 hover:bg-indigo-600 text-white"
             >
