@@ -13,7 +13,7 @@ This brief provides instructions for implementing a specific step from the Phase
    - The objective of this step
    - The deliverables required
    - The technical implementation details
-   - Any relevant context from the main project plan
+   - Any relevant context from the main project plan mm-plan.md
 
 3. Ensure your implementation:
 

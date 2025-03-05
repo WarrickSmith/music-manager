@@ -3,6 +3,7 @@ import { Toaster } from 'sonner'
 import { getCurrentUser } from '@/lib/auth/auth-service'
 import { Music, Trophy, Users, UserCog } from 'lucide-react'
 import CompetitionManagement from '@/components/dashboard/admin/competition-management'
+import UserManagement from '@/components/dashboard/admin/user-management'
 
 export default async function AdminDashboardPage() {
   const user = await getCurrentUser()
@@ -62,16 +63,8 @@ export default async function AdminDashboardPage() {
 
           <TabsContent value="users" className="mt-6">
             {/* User Management Component */}
-            <div className="rounded-lg border border-blue-100 bg-white p-8 text-center shadow-sm">
-              <div className="rounded-full bg-blue-50 p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <Users className="h-8 w-8 text-blue-400" />
-              </div>
-              <h2 className="text-xl font-semibold mb-2 text-blue-700">
-                User Management
-              </h2>
-              <p className="text-slate-500">
-                Coming Soon in Step 4 of the implementation plan
-              </p>
+            <div className="rounded-lg border border-blue-100 bg-white p-6 shadow-sm">
+              <UserManagement />
             </div>
           </TabsContent>
 
