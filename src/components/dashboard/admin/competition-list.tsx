@@ -79,21 +79,21 @@ export default function CompetitionList({
       <div className="mb-4">
         <Label
           htmlFor="year-filter"
-          className="text-xs text-indigo-600 mb-1 block"
+          className="text-xs text-indigo-800 font-semibold mb-1 block"
         >
           Filter by Year
         </Label>
         <Select value={selectedYear} onValueChange={setSelectedYear}>
           <SelectTrigger
             id="year-filter"
-            className="bg-white border-indigo-100"
+            className="bg-white border-indigo-100 text-indigo-800 font-medium"
           >
             <SelectValue placeholder="Select year" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Years</SelectItem>
+            <SelectItem value="all" className="text-indigo-800 font-medium">All Years</SelectItem>
             {uniqueYears.map((year) => (
-              <SelectItem key={year} value={year.toString()}>
+              <SelectItem key={year} value={year.toString()} className="text-indigo-800">
                 {year}
               </SelectItem>
             ))}
@@ -106,7 +106,7 @@ export default function CompetitionList({
           {sortedYears.length > 0 ? (
             sortedYears.map((year) => (
               <div key={year}>
-                <h3 className="font-medium text-sm text-indigo-500 mb-2">
+                <h3 className="font-medium text-sm text-indigo-700 mb-2">
                   {year}
                 </h3>
                 <div className="space-y-2">
@@ -123,7 +123,7 @@ export default function CompetitionList({
               </div>
             ))
           ) : (
-            <div className="text-center py-4 text-indigo-400">
+            <div className="text-center py-4 text-indigo-600">
               No competitions found for the selected year.
             </div>
           )}

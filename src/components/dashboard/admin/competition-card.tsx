@@ -131,7 +131,7 @@ export default function CompetitionCard({
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction
-                    className="bg-destructive text-destructive-foreground"
+                    className="bg-destructive text-white font-medium hover:bg-red-600"
                     onClick={handleDeleteCompetition}
                   >
                     Delete

@@ -79,15 +79,15 @@ export default function CreateCompetitionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] border-indigo-100">
         <DialogHeader>
-          <DialogTitle>Create New Competition</DialogTitle>
+          <DialogTitle className="text-indigo-700 text-xl font-semibold">Create New Competition</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="grid grid-cols-4 gap-4">
             <div className="col-span-3">
-              <Label htmlFor="competition-name">Competition Name</Label>
+              <Label htmlFor="competition-name" className="text-indigo-700 font-medium">Competition Name</Label>
               <Input
                 id="competition-name"
                 placeholder="Enter competition name"
@@ -96,11 +96,12 @@ export default function CreateCompetitionDialog({
                   setFormData({ ...formData, name: e.target.value })
                 }
                 required
+                className="border-indigo-200 focus:border-indigo-400 focus:ring-indigo-400"
               />
             </div>
 
             <div>
-              <Label htmlFor="competition-year">Year</Label>
+              <Label htmlFor="competition-year" className="text-indigo-700 font-medium">Year</Label>
               <Input
                 id="competition-year"
                 type="number"
@@ -111,23 +112,25 @@ export default function CreateCompetitionDialog({
                   setFormData({ ...formData, year: Number(e.target.value) })
                 }
                 required
+                className="border-indigo-200 focus:border-indigo-400 focus:ring-indigo-400"
               />
             </div>
           </div>
 
           <div className="flex items-center justify-between space-x-2">
-            <Label htmlFor="competition-active">Active Competition</Label>
+            <Label htmlFor="competition-active" className="text-indigo-700 font-medium">Active Competition</Label>
             <Switch
               id="competition-active"
               checked={formData.active}
               onCheckedChange={(checked) =>
                 setFormData({ ...formData, active: checked })
               }
+              className="data-[state=checked]:bg-indigo-500"
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Grade Source</Label>
+            <Label className="text-indigo-700 font-medium">Grade Source</Label>
             <RadioGroup
               value={formData.gradeSource}
               onValueChange={(value: string) =>
@@ -136,13 +139,13 @@ export default function CreateCompetitionDialog({
               className="space-y-2"
             >
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="default" id="default-grades" />
-                <Label htmlFor="default-grades">Use default grades</Label>
+                <RadioGroupItem value="default" id="default-grades" className="border-indigo-400 text-indigo-600" />
+                <Label htmlFor="default-grades" className="text-indigo-600">Use default grades</Label>
               </div>
 
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="clone" id="clone-grades" />
-                <Label htmlFor="clone-grades">
+                <RadioGroupItem value="clone" id="clone-grades" className="border-indigo-400 text-indigo-600" />
+                <Label htmlFor="clone-grades" className="text-indigo-600">
                   Clone from existing competition
                 </Label>
               </div>
@@ -157,12 +160,12 @@ export default function CreateCompetitionDialog({
                   }
                   required={formData.gradeSource === 'clone'}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="border-indigo-200 text-indigo-700">
                     <SelectValue placeholder="Select a competition" />
                   </SelectTrigger>
                   <SelectContent>
                     {competitions.map((comp) => (
-                      <SelectItem key={comp.$id} value={comp.$id}>
+                      <SelectItem key={comp.$id} value={comp.$id} className="text-indigo-700">
                         {comp.name} ({comp.year})
                       </SelectItem>
                     ))}
@@ -178,10 +181,15 @@ export default function CreateCompetitionDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
+              className="border-indigo-300 text-indigo-600 hover:bg-indigo-50"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button 
+              type="submit" 
+              disabled={isSubmitting}
+              className="bg-indigo-500 hover:bg-indigo-600 text-white"
+            >
               {isSubmitting ? 'Creating...' : 'Create Competition'}
             </Button>
           </div>

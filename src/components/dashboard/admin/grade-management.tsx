@@ -142,7 +142,7 @@ export default function GradeManagement({
           <div className="mb-4">
             <Label
               htmlFor="name-filter"
-              className="text-xs text-indigo-600 mb-1 block"
+              className="text-xs text-indigo-800 font-semibold mb-1 block"
             >
               Filter by Name
             </Label>
@@ -152,14 +152,14 @@ export default function GradeManagement({
             >
               <SelectTrigger
                 id="name-filter"
-                className="bg-white border-indigo-100"
+                className="bg-white border-indigo-100 text-indigo-800 font-medium"
               >
                 <SelectValue placeholder="Select grade name" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Grade Names</SelectItem>
+                <SelectItem value="all" className="text-indigo-800 font-medium">All Grade Names</SelectItem>
                 {uniqueGradeNames.map((name) => (
-                  <SelectItem key={name} value={name}>
+                  <SelectItem key={name} value={name} className="text-indigo-800">
                     {name}
                   </SelectItem>
                 ))}
@@ -236,7 +236,7 @@ export default function GradeManagement({
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
                               <AlertDialogAction
-                                className="bg-destructive text-destructive-foreground"
+                                className="bg-destructive text-white font-medium hover:bg-red-600"
                                 onClick={() => handleDeleteGrade(grade.$id)}
                               >
                                 Delete
