@@ -244,7 +244,9 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
 
    - Implement all music file management (upload, download, delete) server-side using the Node.js SDK Storage service and Server Actions.
 
-   - Refer to https://appwrite.io/docs/references/cloud/server-nodejs/storage for Storage API details.
+   - Assume mm-plan.md Phases 1 to 4 have been fully implemented. Phase 5 will leverage the existing architecture and implemented code where possible, for example toast components, spinners, Appwrite auth implementation and role based routing for Admins and Competitors.
+
+   - Refer to the project Docs at Docs/appwriteAPI and online at https://appwrite.io/docs/references/cloud/server-nodejs/storage for Storage API details.
 
 2. **Functional File Upload Hook**
 
@@ -295,8 +297,9 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
 
 3. **Competitor Dashboard Features**
 
-   - Display a personal file list for each logged-in Competitor, fetched via server-side API routes.
-   - Support uploading, downloading, previewing, and deleting music files through server-side endpoints.
+   - Display a personal file list for each logged-in Competitor, fetched via server-side Appwrite storage API actions.
+   - Support uploading, downloading, previewing, and deleting music files through server-side Appwrite storage actions.
+   - A music file will be linked to a singular competition that the competitor has selected. The user and the competitionshould be included in the file meta data that is saved.
 
 4. **File Upload with Cascading Selection Interface**
 
@@ -308,7 +311,7 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
 
 5. **Storage Integration**
 
-   - Use Appwrite Storage server-side for all file operations, saving metadata in the MusicFile collection.
+   - Use Appwrite Storage server-side node.js SDK API actions for all file operations, saving metadata in the MusicFile collection.
    - Add validation for file types and size limits server-side.
 
 6. **UI/UX**
