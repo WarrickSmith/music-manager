@@ -1238,6 +1238,7 @@ export async function deleteGrade(gradeId: string) {
 - Role management (admin/competitor toggle)
 - User account status management
 - User deletion with confirmation
+- User details like phone and email should be visable.
 
 **Technical Implementation:**
 
@@ -1623,6 +1624,7 @@ export async function updateUserProfile() {
 - "Include an option to delete users completely (with confirmation dialog)"
 - "Use sonner for success/failure toasts"
 - "Confirm destructive operations with modal dialogs"
+- Use text colour theme from TAB header background colour.
 
 ## Step 5: Admin Profile Management
 
