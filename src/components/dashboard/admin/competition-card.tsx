@@ -4,7 +4,10 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { updateCompetitionStatus, deleteCompetition } from '@/app/actions/competition-actions'
+import {
+  updateCompetitionStatus,
+  deleteCompetition,
+} from '@/app/actions/competition-actions'
 import { toast } from 'sonner'
 import { Trash } from 'lucide-react'
 import {
@@ -28,7 +31,7 @@ interface CompetitionCardProps {
   }
   isSelected: boolean
   onSelect: () => void
-  onUpdate?: () => void  // Optional callback to notify parent when competition is updated
+  onUpdate?: () => void // Optional callback to notify parent when competition is updated
 }
 
 export default function CompetitionCard({
@@ -38,30 +41,30 @@ export default function CompetitionCard({
   onUpdate,
 }: CompetitionCardProps) {
   // Use local state to track competition data, allowing for UI updates without refetching
-  const [competition, setCompetition] = useState(initialCompetition);
-  
+  const [competition, setCompetition] = useState(initialCompetition)
+
   const handleStatusChange = async (checked: boolean) => {
     try {
       await updateCompetitionStatus(competition.$id, checked)
       // Update local state to reflect the change
       setCompetition({
         ...competition,
-        active: checked
-      });
-      toast.success(`Competition ${checked ? 'activated' : 'deactivated'}`);
-      if (onUpdate) onUpdate(); // Notify parent if needed
+        active: checked,
+      })
+      toast.success(`Competition ${checked ? 'activated' : 'deactivated'}`)
+      if (onUpdate) onUpdate() // Notify parent if needed
     } catch (error) {
       toast.error(`Failed to update status: ${(error as Error).message}`)
     }
   }
-  
+
   const handleDeleteCompetition = async () => {
     try {
-      await deleteCompetition(competition.$id);
-      toast.success("Competition and associated grades deleted successfully");
-      if (onUpdate) onUpdate(); // Notify parent to refresh competition list
+      await deleteCompetition(competition.$id)
+      toast.success('Competition and associated grades deleted successfully')
+      if (onUpdate) onUpdate() // Notify parent to refresh competition list
     } catch (error) {
-      toast.error(`Failed to delete competition: ${(error as Error).message}`);
+      toast.error(`Failed to delete competition: ${(error as Error).message}`)
     }
   }
 
@@ -83,8 +86,8 @@ export default function CompetitionCard({
               <Badge
                 variant={competition.active ? 'default' : 'outline'}
                 className={
-                  competition.active 
-                    ? 'bg-green-500 hover:bg-green-600 text-white' 
+                  competition.active
+                    ? 'bg-green-500 hover:bg-green-600 text-white'
                     : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-yellow-300'
                 }
               >
@@ -97,16 +100,18 @@ export default function CompetitionCard({
               checked={competition.active}
               onCheckedChange={handleStatusChange}
               onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              className={competition.active ? "data-[state=checked]:bg-green-500" : ""}
+              className={
+                competition.active ? 'data-[state=checked]:bg-green-500' : ''
+              }
               aria-label={`Competition ${
                 competition.active ? 'active' : 'inactive'
               }`}
             />
-            
+
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   size="icon"
                   className="text-red-500 hover:text-red-700 hover:bg-red-50"
                   onClick={(e: React.MouseEvent) => e.stopPropagation()}
@@ -118,7 +123,9 @@ export default function CompetitionCard({
                 <AlertDialogHeader>
                   <AlertDialogTitle>Delete Competition</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to delete "{competition.name}"? This action cannot be undone and will also delete all associated grades.
+                    Are you sure you want to delete "{competition.name}"? This
+                    action cannot be undone and will also delete all associated
+                    grades.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

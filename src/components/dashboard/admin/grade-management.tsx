@@ -28,8 +28,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
 import { Pencil, Plus, Trash } from 'lucide-react'
 import { toast } from 'sonner'
 import {
@@ -66,7 +72,7 @@ export default function GradeManagement({
   const [isLoading, setIsLoading] = useState(true)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [editingGrade, setEditingGrade] = useState<Grade | null>(null)
-  const [selectedNameFilter, setSelectedNameFilter] = useState<string>("all")
+  const [selectedNameFilter, setSelectedNameFilter] = useState<string>('all')
 
   useEffect(() => {
     if (competition) {
@@ -79,7 +85,7 @@ export default function GradeManagement({
     try {
       const data = await getGradesByCompetition(competition.$id)
       setGrades(data as unknown as Grade[])
-      setSelectedNameFilter("all") // Reset filter when loading new grades
+      setSelectedNameFilter('all') // Reset filter when loading new grades
     } catch (error) {
       toast.error(`Failed to load grades: ${(error as Error).message}`)
     } finally {
@@ -100,14 +106,14 @@ export default function GradeManagement({
 
   // Get unique grade names for the filter dropdown
   const uniqueGradeNames = useMemo(() => {
-    const names = new Set(grades.map(grade => grade.name))
+    const names = new Set(grades.map((grade) => grade.name))
     return Array.from(names).sort()
   }, [grades])
 
   // Filter grades based on selected name
   const filteredGrades = useMemo(() => {
-    if (selectedNameFilter === "all") return grades
-    return grades.filter(grade => grade.name === selectedNameFilter)
+    if (selectedNameFilter === 'all') return grades
+    return grades.filter((grade) => grade.name === selectedNameFilter)
   }, [grades, selectedNameFilter])
 
   return (
@@ -125,20 +131,29 @@ export default function GradeManagement({
               ({competition.year})
             </p>
           </div>
-          <Button onClick={() => setShowCreateDialog(true)} className="bg-indigo-500 hover:bg-indigo-600">
+          <Button
+            onClick={() => setShowCreateDialog(true)}
+            className="bg-indigo-500 hover:bg-indigo-600"
+          >
             <Plus className="h-4 w-4 mr-2" /> Add Grade
           </Button>
         </CardHeader>
         <CardContent>
           <div className="mb-4">
-            <Label htmlFor="name-filter" className="text-xs text-indigo-600 mb-1 block">
+            <Label
+              htmlFor="name-filter"
+              className="text-xs text-indigo-600 mb-1 block"
+            >
               Filter by Name
             </Label>
             <Select
               value={selectedNameFilter}
               onValueChange={setSelectedNameFilter}
             >
-              <SelectTrigger id="name-filter" className="bg-white border-indigo-100">
+              <SelectTrigger
+                id="name-filter"
+                className="bg-white border-indigo-100"
+              >
                 <SelectValue placeholder="Select grade name" />
               </SelectTrigger>
               <SelectContent>
@@ -153,7 +168,9 @@ export default function GradeManagement({
           </div>
 
           {isLoading ? (
-            <div className="py-8 text-center text-indigo-500">Loading grades...</div>
+            <div className="py-8 text-center text-indigo-500">
+              Loading grades...
+            </div>
           ) : grades.length === 0 ? (
             <div className="py-8 text-center text-indigo-400">
               No grades found for this competition
@@ -169,15 +186,23 @@ export default function GradeManagement({
                   <TableHead className="text-indigo-700">Name</TableHead>
                   <TableHead className="text-indigo-700">Category</TableHead>
                   <TableHead className="text-indigo-700">Segment</TableHead>
-                  <TableHead className="text-right text-indigo-700">Actions</TableHead>
+                  <TableHead className="text-right text-indigo-700">
+                    Actions
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredGrades.map((grade) => (
                   <TableRow key={grade.$id} className="border-indigo-100">
-                    <TableCell className="font-medium text-indigo-700">{grade.name}</TableCell>
-                    <TableCell className="text-indigo-600">{grade.category}</TableCell>
-                    <TableCell className="text-indigo-600">{grade.segment}</TableCell>
+                    <TableCell className="font-medium text-indigo-700">
+                      {grade.name}
+                    </TableCell>
+                    <TableCell className="text-indigo-600">
+                      {grade.category}
+                    </TableCell>
+                    <TableCell className="text-indigo-600">
+                      {grade.segment}
+                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end space-x-2">
                         <Button

@@ -1,6 +1,7 @@
 'use server'
 
 import { databases, ID, Query } from '@/lib/appwrite/server'
+import { Models } from 'node-appwrite'
 import { revalidatePath } from 'next/cache'
 import { defaultGrades } from '../../../Docs/default-grades'
 
@@ -16,36 +17,40 @@ const gradesCollectionId = process.env.APPWRITE_GRADES_COLLECTION_ID!
  * @param queries Query parameters
  * @returns Array of all documents from all pages
  */
-async function getAllDocuments(databaseId: string, collectionId: string, queries: any[] = []) {
-  const limit = 100; // Maximum allowed by Appwrite
-  let offset = 0;
-  let allDocuments: any[] = [];
-  let hasMoreDocuments = true;
+async function getAllDocuments(
+  databaseId: string,
+  collectionId: string,
+  queries: string[] = []
+) {
+  const limit = 100 // Maximum allowed by Appwrite
+  let offset = 0
+  let allDocuments: Models.Document[] = []
+  let hasMoreDocuments = true
 
   // Add limit to queries if not already specified
-  const queriesWithLimit = [...queries, Query.limit(limit)];
-  
+  const queriesWithLimit = [...queries, Query.limit(limit)]
+
   while (hasMoreDocuments) {
     // Add offset to queries
-    const currentQueries = [...queriesWithLimit, Query.offset(offset)];
-    
+    const currentQueries = [...queriesWithLimit, Query.offset(offset)]
+
     const response = await databases.listDocuments(
       databaseId,
       collectionId,
       currentQueries
-    );
+    )
 
-    allDocuments = [...allDocuments, ...response.documents];
-    
+    allDocuments = [...allDocuments, ...response.documents]
+
     // Check if there are more documents
     if (response.documents.length < limit) {
-      hasMoreDocuments = false;
+      hasMoreDocuments = false
     } else {
-      offset += limit;
+      offset += limit
     }
   }
 
-  return allDocuments;
+  return allDocuments
 }
 
 export async function getCompetitions() {
@@ -159,11 +164,9 @@ export async function updateCompetitionStatus(
 export async function deleteCompetition(competitionId: string) {
   try {
     // Delete all associated grades using pagination
-    const grades = await getAllDocuments(
-      databaseId,
-      gradesCollectionId,
-      [Query.equal('competitionId', competitionId)]
-    )
+    const grades = await getAllDocuments(databaseId, gradesCollectionId, [
+      Query.equal('competitionId', competitionId),
+    ])
 
     // Delete grades
     for (const grade of grades) {

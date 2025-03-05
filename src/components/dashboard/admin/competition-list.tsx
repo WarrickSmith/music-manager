@@ -1,7 +1,13 @@
 'use client'
 import { useState, useMemo } from 'react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Label } from '@/components/ui/label'
 import CompetitionCard from './competition-card'
 
 interface Competition {
@@ -22,63 +28,66 @@ export default function CompetitionList({
   competitions,
   selectedCompetition,
   onSelectCompetition,
-  onCompetitionUpdate
+  onCompetitionUpdate,
 }: CompetitionListProps) {
   // Get unique years from competitions
   const uniqueYears = useMemo(() => {
-    const years = new Set(competitions.map(comp => comp.year));
-    return Array.from(years).sort((a, b) => b - a); // Sort years descending
-  }, [competitions]);
+    const years = new Set(competitions.map((comp) => comp.year))
+    return Array.from(years).sort((a, b) => b - a) // Sort years descending
+  }, [competitions])
 
   // State for year filter
-  const [selectedYear, setSelectedYear] = useState<string>("all");
+  const [selectedYear, setSelectedYear] = useState<string>('all')
 
   // Filter competitions based on selected year
   const filteredCompetitions = useMemo(() => {
-    if (selectedYear === "all") return competitions;
-    return competitions.filter(comp => comp.year === parseInt(selectedYear));
-  }, [competitions, selectedYear]);
+    if (selectedYear === 'all') return competitions
+    return competitions.filter((comp) => comp.year === parseInt(selectedYear))
+  }, [competitions, selectedYear])
 
   // Group competitions by year
   const competitionsByYear = useMemo(() => {
     return filteredCompetitions.reduce<Record<number, Competition[]>>(
       (acc, comp) => {
-        const year = comp.year;
+        const year = comp.year
         if (!acc[year]) {
-          acc[year] = [];
+          acc[year] = []
         }
-        acc[year].push(comp);
-        return acc;
+        acc[year].push(comp)
+        return acc
       },
       {}
-    );
-  }, [filteredCompetitions]);
+    )
+  }, [filteredCompetitions])
 
   // Sort years descending
   const sortedYears = useMemo(() => {
     return Object.keys(competitionsByYear)
       .map(Number)
-      .sort((a, b) => b - a);
-  }, [competitionsByYear]);
+      .sort((a, b) => b - a)
+  }, [competitionsByYear])
 
   // Sort competitions within each year by name ascending
   useMemo(() => {
     sortedYears.forEach((year) => {
-      competitionsByYear[year].sort((a, b) => a.name.localeCompare(b.name));
-    });
-  }, [sortedYears, competitionsByYear]);
+      competitionsByYear[year].sort((a, b) => a.name.localeCompare(b.name))
+    })
+  }, [sortedYears, competitionsByYear])
 
   return (
     <>
       <div className="mb-4">
-        <Label htmlFor="year-filter" className="text-xs text-indigo-600 mb-1 block">
+        <Label
+          htmlFor="year-filter"
+          className="text-xs text-indigo-600 mb-1 block"
+        >
           Filter by Year
         </Label>
-        <Select
-          value={selectedYear}
-          onValueChange={setSelectedYear}
-        >
-          <SelectTrigger id="year-filter" className="bg-white border-indigo-100">
+        <Select value={selectedYear} onValueChange={setSelectedYear}>
+          <SelectTrigger
+            id="year-filter"
+            className="bg-white border-indigo-100"
+          >
             <SelectValue placeholder="Select year" />
           </SelectTrigger>
           <SelectContent>
@@ -91,7 +100,7 @@ export default function CompetitionList({
           </SelectContent>
         </Select>
       </div>
-      
+
       <div className="max-h-[calc(100vh-330px)] overflow-auto pr-2">
         <div className="space-y-5">
           {sortedYears.length > 0 ? (
