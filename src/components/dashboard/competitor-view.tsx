@@ -9,8 +9,11 @@ export default async function CompetitorView() {
   }
 
   return (
-    <div className="p-8">
-      <CompetitorDashboard userId={user.$id} />
+    <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <CompetitorDashboard
+        userId={user.$id}
+        userName={user.name || 'Competitor'}
+      />
     </div>
   )
 }

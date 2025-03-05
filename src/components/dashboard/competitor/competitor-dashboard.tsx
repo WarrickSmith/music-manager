@@ -4,12 +4,25 @@ import UploadMusic from './upload-music'
 import ProfileManagement from './profile-management'
 import { FileMusic, Upload, UserCog } from 'lucide-react'
 
-export default function CompetitorDashboard({ userId }: { userId: string }) {
+export default function CompetitorDashboard({
+  userId,
+  userName,
+}: {
+  userId: string
+  userName: string
+}) {
   return (
     <div className="w-full">
-      <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-blue-500 mb-6">
-        Competitor Dashboard
-      </h1>
+      <div className="bg-gradient-to-r from-sky-50 via-blue-50 to-indigo-50 rounded-lg p-6 mb-8 shadow-sm border border-blue-100">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-blue-500">
+            Competitor Dashboard
+          </h1>
+          <div className="bg-white px-4 py-2 rounded-full shadow-sm text-blue-600 font-medium border border-blue-100">
+            Welcome, {userName}
+          </div>
+        </div>
+      </div>
 
       <Tabs defaultValue="my-files" className="w-full">
         <TabsList className="grid w-full grid-cols-3 mb-8 p-1 bg-slate-50 rounded-xl shadow-sm border border-slate-200">
