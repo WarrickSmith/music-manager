@@ -7,11 +7,9 @@ import {
   Client,
   Databases,
   Storage,
-  ID,
   Teams,
   type IndexType,
 } from 'node-appwrite'
-import { defaultGrades } from '../Docs/default-grades'
 
 // Custom error type for better type safety
 interface AppwriteError extends Error {
@@ -458,35 +456,6 @@ async function setupTeams(teams: Teams) {
   }
 }
 
-async function importDefaultGrades(databases: Databases) {
-  const databaseId = process.env.APPWRITE_DATABASE_ID!
-  const gradesCollectionId = 'grades'
-
-  // Import default grades as templates
-  let importedCount = 0
-
-  for (const grade of defaultGrades) {
-    try {
-      await databases.createDocument(
-        databaseId,
-        gradesCollectionId,
-        ID.unique(),
-        {
-          ...grade,
-          isTemplate: true,
-          competitionId: 'template',
-          description: `Default template for ${grade.name} ${grade.category} ${grade.segment}`,
-        }
-      )
-      importedCount++
-    } catch (error) {
-      console.error(`Error importing grade: ${error}`)
-    }
-  }
-
-  console.log(`Successfully imported ${importedCount} default grade templates`)
-}
-
 async function main() {
   try {
     console.log('Starting Appwrite setup...')
@@ -504,9 +473,6 @@ async function main() {
 
     // Setup teams
     await setupTeams(teams)
-
-    // Import default grades
-    await importDefaultGrades(databases)
 
     console.log('Appwrite setup completed successfully!')
   } catch (error) {

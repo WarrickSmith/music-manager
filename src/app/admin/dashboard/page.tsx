@@ -2,6 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Toaster } from 'sonner'
 import { getCurrentUser } from '@/lib/auth/auth-service'
 import { Music, Trophy, Users, UserCog } from 'lucide-react'
+import CompetitionManagement from '@/components/dashboard/admin/competition-management'
 
 export default async function AdminDashboardPage() {
   const user = await getCurrentUser()
@@ -20,7 +21,7 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
-        <Tabs defaultValue="musicfiles" className="w-full">
+        <Tabs defaultValue="competitions" className="w-full">
           <TabsList className="grid w-full grid-cols-4 mb-8 p-1 bg-slate-50 rounded-xl shadow-sm border border-slate-200">
             <TabsTrigger
               value="musicfiles"
@@ -54,16 +55,8 @@ export default async function AdminDashboardPage() {
 
           <TabsContent value="competitions" className="mt-6">
             {/* Competition & Grade Management Component */}
-            <div className="rounded-lg border border-indigo-100 bg-white p-8 text-center shadow-sm">
-              <div className="rounded-full bg-indigo-50 p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <Trophy className="h-8 w-8 text-indigo-400" />
-              </div>
-              <h2 className="text-xl font-semibold mb-2 text-indigo-700">
-                Competition and Grade Management
-              </h2>
-              <p className="text-slate-500">
-                Coming Soon in Step 2 of the implementation plan
-              </p>
+            <div className="rounded-lg border border-indigo-100 bg-white p-6 shadow-sm">
+              <CompetitionManagement />
             </div>
           </TabsContent>
 
