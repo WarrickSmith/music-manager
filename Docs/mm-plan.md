@@ -248,6 +248,8 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
 
    - Refer to the project Docs at Docs/appwriteAPI and online at https://appwrite.io/docs/references/cloud/server-nodejs/storage for Storage API details.
 
+   - A value for APPWRITE_BUCKET_ID already exists in the .env.local file so no .env.local valuse need to be implemented.
+
 2. **Functional File Upload Hook**
 
    - Update the hook to interact with server-side API routes without progress tracking:
