@@ -123,9 +123,9 @@ export default function CompetitionCard({
                 <AlertDialogHeader>
                   <AlertDialogTitle>Delete Competition</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to delete "{competition.name}"? This
-                    action cannot be undone and will also delete all associated
-                    grades.
+                    Are you sure you want to delete &quot;{competition.name}
+                    &quot;? This action cannot be undone and will also delete
+                    all associated grades.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

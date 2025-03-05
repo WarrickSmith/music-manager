@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ArrowUpDown, Check, Pencil, Plus, Trash, X } from 'lucide-react'
+import { Check, Pencil, Plus, Trash, X } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   getGradesByCompetition,
@@ -78,13 +78,7 @@ export default function GradeManagement({
   const [editForm, setEditForm] = useState<EditableGrade | null>(null)
   const [selectedNameFilter, setSelectedNameFilter] = useState<string>('all')
 
-  useEffect(() => {
-    if (competition) {
-      loadGrades()
-    }
-  }, [competition?.$id])
-
-  const loadGrades = async () => {
+  const loadGrades = useCallback(async () => {
     setIsLoading(true)
     try {
       const data = await getGradesByCompetition(competition.$id)
@@ -97,7 +91,13 @@ export default function GradeManagement({
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [competition.$id])
+
+  useEffect(() => {
+    if (competition) {
+      loadGrades()
+    }
+  }, [competition, loadGrades])
 
   const handleStartEditing = (grade: Grade | null) => {
     if (grade) {
