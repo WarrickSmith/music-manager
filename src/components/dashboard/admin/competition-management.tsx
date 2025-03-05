@@ -33,7 +33,26 @@ export default function CompetitionManagement() {
     try {
       const data = await getCompetitions()
       setCompetitions(data as unknown as Competition[])
-      if (data.length > 0 && !selectedCompetition) {
+      
+      // If we have a selected competition, try to find it in the newly loaded data
+      if (selectedCompetition) {
+        const updatedCompetition = data.find(
+          comp => comp.$id === selectedCompetition.$id
+        ) as unknown as Competition | undefined;
+        
+        // Update the selected competition with the latest data if found
+        if (updatedCompetition) {
+          setSelectedCompetition(updatedCompetition);
+        } 
+        // If the competition was deleted, select the first one if available
+        else if (data.length > 0) {
+          setSelectedCompetition(data[0] as unknown as Competition);
+        } else {
+          setSelectedCompetition(null);
+        }
+      } 
+      // For initial load, select the first competition if available
+      else if (data.length > 0 && !selectedCompetition) {
         setSelectedCompetition(data[0] as unknown as Competition)
       }
     } catch (error) {
@@ -47,21 +66,21 @@ export default function CompetitionManagement() {
     <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
       <div className="md:col-span-4">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Competitions</h2>
+          <h2 className="text-xl font-semibold text-indigo-700">Competitions</h2>
           <Button
             onClick={() => setShowCreateDialog(true)}
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 bg-indigo-500 hover:bg-indigo-600"
           >
             <Plus className="h-4 w-4" /> Create New
           </Button>
         </div>
 
-        <Card>
+        <Card className="border-indigo-100">
           <CardContent className="p-4">
             {isLoading ? (
-              <div className="py-8 text-center">Loading competitions...</div>
+              <div className="py-8 text-center text-indigo-500">Loading competitions...</div>
             ) : competitions.length === 0 ? (
-              <div className="py-8 text-center">
+              <div className="py-8 text-center text-indigo-600">
                 No competitions found. Create your first competition!
               </div>
             ) : (
@@ -69,6 +88,7 @@ export default function CompetitionManagement() {
                 competitions={competitions}
                 selectedCompetition={selectedCompetition}
                 onSelectCompetition={setSelectedCompetition}
+                onCompetitionUpdate={loadCompetitions}
               />
             )}
           </CardContent>
@@ -94,9 +114,9 @@ export default function CompetitionManagement() {
             onCompetitionUpdate={loadCompetitions}
           />
         ) : (
-          <Card>
+          <Card className="border-indigo-100">
             <CardContent className="p-6 text-center">
-              <p className="text-muted-foreground">
+              <p className="text-indigo-400">
                 Select a competition to manage its grades
               </p>
             </CardContent>

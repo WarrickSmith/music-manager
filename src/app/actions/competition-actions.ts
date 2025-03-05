@@ -9,6 +9,45 @@ const competitionsCollectionId =
   process.env.APPWRITE_COMPETITIONS_COLLECTION_ID!
 const gradesCollectionId = process.env.APPWRITE_GRADES_COLLECTION_ID!
 
+/**
+ * Utility function to fetch all documents with pagination
+ * @param databaseId Database ID
+ * @param collectionId Collection ID
+ * @param queries Query parameters
+ * @returns Array of all documents from all pages
+ */
+async function getAllDocuments(databaseId: string, collectionId: string, queries: any[] = []) {
+  const limit = 100; // Maximum allowed by Appwrite
+  let offset = 0;
+  let allDocuments: any[] = [];
+  let hasMoreDocuments = true;
+
+  // Add limit to queries if not already specified
+  const queriesWithLimit = [...queries, Query.limit(limit)];
+  
+  while (hasMoreDocuments) {
+    // Add offset to queries
+    const currentQueries = [...queriesWithLimit, Query.offset(offset)];
+    
+    const response = await databases.listDocuments(
+      databaseId,
+      collectionId,
+      currentQueries
+    );
+
+    allDocuments = [...allDocuments, ...response.documents];
+    
+    // Check if there are more documents
+    if (response.documents.length < limit) {
+      hasMoreDocuments = false;
+    } else {
+      offset += limit;
+    }
+  }
+
+  return allDocuments;
+}
+
 export async function getCompetitions() {
   try {
     const response = await databases.listDocuments(
@@ -67,14 +106,14 @@ export async function createCompetition({
         )
       }
     } else if (cloneFromCompetitionId) {
-      // Clone grades from existing competition
-      const existingGrades = await databases.listDocuments(
+      // Clone grades from existing competition using the pagination utility
+      const existingGrades = await getAllDocuments(
         databaseId,
         gradesCollectionId,
         [Query.equal('competitionId', cloneFromCompetitionId)]
       )
 
-      for (const grade of existingGrades.documents) {
+      for (const grade of existingGrades) {
         await databases.createDocument(
           databaseId,
           gradesCollectionId,
@@ -119,15 +158,15 @@ export async function updateCompetitionStatus(
 
 export async function deleteCompetition(competitionId: string) {
   try {
-    // Delete all associated grades first
-    const grades = await databases.listDocuments(
+    // Delete all associated grades using pagination
+    const grades = await getAllDocuments(
       databaseId,
       gradesCollectionId,
       [Query.equal('competitionId', competitionId)]
     )
 
     // Delete grades
-    for (const grade of grades.documents) {
+    for (const grade of grades) {
       await databases.deleteDocument(databaseId, gradesCollectionId, grade.$id)
     }
 

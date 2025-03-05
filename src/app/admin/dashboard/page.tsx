@@ -21,7 +21,7 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
 
-        <Tabs defaultValue="competitions" className="w-full">
+        <Tabs defaultValue="musicfiles" className="w-full">
           <TabsList className="grid w-full grid-cols-4 mb-8 p-1 bg-slate-50 rounded-xl shadow-sm border border-slate-200">
             <TabsTrigger
               value="musicfiles"

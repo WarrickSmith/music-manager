@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -28,6 +28,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
 import { Pencil, Plus, Trash } from 'lucide-react'
 import { toast } from 'sonner'
 import {
@@ -64,6 +66,7 @@ export default function GradeManagement({
   const [isLoading, setIsLoading] = useState(true)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [editingGrade, setEditingGrade] = useState<Grade | null>(null)
+  const [selectedNameFilter, setSelectedNameFilter] = useState<string>("all")
 
   useEffect(() => {
     if (competition) {
@@ -76,6 +79,7 @@ export default function GradeManagement({
     try {
       const data = await getGradesByCompetition(competition.$id)
       setGrades(data as unknown as Grade[])
+      setSelectedNameFilter("all") // Reset filter when loading new grades
     } catch (error) {
       toast.error(`Failed to load grades: ${(error as Error).message}`)
     } finally {
@@ -94,54 +98,93 @@ export default function GradeManagement({
     }
   }
 
+  // Get unique grade names for the filter dropdown
+  const uniqueGradeNames = useMemo(() => {
+    const names = new Set(grades.map(grade => grade.name))
+    return Array.from(names).sort()
+  }, [grades])
+
+  // Filter grades based on selected name
+  const filteredGrades = useMemo(() => {
+    if (selectedNameFilter === "all") return grades
+    return grades.filter(grade => grade.name === selectedNameFilter)
+  }, [grades, selectedNameFilter])
+
   return (
     <>
-      <Card>
+      <Card className="border-indigo-100">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div>
-            <CardTitle className="text-xl font-semibold">
+            <CardTitle className="text-xl font-semibold text-indigo-700">
               {competition.name} - Grades
             </CardTitle>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-sm text-indigo-500 mt-1">
               {competition.active
                 ? 'Active Competition'
                 : 'Inactive Competition'}{' '}
               ({competition.year})
             </p>
           </div>
-          <Button onClick={() => setShowCreateDialog(true)}>
+          <Button onClick={() => setShowCreateDialog(true)} className="bg-indigo-500 hover:bg-indigo-600">
             <Plus className="h-4 w-4 mr-2" /> Add Grade
           </Button>
         </CardHeader>
         <CardContent>
+          <div className="mb-4">
+            <Label htmlFor="name-filter" className="text-xs text-indigo-600 mb-1 block">
+              Filter by Name
+            </Label>
+            <Select
+              value={selectedNameFilter}
+              onValueChange={setSelectedNameFilter}
+            >
+              <SelectTrigger id="name-filter" className="bg-white border-indigo-100">
+                <SelectValue placeholder="Select grade name" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Grade Names</SelectItem>
+                {uniqueGradeNames.map((name) => (
+                  <SelectItem key={name} value={name}>
+                    {name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {isLoading ? (
-            <div className="py-8 text-center">Loading grades...</div>
+            <div className="py-8 text-center text-indigo-500">Loading grades...</div>
           ) : grades.length === 0 ? (
-            <div className="py-8 text-center text-muted-foreground">
+            <div className="py-8 text-center text-indigo-400">
               No grades found for this competition
+            </div>
+          ) : filteredGrades.length === 0 ? (
+            <div className="py-8 text-center text-indigo-400">
+              No grades match your filter
             </div>
           ) : (
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Segment</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                <TableRow className="border-indigo-200">
+                  <TableHead className="text-indigo-700">Name</TableHead>
+                  <TableHead className="text-indigo-700">Category</TableHead>
+                  <TableHead className="text-indigo-700">Segment</TableHead>
+                  <TableHead className="text-right text-indigo-700">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {grades.map((grade) => (
-                  <TableRow key={grade.$id}>
-                    <TableCell className="font-medium">{grade.name}</TableCell>
-                    <TableCell>{grade.category}</TableCell>
-                    <TableCell>{grade.segment}</TableCell>
+                {filteredGrades.map((grade) => (
+                  <TableRow key={grade.$id} className="border-indigo-100">
+                    <TableCell className="font-medium text-indigo-700">{grade.name}</TableCell>
+                    <TableCell className="text-indigo-600">{grade.category}</TableCell>
+                    <TableCell className="text-indigo-600">{grade.segment}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end space-x-2">
                         <Button
                           variant="ghost"
                           size="icon"
                           onClick={() => setEditingGrade(grade)}
+                          className="text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50"
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
@@ -190,7 +233,7 @@ export default function GradeManagement({
       <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add New Grade</DialogTitle>
+            <DialogTitle className="text-indigo-700">Add New Grade</DialogTitle>
           </DialogHeader>
           <GradeForm
             competitionId={competition.$id}
@@ -211,7 +254,7 @@ export default function GradeManagement({
         >
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Edit Grade</DialogTitle>
+              <DialogTitle className="text-indigo-700">Edit Grade</DialogTitle>
             </DialogHeader>
             <GradeForm
               competitionId={competition.$id}
