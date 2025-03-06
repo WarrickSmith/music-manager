@@ -26,6 +26,12 @@ type MusicFile = {
 export default function MyFiles({ userId }: { userId: string }) {
   const [files, setFiles] = useState<MusicFile[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
+
+  // Function to trigger a refresh when a file is deleted
+  const handleFileDeleted = () => {
+    setRefreshTrigger((prev) => prev + 1)
+  }
 
   useEffect(() => {
     const fetchFiles = async () => {
@@ -42,7 +48,7 @@ export default function MyFiles({ userId }: { userId: string }) {
     }
 
     fetchFiles()
-  }, [userId])
+  }, [userId, refreshTrigger]) // Added refreshTrigger to dependencies to reload when triggered
 
   // Group files by competition
   const filesByCompetition = files.reduce(
@@ -90,9 +96,11 @@ export default function MyFiles({ userId }: { userId: string }) {
       <h2 className="text-2xl font-semibold mb-4 text-sky-500">
         My Music Files
       </h2>
-      <p className="mb-6 text-sky-400">
-        Total Files: <Badge variant="outline">{files.length}</Badge>
-      </p>
+      {/* Fix: Move Badge outside of p tag to prevent hydration error */}
+      <div className="flex items-center gap-2 mb-6">
+        <span className="text-sky-400">Total Files:</span>
+        <Badge variant="outline">{files.length}</Badge>
+      </div>
 
       {sortedCompetitions.map((competition) => (
         <div key={competition} className="mb-8">
@@ -118,6 +126,7 @@ export default function MyFiles({ userId }: { userId: string }) {
                   status: file.status,
                   storagePath: file.storagePath,
                 }}
+                onDeleteSuccess={handleFileDeleted}
               />
             ))}
           </div>

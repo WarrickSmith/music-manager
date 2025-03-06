@@ -43,7 +43,12 @@ type MusicFileProps = {
   storagePath: string
 }
 
-export default function FileCard({ file }: { file: MusicFileProps }) {
+interface FileCardProps {
+  file: MusicFileProps
+  onDeleteSuccess?: () => void
+}
+
+export default function FileCard({ file, onDeleteSuccess }: FileCardProps) {
   const [isLoading, setIsLoading] = useState(false)
 
   // Extract fileId from storagePath
@@ -77,6 +82,11 @@ export default function FileCard({ file }: { file: MusicFileProps }) {
       setIsLoading(true)
       await deleteMusicFile(fileId, file.id)
       toast.success('File deleted successfully')
+
+      // Call the onDeleteSuccess callback to refresh the parent component
+      if (onDeleteSuccess) {
+        onDeleteSuccess()
+      }
     } catch (error) {
       toast.error('Failed to delete file')
       console.error(error)
@@ -138,7 +148,10 @@ export default function FileCard({ file }: { file: MusicFileProps }) {
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete}>
+              <AlertDialogAction
+                onClick={handleDelete}
+                className="bg-red-600 text-white hover:bg-red-700 focus:ring-red-500"
+              >
                 Delete
               </AlertDialogAction>
             </AlertDialogFooter>
