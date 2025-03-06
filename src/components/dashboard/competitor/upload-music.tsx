@@ -99,7 +99,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
     reset: resetProgress,
   } = useUploadProgress()
 
-  // Initialize form
+  // Initialize form with mode = 'onSubmit' to prevent initial validation
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -108,7 +108,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
       gradeId: '',
       file: undefined,
     },
-    mode: 'all',
+    mode: 'onSubmit', // Changed from 'all' to 'onSubmit'
     criteriaMode: 'all',
   })
 
@@ -116,14 +116,9 @@ export default function UploadMusic({ userId }: { userId: string }) {
   useEffect(() => {
     if (selectedFile) {
       form.setValue('file', selectedFile)
-      form.trigger()
+      form.trigger('file')
     }
   }, [selectedFile, form])
-
-  // Validate form on mount
-  useEffect(() => {
-    form.trigger()
-  }, [form])
 
   const { watch, setValue, reset } = form
   const competitionId = watch('competitionId')
@@ -434,13 +429,10 @@ export default function UploadMusic({ userId }: { userId: string }) {
                         const file = e.target.files?.[0]
                         setSelectedFile(file || null)
                         field.onChange(file || null)
-                        // Always trigger validation, even when clearing the file
-                        await form.trigger([
-                          'competitionId',
-                          'category',
-                          'gradeId',
-                          'file',
-                        ])
+                        // Only validate file when a file is selected
+                        if (file) {
+                          await form.trigger('file')
+                        }
                       }}
                     />
                   </FormControl>
@@ -481,23 +473,27 @@ export default function UploadMusic({ userId }: { userId: string }) {
                 disabled={
                   isLoading ||
                   status !== 'idle' ||
-                  !form.formState.isValid ||
+                  // Only check if the form has been submitted before using isValid
+                  (form.formState.submitCount > 0 && !form.formState.isValid) ||
                   !form.getValues('competitionId') ||
                   !form.getValues('category') ||
                   !form.getValues('gradeId') ||
                   !selectedFile
                 }
                 onClick={() => {
-                  // Debug logging
-                  console.log('Form Values:', {
-                    competitionId: form.getValues('competitionId'),
-                    category: form.getValues('category'),
-                    gradeId: form.getValues('gradeId'),
-                    file: form.getValues('file'),
-                  })
-                  console.log('Form State:', {
-                    isValid: form.formState.isValid,
-                    errors: form.formState.errors,
+                  // Trigger validation on all fields before submission
+                  form.trigger().then((isValid) => {
+                    console.log('Form valid?', isValid)
+                    console.log('Form Values:', {
+                      competitionId: form.getValues('competitionId'),
+                      category: form.getValues('category'),
+                      gradeId: form.getValues('gradeId'),
+                      file: form.getValues('file'),
+                    })
+                    console.log('Form State:', {
+                      isValid: form.formState.isValid,
+                      errors: form.formState.errors,
+                    })
                   })
                 }}
                 variant="default"

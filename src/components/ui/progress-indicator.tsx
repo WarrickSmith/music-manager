@@ -1,4 +1,3 @@
-import { Progress } from '@/components/ui/progress'
 import { cva } from 'class-variance-authority'
 
 interface ProgressIndicatorProps {
@@ -16,18 +15,6 @@ const statusTextVariants = cva('text-sm text-center mt-1', {
       processing: 'text-emerald-500',
       complete: 'text-emerald-500',
       error: 'text-red-500',
-    },
-  },
-})
-
-const progressVariants = cva('h-4 w-full', {
-  variants: {
-    status: {
-      idle: '',
-      uploading: '!bg-emerald-500',
-      processing: '!bg-emerald-500',
-      complete: '!bg-emerald-500',
-      error: '!bg-red-500',
     },
   },
 })
@@ -53,9 +40,23 @@ export function ProgressIndicator({
     }
   }
 
+  // Generate a gradient background for the progress bar
+  const getProgressBackground = () => {
+    if (status === 'error') {
+      return 'bg-red-500'
+    }
+
+    return 'bg-gradient-to-r from-emerald-300 to-emerald-500'
+  }
+
   return (
-    <div className={`space-y-1 ${className}`}>
-      <Progress value={progress} className={progressVariants({ status })} />
+    <div className={`space-y-2 ${className}`}>
+      <div className="h-4 w-full bg-gray-200 rounded-full overflow-hidden">
+        <div
+          className={`h-full ${getProgressBackground()} transition-all duration-300`}
+          style={{ width: `${progress}%` }}
+        ></div>
+      </div>
       <p className={statusTextVariants({ status })}>{getStatusText()}</p>
     </div>
   )
