@@ -71,11 +71,13 @@ export default function MyFiles({ userId }: { userId: string }) {
   if (files.length === 0) {
     return (
       <div className="text-center py-10">
-        <h2 className="text-2xl font-semibold mb-4">My Music Files</h2>
-        <p className="text-gray-500 mb-4">
+        <h2 className="text-2xl font-semibold mb-4 text-sky-500">
+          My Music Files
+        </h2>
+        <p className="text-sky-400 mb-4">
           You haven&apos;t uploaded any music files yet.
         </p>
-        <p className="text-gray-500">
+        <p className="text-sky-400">
           Use the <span className="font-medium">Upload Music</span> tab to add
           your first music file.
         </p>
@@ -85,14 +87,18 @@ export default function MyFiles({ userId }: { userId: string }) {
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold mb-4">My Music Files</h2>
-      <p className="mb-6">
+      <h2 className="text-2xl font-semibold mb-4 text-sky-500">
+        My Music Files
+      </h2>
+      <p className="mb-6 text-sky-400">
         Total Files: <Badge variant="outline">{files.length}</Badge>
       </p>
 
       {sortedCompetitions.map((competition) => (
         <div key={competition} className="mb-8">
-          <h3 className="text-xl font-medium mb-4">{competition}</h3>
+          <h3 className="text-xl font-medium mb-4 text-sky-500">
+            {competition}
+          </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filesByCompetition[competition].map((file) => (
               <FileCard

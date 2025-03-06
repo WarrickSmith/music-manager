@@ -11,6 +11,11 @@ const nextConfig: NextConfig = {
     unoptimized: process.env.NODE_ENV === 'development',
   },
   serverExternalPackages: ['node-appwrite'],
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '15mb',
+    },
+  },
 }
 
 export default nextConfig

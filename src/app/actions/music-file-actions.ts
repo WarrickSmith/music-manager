@@ -66,18 +66,24 @@ export async function uploadMusicFile(formData: FormData) {
       gradeId
     )
 
-    // Generate standardized file name
+    // Generate standardized file name with extension
+    const fileExtension = file.name.split('.').pop()
     const formattedFileName = `${competition.year}-${competition.name}-${
       grade.category
     }-${grade.segment}-${formData.get('userName')}`
       .replace(/[^a-zA-Z0-9-]/g, '-')
       .toLowerCase()
+    const fullFileName = `${formattedFileName}.${fileExtension}`
 
-    // Create a file ID
-    const fileId = ID.unique()
+    // Create a new File object with the formatted name
+    const renamedFile = new File([file], fullFileName, { type: file.type })
 
     // Upload file to storage
-    await storage.createFile(bucketId, fileId, file)
+    const uploadedFile = await storage.createFile(
+      bucketId,
+      ID.unique(),
+      renamedFile
+    )
 
     // Create document in MusicFiles collection
     const musicFileDocument = await databases.createDocument(
@@ -85,10 +91,11 @@ export async function uploadMusicFile(formData: FormData) {
       musicFilesCollectionId,
       ID.unique(),
       {
+        fileId: uploadedFile.$id,
         originalName: file.name,
         fileName: formattedFileName,
-        storagePath: `${bucketId}/${fileId}`,
-        downloadURL: getFileDownloadUrl(fileId),
+        storagePath: `${bucketId}/${uploadedFile.$id}`,
+        downloadURL: getFileDownloadUrl(uploadedFile.$id),
         competitionId,
         competitionName: competition.name,
         competitionYear: competition.year,
