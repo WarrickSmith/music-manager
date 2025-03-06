@@ -81,11 +81,10 @@ export async function uploadMusicFile(formData: FormData) {
 
     // Generate standardized file name with extension
     const fileExtension = file.name.split('.').pop()
-    const formattedFileName = `${competition.year}-${competition.name}-${
-      grade.category
-    }-${grade.segment}-${formattedUserName}`
-      .replace(/[^a-zA-Z0-9-]/g, '-')
-      .toLowerCase()
+    const formattedFileName =
+      `${competition.year}-${competition.name}-${grade.category}-${grade.segment}-${formattedUserName}`
+        .replace(/[^a-zA-Z0-9-]/g, '-')
+        .toLowerCase()
     const fullFileName = `${formattedFileName}.${fileExtension}`
 
     // Create a new File object with the formatted name
