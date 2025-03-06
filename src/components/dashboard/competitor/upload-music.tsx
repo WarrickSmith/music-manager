@@ -289,14 +289,10 @@ export default function UploadMusic({ userId }: { userId: string }) {
                       status !== 'idle' ||
                       competitions.length === 0
                     }
-                    onValueChange={async (value) => {
+                    onValueChange={(value) => {
                       field.onChange(value)
-                      await form.trigger([
-                        'competitionId',
-                        'category',
-                        'gradeId',
-                        'file',
-                      ])
+                      // Only trigger validation for the current field
+                      form.trigger('competitionId')
                     }}
                     value={field.value}
                   >
@@ -338,14 +334,10 @@ export default function UploadMusic({ userId }: { userId: string }) {
                       !competitionId ||
                       categories.length === 0
                     }
-                    onValueChange={async (value) => {
+                    onValueChange={(value) => {
                       field.onChange(value)
-                      await form.trigger([
-                        'competitionId',
-                        'category',
-                        'gradeId',
-                        'file',
-                      ])
+                      // Only trigger validation for the current field
+                      form.trigger('category')
                     }}
                     value={field.value}
                   >
@@ -381,14 +373,10 @@ export default function UploadMusic({ userId }: { userId: string }) {
                       !category ||
                       grades.length === 0
                     }
-                    onValueChange={async (value) => {
+                    onValueChange={(value) => {
                       field.onChange(value)
-                      await form.trigger([
-                        'competitionId',
-                        'category',
-                        'gradeId',
-                        'file',
-                      ])
+                      // Only trigger validation for the current field
+                      form.trigger('gradeId')
                     }}
                     value={field.value}
                   >
