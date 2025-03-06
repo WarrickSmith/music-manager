@@ -66,11 +66,24 @@ export async function uploadMusicFile(formData: FormData) {
       gradeId
     )
 
+    // Format the user name to get first name and last name initial
+    const fullName = (formData.get('userName') as string).trim()
+    let formattedUserName = fullName
+
+    // Process the name to extract first name and last name initial
+    if (fullName.includes(' ')) {
+      const nameParts = fullName.split(' ')
+      const firstName = nameParts[0]
+      const lastName = nameParts[nameParts.length - 1]
+      const lastNameInitial = lastName.charAt(0).toLowerCase()
+      formattedUserName = `${firstName}-${lastNameInitial}`
+    }
+
     // Generate standardized file name with extension
     const fileExtension = file.name.split('.').pop()
     const formattedFileName = `${competition.year}-${competition.name}-${
       grade.category
-    }-${grade.segment}-${formData.get('userName')}`
+    }-${grade.segment}-${formattedUserName}`
       .replace(/[^a-zA-Z0-9-]/g, '-')
       .toLowerCase()
     const fullFileName = `${formattedFileName}.${fileExtension}`
