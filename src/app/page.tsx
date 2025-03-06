@@ -23,10 +23,10 @@ export default function Home() {
         setInitializing(false)
       }
     }
-    
+
     clearExistingSession()
   }, [])
-  
+
   if (initializing) {
     return <LoadingOverlay message="Loading..." />
   }
