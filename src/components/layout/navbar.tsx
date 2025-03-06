@@ -55,6 +55,29 @@ export default function Navbar({ user }: NavbarProps) {
     }
   }
 
+  // Handle logo click - if user is logged in, log them out first
+  const handleLogoClick = async (e: React.MouseEvent) => {
+    if (user) {
+      e.preventDefault() // Prevent default navigation
+      setIsLoggingOut(true)
+      try {
+        const result = await logoutAction()
+        if (result.success) {
+          showToast.logout('Logged out successfully')
+          router.push('/')
+        } else {
+          showToast.error(result.error || 'Logout failed')
+        }
+      } catch (error) {
+        console.error('Logout error:', error)
+        showToast.error('Logout failed')
+      } finally {
+        setIsLoggingOut(false)
+      }
+    }
+    // If user is not logged in, default navigation will occur
+  }
+
   // Determine button color based on user status - explicitly set blue when logged out
   const buttonColorClass = !user
     ? 'text-blue-600 hover:bg-blue-50'
@@ -67,25 +90,49 @@ export default function Navbar({ user }: NavbarProps) {
       {isLoggingOut && <LoadingOverlay message="Signing out..." />}
       <nav className="w-full py-4 px-6 bg-gradient-to-r from-blue-50 to-purple-50 border-b border-blue-100 sticky top-0 z-50 shadow-sm backdrop-blur-md">
         <div className="container mx-auto flex justify-between items-center">
-          <Link
-            href="/"
-            className="flex items-center gap-3 transition-transform hover:scale-105"
-          >
-            <div className="relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
-              <Image
-                src="/mm-logo.png"
-                alt="Music Manager Logo"
-                width={36}
-                height={36}
-                priority
-                className="rounded-md relative"
-              />
-            </div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Music Manager
-            </h1>
-          </Link>
+          {user ? (
+            // If user is logged in, use a button with click handler
+            <button
+              onClick={handleLogoClick}
+              className="flex items-center gap-3 transition-transform hover:scale-105 text-left cursor-pointer"
+            >
+              <div className="relative">
+                <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                <Image
+                  src="/mm-logo.png"
+                  alt="Music Manager Logo"
+                  width={36}
+                  height={36}
+                  priority
+                  className="rounded-md relative"
+                />
+              </div>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Music Manager
+              </h1>
+            </button>
+          ) : (
+            // If no user is logged in, use regular Link
+            <Link
+              href="/"
+              className="flex items-center gap-3 transition-transform hover:scale-105"
+            >
+              <div className="relative">
+                <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                <Image
+                  src="/mm-logo.png"
+                  alt="Music Manager Logo"
+                  width={36}
+                  height={36}
+                  priority
+                  className="rounded-md relative"
+                />
+              </div>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Music Manager
+              </h1>
+            </Link>
+          )}
 
           <div className="flex items-center gap-4">
             {user && (

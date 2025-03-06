@@ -1,9 +1,36 @@
+'use client'
+
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { FaMusic, FaUpload, FaHeadphones } from 'react-icons/fa'
+import { useEffect, useState } from 'react'
+import { logoutAction } from '@/app/actions/auth-actions'
+import LoadingOverlay from '@/components/ui/loading-overlay'
 
 export default function Home() {
+  const [initializing, setInitializing] = useState(true)
+
+  // Clear any existing session when the home page loads
+  useEffect(() => {
+    const clearExistingSession = async () => {
+      try {
+        await logoutAction()
+        // No toast notification needed for landing page session cleanup
+      } catch (error) {
+        console.error('Session cleanup error:', error)
+      } finally {
+        setInitializing(false)
+      }
+    }
+    
+    clearExistingSession()
+  }, [])
+  
+  if (initializing) {
+    return <LoadingOverlay message="Loading..." />
+  }
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-gradient-to-b from-background to-background/95">
       <div className="flex flex-col items-center text-center max-w-3xl mx-auto">
