@@ -3,6 +3,7 @@
 import { databases, storage, ID, Query } from '@/lib/appwrite/server'
 import { getFileDownloadUrl } from '@/lib/appwrite/helpers'
 import { revalidatePath } from 'next/cache'
+import * as musicMetadata from 'music-metadata'
 
 const databaseId = process.env.APPWRITE_DATABASE_ID!
 const bucketId = process.env.APPWRITE_BUCKET_ID!
@@ -34,6 +35,13 @@ export async function uploadMusicFile(formData: FormData) {
     const competitionId = formData.get('competitionId') as string
     const gradeId = formData.get('gradeId') as string
     const userId = formData.get('userId') as string
+    // Get duration from form data if available
+    const durationFromForm = formData.get('duration')
+    let initialDuration: number | null = null
+    if (durationFromForm && !isNaN(Number(durationFromForm))) {
+      initialDuration = Number(durationFromForm)
+      console.log('Using duration from form data:', initialDuration)
+    }
 
     if (!file || !competitionId || !gradeId || !userId) {
       throw new Error('Missing required information')
@@ -51,6 +59,68 @@ export async function uploadMusicFile(formData: FormData) {
     ]
     if (!validTypes.includes(file.type)) {
       throw new Error('Invalid file type. Only audio files are accepted.')
+    }
+
+    console.log('Starting metadata extraction for file:', file.name)
+    console.log('File type:', file.type)
+    console.log('File size:', file.size)
+
+    // Use the duration from form data if available, otherwise try to extract it
+    let duration: number | null = initialDuration
+
+    // Only try to extract duration if it wasn't provided in the form data
+    if (duration === null) {
+      try {
+        console.log('No duration from form data, extracting from file...')
+        // Convert the File to ArrayBuffer for music-metadata parsing
+        const buffer = await file.arrayBuffer()
+        console.log(
+          'Successfully converted file to ArrayBuffer:',
+          buffer.byteLength,
+          'bytes'
+        )
+
+        // Use a different parsing approach based on file type
+        let metadata
+        try {
+          console.log('Attempting to parse audio metadata...')
+          metadata = await musicMetadata.parseBuffer(
+            new Uint8Array(buffer),
+            file.type
+          )
+          console.log(
+            'Metadata parsing successful:',
+            JSON.stringify(metadata.format, null, 2)
+          )
+        } catch (parseError) {
+          console.error(
+            'Error during parseBuffer, trying alternate approach:',
+            parseError
+          )
+          // Try without specifying content type as fallback
+          metadata = await musicMetadata.parseBuffer(new Uint8Array(buffer))
+          console.log('Fallback metadata parsing successful')
+        }
+
+        // Get duration in seconds and round to nearest second
+        if (metadata && metadata.format && metadata.format.duration) {
+          duration = Math.round(metadata.format.duration)
+          console.log(`Extracted audio duration: ${duration} seconds`)
+        } else {
+          console.log('Could not extract duration from metadata:', metadata)
+        }
+      } catch (metadataError) {
+        console.error('Error extracting audio metadata:', metadataError)
+        console.error(
+          'Stack trace:',
+          metadataError instanceof Error
+            ? metadataError.stack
+            : 'No stack trace'
+        )
+        // We'll continue without the duration if extraction fails
+      }
+    } else {
+      console.log(`Using provided duration: ${duration} seconds`)
     }
 
     // Get competition and grade details for denormalization
@@ -118,10 +188,13 @@ export async function uploadMusicFile(formData: FormData) {
         userId,
         userName: formData.get('userName') as string,
         uploadedAt: new Date().toISOString(),
+        duration: duration, // Add the extracted duration to the metadata
         size: file.size,
         status: 'ready',
       }
     )
+
+    console.log('Music file document created with duration:', duration)
 
     revalidatePath('/dashboard')
     return { success: true, musicFile: musicFileDocument }

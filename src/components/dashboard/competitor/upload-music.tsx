@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Models } from 'node-appwrite'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { toast } from 'sonner'
+import * as musicMetadata from 'music-metadata'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -35,6 +36,7 @@ import {
 import { uploadMusicFile } from '@/app/actions/music-file-actions'
 import { getUserProfile } from '@/app/actions/user-actions'
 import { useUploadProgress } from '@/hooks/useUploadProgress'
+import { formatDuration } from '@/lib/utils'
 
 // Form validation schema
 const formSchema = z.object({
@@ -63,6 +65,7 @@ const formSchema = z.object({
       ]
       return validTypes.includes(value.type)
     }, 'File must be an audio file (MP3, WAV, M4A, AAC)'),
+  duration: z.number().nullable().optional(),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -89,6 +92,9 @@ export default function UploadMusic({ userId }: { userId: string }) {
   const [userName, setUserName] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [fileDuration, setFileDuration] = useState<number | null>(null)
+  const [extractingMetadata, setExtractingMetadata] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const {
     progress,
     status,
@@ -107,6 +113,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
       category: '',
       gradeId: '',
       file: undefined,
+      duration: null,
     },
     mode: 'onSubmit', // Changed from 'all' to 'onSubmit'
     criteriaMode: 'all',
@@ -214,6 +221,11 @@ export default function UploadMusic({ userId }: { userId: string }) {
       formData.append('userId', userId)
       formData.append('userName', userName)
 
+      // Add duration if available
+      if (values.duration !== null && values.duration !== undefined) {
+        formData.append('duration', values.duration.toString())
+      }
+
       // After 90% progress, show processing status
       setTimeout(() => {
         if (status === 'uploading') {
@@ -229,9 +241,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
 
       // Reset form and state after a short delay to show completed state
       setTimeout(() => {
-        resetProgress()
-        reset()
-        setSelectedFile(null)
+        handleReset()
       }, 2000)
     } catch (error) {
       setError()
@@ -248,6 +258,12 @@ export default function UploadMusic({ userId }: { userId: string }) {
     resetProgress()
     reset()
     setSelectedFile(null)
+    setFileDuration(null)
+
+    // Reset the file input element directly
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
   }
 
   // Debug state changes
@@ -409,24 +425,118 @@ export default function UploadMusic({ userId }: { userId: string }) {
                     <Input
                       type="file"
                       accept="audio/*"
-                      disabled={status !== 'idle'}
-                      ref={field.ref}
+                      disabled={status !== 'idle' || extractingMetadata}
+                      ref={(e) => {
+                        field.ref(e)
+                        if (fileInputRef) fileInputRef.current = e
+                      }}
                       name={field.name}
                       onBlur={field.onBlur}
                       onChange={async (e) => {
                         const file = e.target.files?.[0]
                         setSelectedFile(file || null)
                         field.onChange(file || null)
-                        // Only validate file when a file is selected
+
+                        // Extract metadata when file is selected
                         if (file) {
+                          try {
+                            setExtractingMetadata(true)
+                            // Convert the File to ArrayBuffer for music-metadata parsing
+                            const buffer = await file.arrayBuffer()
+                            console.log(
+                              'Successfully converted file to ArrayBuffer:',
+                              buffer.byteLength,
+                              'bytes'
+                            )
+
+                            // Use a different parsing approach based on file type
+                            let metadata
+                            try {
+                              console.log(
+                                'Attempting to parse audio metadata...'
+                              )
+                              metadata = await musicMetadata.parseBuffer(
+                                new Uint8Array(buffer),
+                                file.type
+                              )
+                              console.log(
+                                'Metadata parsing successful:',
+                                JSON.stringify(metadata.format, null, 2)
+                              )
+                            } catch (parseError) {
+                              console.error(
+                                'Error during parseBuffer, trying alternate approach:',
+                                parseError
+                              )
+                              // Try without specifying content type as fallback
+                              metadata = await musicMetadata.parseBuffer(
+                                new Uint8Array(buffer)
+                              )
+                              console.log(
+                                'Fallback metadata parsing successful'
+                              )
+                            }
+
+                            // Get duration in seconds and round to nearest second
+                            if (
+                              metadata &&
+                              metadata.format &&
+                              metadata.format.duration
+                            ) {
+                              const duration = Math.round(
+                                metadata.format.duration
+                              )
+                              setFileDuration(duration)
+                              console.log(
+                                `Extracted audio duration: ${duration} seconds (${formatDuration(
+                                  duration
+                                )})`
+                              )
+
+                              // Store duration in a hidden field or form state to be used during submission
+                              form.setValue('duration', duration)
+                            } else {
+                              console.log(
+                                'Could not extract duration from metadata:',
+                                metadata
+                              )
+                              setFileDuration(null)
+                            }
+                          } catch (error) {
+                            console.error(
+                              'Error extracting audio metadata:',
+                              error
+                            )
+                            setFileDuration(null)
+                          } finally {
+                            setExtractingMetadata(false)
+                          }
+
+                          // Validate file
                           await form.trigger('file')
+                        } else {
+                          setFileDuration(null)
                         }
                       }}
                     />
                   </FormControl>
-                  <FormDescription className="text-emerald-400">
-                    Max file size: 15MB. Supported formats: MP3, WAV, M4A, AAC
-                  </FormDescription>
+                  <div className="space-y-2">
+                    <FormDescription className="text-emerald-400">
+                      Max file size: 15MB. Supported formats: MP3, WAV, M4A, AAC
+                    </FormDescription>
+
+                    {/* Show metadata extraction status and duration */}
+                    {extractingMetadata && (
+                      <div className="text-sm text-amber-500">
+                        Extracting file metadata...
+                      </div>
+                    )}
+                    {fileDuration !== null && selectedFile && (
+                      <div className="text-sm text-emerald-600">
+                        File duration: {formatDuration(fileDuration)}
+                      </div>
+                    )}
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}

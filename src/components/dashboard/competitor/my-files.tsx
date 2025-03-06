@@ -29,6 +29,7 @@ type MusicFile = {
   size: number
   status: string
   storagePath: string
+  duration?: number | null
 }
 
 export default function MyFiles({ userId }: { userId: string }) {
@@ -245,6 +246,7 @@ export default function MyFiles({ userId }: { userId: string }) {
                     size: file.size,
                     status: file.status,
                     storagePath: file.storagePath,
+                    duration: file.duration,
                   }}
                   onDeleteSuccess={handleFileDeleted}
                 />

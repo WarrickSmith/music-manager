@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { formatFileSize, formatDate } from '@/lib/utils'
+import { formatFileSize, formatDate, formatDuration } from '@/lib/utils'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,6 +41,7 @@ type MusicFileProps = {
   size: number
   status: string
   storagePath: string
+  duration?: number | null
 }
 
 interface FileCardProps {
@@ -125,6 +126,10 @@ export default function FileCard({ file, onDeleteSuccess }: FileCardProps) {
           <div>
             <p className="font-semibold">Size:</p>
             <p>{formatFileSize(file.size)}</p>
+          </div>
+          <div>
+            <p className="font-semibold">Duration:</p>
+            <p>{file.duration ? formatDuration(file.duration) : 'Unknown'}</p>
           </div>
         </div>
       </CardContent>
