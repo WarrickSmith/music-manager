@@ -135,13 +135,19 @@ export default function FileCard({ file, onDeleteSuccess }: FileCardProps) {
       </CardContent>
 
       <CardFooter className="flex justify-between">
-        <Button variant="outline" onClick={handleDownload}>
+        <Button
+          variant="outline"
+          onClick={handleDownload}
+          className="cursor-pointer"
+        >
           Download
         </Button>
 
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive">Delete</Button>
+            <Button variant="destructive" className="cursor-pointer">
+              Delete
+            </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -155,7 +161,7 @@ export default function FileCard({ file, onDeleteSuccess }: FileCardProps) {
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDelete}
-                className="bg-red-600 text-white hover:bg-red-700 focus:ring-red-500"
+                className="bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 cursor-pointer"
               >
                 Delete
               </AlertDialogAction>
