@@ -556,7 +556,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
                     <Button
                       type="button"
                       variant="outline"
-                      className="w-1/2 bg-black hover:bg-black/90 text-white !cursor-pointer"
+                      className="w-1/2 bg-black hover:bg-black/90 text-white cursor-pointer"
                       onClick={handleReset}
                     >
                       Reset Form
