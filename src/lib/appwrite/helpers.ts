@@ -61,7 +61,7 @@ export async function uploadMusicFile(
         originalName: file.name,
         fileName,
         storagePath: uploadedFile.$id,
-        downloadURL: getFileDownloadUrl(uploadedFile.$id),
+        // Don't store downloadURL in the database as it may expire
         competitionId,
         competitionName: competition.name,
         competitionYear: competition.year,
@@ -142,7 +142,15 @@ export async function formatFileName(
  * Generates the download URL for a file
  */
 export function getFileDownloadUrl(fileId: string): string {
-  return `${process.env.APPWRITE_ENDPOINT}/storage/buckets/${process.env.APPWRITE_BUCKET_ID}/files/${fileId}/download`
+  // Construct the URL manually based on the Appwrite API documentation
+  const endpoint = process.env.APPWRITE_ENDPOINT!
+  const bucketId = process.env.APPWRITE_BUCKET_ID!
+  const projectId = process.env.APPWRITE_PROJECT_ID!
+
+  // Remove any trailing slash from the endpoint
+  const baseUrl = endpoint.endsWith('/') ? endpoint.slice(0, -1) : endpoint
+
+  return `${baseUrl}/storage/buckets/${bucketId}/files/${fileId}/download?project=${projectId}`
 }
 
 /**

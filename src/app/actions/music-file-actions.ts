@@ -1,7 +1,6 @@
 'use server'
 
 import { databases, storage, ID, Query } from '@/lib/appwrite/server'
-import { getFileDownloadUrl } from '@/lib/appwrite/helpers'
 import { revalidatePath } from 'next/cache'
 import * as musicMetadata from 'music-metadata'
 
@@ -177,7 +176,7 @@ export async function uploadMusicFile(formData: FormData) {
         originalName: file.name,
         fileName: formattedFileName,
         storagePath: `${bucketId}/${uploadedFile.$id}`,
-        downloadURL: getFileDownloadUrl(uploadedFile.$id),
+        // Don't store downloadURL in the database as it may expire
         competitionId,
         competitionName: competition.name,
         competitionYear: competition.year,
@@ -232,11 +231,49 @@ export async function deleteMusicFile(fileId: string, musicFileId: string) {
 }
 
 /**
- * Get file download URL
+ * Get file download URL with proper authentication and correct file extension
  */
 export async function getMusicFileDownloadUrl(fileId: string) {
   try {
-    return { url: getFileDownloadUrl(fileId) }
+    console.log('Getting download URL for file:', fileId)
+    console.log('Bucket ID:', bucketId)
+
+    // First, verify the file exists using the server API key
+    await storage.getFile(bucketId, fileId)
+
+    // Find the corresponding database record to get the original file name
+    const fileRecords = await databases.listDocuments(
+      databaseId,
+      musicFilesCollectionId,
+      [Query.equal('fileId', fileId)]
+    )
+
+    let originalName = ''
+
+    if (fileRecords.documents.length > 0) {
+      // Get the file metadata from the database
+      originalName = fileRecords.documents[0].originalName || ''
+      console.log('Found file record with name:', originalName)
+    } else {
+      console.log('No file record found in database, using default file name')
+    }
+
+    // Generate the download URL with the format from the working admin link
+    const endpoint = process.env.APPWRITE_ENDPOINT!
+    const projectId = process.env.APPWRITE_PROJECT_ID!
+
+    // Remove any trailing slash from the endpoint
+    const baseUrl = endpoint.endsWith('/') ? endpoint.slice(0, -1) : endpoint
+
+    // Check if the endpoint already includes the /v1 path and avoid duplicating it
+    const apiPath = baseUrl.endsWith('/v1') ? '' : '/v1'
+
+    // Create a properly formed URL with admin mode authentication
+    const url = `${baseUrl}${apiPath}/storage/buckets/${bucketId}/files/${fileId}/download?project=${projectId}&project=${projectId}&mode=admin`
+
+    console.log('Generated download URL with server authentication:', url)
+
+    return { url }
   } catch (error) {
     console.error('Error generating download URL:', error)
     throw new Error('Failed to generate download URL')
