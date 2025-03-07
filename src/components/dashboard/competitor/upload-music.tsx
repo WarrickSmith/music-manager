@@ -37,6 +37,7 @@ import { uploadMusicFile } from '@/app/actions/music-file-actions'
 import { getUserProfile } from '@/app/actions/user-actions'
 import { useUploadProgress } from '@/hooks/useUploadProgress'
 import { formatDuration } from '@/lib/utils'
+import { Upload } from 'lucide-react'
 
 // Form validation schema
 const formSchema = z.object({
@@ -564,7 +565,6 @@ export default function UploadMusic({ userId }: { userId: string }) {
                 )}
               </div>
             )}
-
             <div className="flex justify-center">
               <Button
                 type="submit"
@@ -595,9 +595,12 @@ export default function UploadMusic({ userId }: { userId: string }) {
                   })
                 }}
                 variant="default"
-                className="w-1/2 !bg-emerald-500 hover:!bg-emerald-600 !cursor-pointer"
+                className="w-1/2 !bg-emerald-500 hover:!bg-emerald-600 cursor-pointer flex items-center justify-center gap-2"
               >
-                {status === 'idle' ? 'Upload Music File' : 'Uploading...'}
+                <Upload className="h-4 w-4" />
+                <span>
+                  {status === 'idle' ? 'Upload Music File' : 'Uploading...'}
+                </span>
               </Button>
             </div>
           </form>

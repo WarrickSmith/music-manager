@@ -26,6 +26,7 @@ import {
 import { useState } from 'react'
 import { toast } from 'sonner'
 import LoadingOverlay from '@/components/ui/loading-overlay'
+import { Download, Trash2 } from 'lucide-react'
 
 type MusicFileProps = {
   id: string
@@ -139,14 +140,21 @@ export default function FileCard({ file, onDeleteSuccess }: FileCardProps) {
           variant="outline"
           onClick={handleDownload}
           className="cursor-pointer"
+          size="icon"
+          title="Download"
         >
-          Download
+          <Download className="h-4 w-4" />
         </Button>
 
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" className="cursor-pointer">
-              Delete
+            <Button
+              variant="destructive"
+              className="cursor-pointer"
+              size="icon"
+              title="Delete"
+            >
+              <Trash2 className="h-4 w-4" />
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
