@@ -214,6 +214,57 @@ export async function updateUserProfile({
   }
 }
 
+/**
+ * Get user profile information
+ */
+export async function getUserProfile(userId: string) {
+  try {
+    const user = await users.get(userId)
+    const prefs = await users.getPrefs(userId)
+
+    return {
+      id: user.$id,
+      email: user.email,
+      name: user.name,
+      prefs,
+    }
+  } catch (error) {
+    console.error('Error fetching user profile:', error)
+    throw new Error('Failed to fetch user profile')
+  }
+}
+
+/**
+ * Update user profile
+ */
+export async function updateCompetitorProfile(
+  userId: string,
+  data: {
+    name?: string
+    prefs?: Record<string, unknown>
+  }
+) {
+  try {
+    const updates: Promise<unknown>[] = []
+
+    if (data.name) {
+      updates.push(users.updateName(userId, data.name))
+    }
+
+    if (data.prefs) {
+      updates.push(users.updatePrefs(userId, data.prefs))
+    }
+
+    await Promise.all(updates)
+    revalidatePath('/dashboard')
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error updating user profile:', error)
+    throw new Error('Failed to update user profile')
+  }
+}
+
 export async function changePassword({
   currentPassword,
   newPassword,

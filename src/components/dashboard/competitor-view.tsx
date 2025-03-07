@@ -1,11 +1,19 @@
-export default function CompetitorView() {
+import { getCurrentUser } from '@/lib/auth/auth-service'
+import CompetitorDashboard from './competitor/competitor-dashboard'
+
+export default async function CompetitorView() {
+  const user = await getCurrentUser()
+
+  if (!user) {
+    return <div>You must be logged in to view this page.</div>
+  }
+
   return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold mb-6">Competitor Dashboard</h1>
-      <p>
-        This is the competitor dashboard. Implementation will be completed in
-        Phase 5.
-      </p>
+    <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <CompetitorDashboard
+        userId={user.$id}
+        userName={user.name || 'Competitor'}
+      />
     </div>
   )
 }

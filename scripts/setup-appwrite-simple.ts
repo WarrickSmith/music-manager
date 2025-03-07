@@ -260,13 +260,6 @@ async function setupCollections(databases: Databases) {
       await databases.createStringAttribute(
         databaseId,
         'musicfiles',
-        'downloadURL',
-        255,
-        true
-      )
-      await databases.createStringAttribute(
-        databaseId,
-        'musicfiles',
         'competitionId',
         255,
         true

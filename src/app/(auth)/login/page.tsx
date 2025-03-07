@@ -1,18 +1,35 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
-import { loginAction } from '@/app/actions/auth-actions'
+import { loginAction, logoutAction } from '@/app/actions/auth-actions'
 import { showToast } from '@/components/ui/toast'
 import LoadingOverlay from '@/components/ui/loading-overlay'
 
 export default function LoginPage() {
   const [formState, setFormState] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
+  const [initializing, setInitializing] = useState(true)
   const router = useRouter()
+
+  // Clear any existing session when the login page loads
+  useEffect(() => {
+    const clearExistingSession = async () => {
+      try {
+        await logoutAction()
+        // No need for a toast notification here since this is just clean-up
+      } catch (error) {
+        console.error('Session cleanup error:', error)
+      } finally {
+        setInitializing(false)
+      }
+    }
+
+    clearExistingSession()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -44,6 +61,10 @@ export default function LoginPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormState({ ...formState, [name]: value })
+  }
+
+  if (initializing) {
+    return <LoadingOverlay message="Preparing login..." />
   }
 
   return (

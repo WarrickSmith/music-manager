@@ -126,7 +126,7 @@ const collections: CollectionDefinition[] = [
       { key: 'originalName', type: 'string', size: 255, required: true },
       { key: 'fileName', type: 'string', size: 255, required: true },
       { key: 'storagePath', type: 'string', size: 255, required: true },
-      { key: 'downloadURL', type: 'string', size: 255, required: true },
+      // downloadURL attribute removed as it is now redundant
       { key: 'competitionId', type: 'string', size: 255, required: true },
       { key: 'competitionName', type: 'string', size: 255, required: true },
       { key: 'competitionYear', type: 'integer', required: true },

@@ -29,7 +29,7 @@ export interface MusicFile {
   originalName: string
   fileName: string
   storagePath: string
-  downloadURL: string
+  fileId: string
   competitionId: string
   gradeId: string
   userId: string

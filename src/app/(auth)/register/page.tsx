@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { registerAction } from '@/app/actions/auth-actions'
+import { registerAction, logoutAction } from '@/app/actions/auth-actions'
 import { showToast } from '@/components/ui/toast'
 import LoadingOverlay from '@/components/ui/loading-overlay'
 
@@ -18,7 +18,24 @@ export default function RegisterPage() {
     confirmPassword: '',
   })
   const [loading, setLoading] = useState(false)
+  const [initializing, setInitializing] = useState(true)
   const router = useRouter()
+
+  // Clear any existing session when the register page loads
+  useEffect(() => {
+    const clearExistingSession = async () => {
+      try {
+        await logoutAction()
+        // No need for a toast notification here since this is just clean-up
+      } catch (error) {
+        console.error('Session cleanup error:', error)
+      } finally {
+        setInitializing(false)
+      }
+    }
+
+    clearExistingSession()
+  }, [])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -68,6 +85,10 @@ export default function RegisterPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (initializing) {
+    return <LoadingOverlay message="Preparing registration..." />
   }
 
   return (

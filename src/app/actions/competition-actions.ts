@@ -187,3 +187,75 @@ export async function deleteCompetition(competitionId: string) {
     throw new Error('Failed to delete competition')
   }
 }
+
+/**
+ * Get all active competitions
+ */
+export async function getActiveCompetitions() {
+  try {
+    const response = await databases.listDocuments(
+      databaseId,
+      competitionsCollectionId,
+      [
+        Query.equal('active', true),
+        Query.orderDesc('year'),
+        Query.orderAsc('name'),
+      ]
+    )
+    return response.documents
+  } catch (error) {
+    console.error('Error fetching active competitions:', error)
+    throw new Error('Failed to fetch active competitions')
+  }
+}
+
+/**
+ * Get grades for a competition with optional filtering
+ */
+export async function getGradesForCompetition(
+  competitionId: string,
+  category?: string
+) {
+  try {
+    const queries = [Query.equal('competitionId', competitionId)]
+
+    if (category) {
+      queries.push(Query.equal('category', category))
+    }
+
+    const response = await databases.listDocuments(
+      databaseId,
+      gradesCollectionId,
+      queries
+    )
+
+    return response.documents
+  } catch (error) {
+    console.error('Error fetching grades:', error)
+    throw new Error('Failed to fetch grades')
+  }
+}
+
+/**
+ * Get unique grade categories for a competition
+ */
+export async function getGradeCategoriesForCompetition(competitionId: string) {
+  try {
+    const grades = await databases.listDocuments(
+      databaseId,
+      gradesCollectionId,
+      [Query.equal('competitionId', competitionId)]
+    )
+
+    // Extract unique categories
+    const categories = new Set<string>()
+    for (const grade of grades.documents) {
+      categories.add(grade.category)
+    }
+
+    return Array.from(categories).sort()
+  } catch (error) {
+    console.error('Error fetching grade categories:', error)
+    throw new Error('Failed to fetch grade categories')
+  }
+}
