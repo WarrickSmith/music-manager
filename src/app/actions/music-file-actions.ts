@@ -26,6 +26,53 @@ export async function getUserMusicFiles(userId: string) {
 }
 
 /**
+ * Get all music files (for admin use)
+ */
+export async function getAllMusicFiles() {
+  try {
+    // Fetch all music files with pagination handling
+    const limit = 100 // Maximum allowed by Appwrite
+    let offset = 0
+    let allDocuments = []
+    let hasMoreDocuments = true
+
+    // Add limit to queries
+    const queriesWithLimit = [
+      Query.orderDesc('uploadedAt'),
+      Query.limit(limit)
+    ]
+
+    while (hasMoreDocuments) {
+      // Add offset to queries
+      const currentQueries = [
+        ...queriesWithLimit, 
+        Query.offset(offset)
+      ]
+
+      const response = await databases.listDocuments(
+        databaseId,
+        musicFilesCollectionId,
+        currentQueries
+      )
+
+      allDocuments = [...allDocuments, ...response.documents]
+
+      // Check if there are more documents
+      if (response.documents.length < limit) {
+        hasMoreDocuments = false
+      } else {
+        offset += limit
+      }
+    }
+
+    return allDocuments
+  } catch (error) {
+    console.error('Error fetching all music files:', error)
+    throw new Error('Failed to fetch music files')
+  }
+}
+
+/**
  * Upload a new music file
  */
 export async function uploadMusicFile(formData: FormData) {

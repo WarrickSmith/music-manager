@@ -5,6 +5,7 @@ import { Music, Trophy, Users, UserCog } from 'lucide-react'
 import CompetitionManagement from '@/components/dashboard/admin/competition-management'
 import UserManagement from '@/components/dashboard/admin/user-management'
 import AdminProfileManagement from '@/components/dashboard/admin/profile-management'
+import MusicFileManagement from '@/components/dashboard/admin/music-file-management'
 
 export default async function AdminDashboardPage() {
   const user = await getCurrentUser()
@@ -71,16 +72,8 @@ export default async function AdminDashboardPage() {
 
           <TabsContent value="musicfiles" className="mt-6">
             {/* Music File Management Component */}
-            <div className="rounded-lg border border-purple-100 bg-white p-8 text-center shadow-sm">
-              <div className="rounded-full bg-purple-50 p-4 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <Music className="h-8 w-8 text-purple-400" />
-              </div>
-              <h2 className="text-xl font-semibold mb-2 text-purple-700">
-                Music File Management
-              </h2>
-              <p className="text-slate-500">
-                Coming Soon in Phase 5 of the project
-              </p>
+            <div className="rounded-lg border border-purple-100 bg-white p-8 shadow-sm">
+              <MusicFileManagement />
             </div>
           </TabsContent>
 
