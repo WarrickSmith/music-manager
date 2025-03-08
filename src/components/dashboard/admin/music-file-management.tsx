@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 import { 
   Card, 
@@ -27,6 +27,7 @@ import {
   TableRow 
 } from '@/components/ui/table'
 import LoadingOverlay from '@/components/ui/loading-overlay'
+import { Progress } from '@/components/ui/progress'
 import { 
   Download, 
   Filter, 
@@ -79,6 +80,12 @@ export default function MusicFileManagement() {
   const [selectedFileIds, setSelectedFileIds] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   
+  // Bulk download state
+  const [downloadProgress, setDownloadProgress] = useState(0)
+  const [currentFileIndex, setCurrentFileIndex] = useState(0)
+  const [totalFilesToDownload, setTotalFilesToDownload] = useState(0)
+  const [isDownloading, setIsDownloading] = useState(false)
+  
   // Filter states
   const [yearFilter, setYearFilter] = useState<string>("all")
   const [competitionFilter, setCompetitionFilter] = useState<string>("all")
@@ -94,6 +101,9 @@ export default function MusicFileManagement() {
   const [categories, setCategories] = useState<string[]>([])
   const [segments, setSegments] = useState<string[]>([])
   const [competitors, setCompetitors] = useState<string[]>([])
+
+  // Add a ref for download links
+  const downloadLinkRef = useRef<HTMLAnchorElement | null>(null)
 
   // Fetch all music files
   const fetchMusicFiles = async () => {
@@ -220,10 +230,18 @@ export default function MusicFileManagement() {
   }
 
   // Download a single file
-  const handleDownload = async (fileId: string) => {
+  const handleDownload = async (fileId: string, fileName: string) => {
     try {
       const { url } = await getMusicFileDownloadUrl(fileId)
-      window.open(url, '_blank')
+      
+      // Create a hidden anchor element for download
+      const link = document.createElement('a')
+      link.href = url
+      link.download = fileName // Set the filename for download
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
       toast.success('Download started')
     } catch (error) {
       console.error('Error downloading file:', error)
@@ -231,7 +249,7 @@ export default function MusicFileManagement() {
     }
   }
 
-  // Download selected files as a zip
+  // Download selected files 
   const handleBulkDownload = async () => {
     try {
       if (selectedFileIds.length === 0) {
@@ -239,32 +257,65 @@ export default function MusicFileManagement() {
         return
       }
       
-      setIsLoading(true)
-      toast.info(`Preparing ${selectedFileIds.length} files for download...`)
+      setIsDownloading(true)
+      setDownloadProgress(0)
+      setCurrentFileIndex(0)
       
-      // Get download URLs for all selected files
+      // Get selected files
       const selectedFiles = filteredFiles.filter(file => 
         selectedFileIds.includes(file.$id)
       )
       
-      // For each file, open the download in a new tab with a slight delay
-      // This is a simple approach - in a production app you might want to create a zip file server-side
-      for (let i = 0; i < selectedFiles.length; i++) {
-        const file = selectedFiles[i]
-        const { url } = await getMusicFileDownloadUrl(file.fileId)
+      setTotalFilesToDownload(selectedFiles.length)
+      toast.info(`Starting download of ${selectedFiles.length} files...`)
+      
+      // Create a hidden anchor element for downloads
+      const link = document.createElement('a')
+      document.body.appendChild(link)
+      
+      // Use recursion to download files one at a time with proper progress tracking
+      const downloadNextFile = async (index: number) => {
+        if (index >= selectedFiles.length) {
+          // All files downloaded
+          setIsDownloading(false)
+          document.body.removeChild(link)
+          toast.success(`Successfully downloaded ${selectedFiles.length} files`)
+          return
+        }
         
-        // Open in new tab with a small delay between each to prevent browser blocking
-        setTimeout(() => {
-          window.open(url, '_blank')
-        }, i * 300)
+        const file = selectedFiles[index]
+        setCurrentFileIndex(index + 1)
+        setDownloadProgress(Math.round(((index + 1) / selectedFiles.length) * 100))
+        
+        try {
+          // Get download URL and trigger download
+          const { url } = await getMusicFileDownloadUrl(file.fileId)
+          
+          // Set link properties and click it
+          link.href = url
+          link.download = `${file.fileName}.${file.originalName.split('.').pop()}` // Keep the original file extension
+          link.click()
+          
+          // Wait before downloading the next file
+          setTimeout(() => {
+            downloadNextFile(index + 1)
+          }, 2000) // Longer delay to ensure each download starts
+        } catch (error) {
+          console.error(`Error downloading file ${file.fileName}:`, error)
+          // Continue with next file despite error
+          setTimeout(() => {
+            downloadNextFile(index + 1)
+          }, 1000)
+        }
       }
       
-      toast.success(`Started download of ${selectedFiles.length} files`)
+      // Start the download sequence
+      downloadNextFile(0)
+      
     } catch (error) {
       console.error('Error in bulk download:', error)
       toast.error('Failed to download files')
-    } finally {
-      setIsLoading(false)
+      setIsDownloading(false)
     }
   }
 
@@ -290,7 +341,7 @@ export default function MusicFileManagement() {
 
   return (
     <div className="space-y-6">
-      {isLoading && <LoadingOverlay text="Loading music files..." />}
+      {isLoading && <LoadingOverlay message="Loading music files..." />}
       
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold text-purple-700">
@@ -453,14 +504,29 @@ export default function MusicFileManagement() {
           <Button
             onClick={handleBulkDownload}
             className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2"
-            disabled={selectedFileIds.length === 0}
+            disabled={selectedFileIds.length === 0 || isDownloading}
           >
             <FileDown size={16} />
-            <span>Download {selectedFileIds.length > 0 ? `(${selectedFileIds.length})` : ''}</span>
+            <span>
+              {isDownloading 
+                ? `Downloading (${currentFileIndex}/${totalFilesToDownload})`
+                : `Download ${selectedFileIds.length > 0 ? `(${selectedFileIds.length})` : ''}`
+              }
+            </span>
           </Button>
         </CardHeader>
         
         <CardContent>
+          {/* Download progress bar */}
+          {isDownloading && (
+            <div className="mb-4 space-y-2">
+              <Progress value={downloadProgress} className="h-2" />
+              <p className="text-sm text-center text-purple-600">
+                Downloading file {currentFileIndex} of {totalFilesToDownload} ({downloadProgress}%)
+              </p>
+            </div>
+          )}
+          
           <div className="rounded-md border">
             <Table>
               <TableHeader className="bg-purple-50">
@@ -476,6 +542,7 @@ export default function MusicFileManagement() {
                   <TableHead>File Name</TableHead>
                   <TableHead>Competition</TableHead>
                   <TableHead>Grade</TableHead>
+                  <TableHead>Category</TableHead>
                   <TableHead>Competitor</TableHead>
                   <TableHead>Duration</TableHead>
                   <TableHead>Uploaded</TableHead>
@@ -485,7 +552,7 @@ export default function MusicFileManagement() {
               <TableBody>
                 {filteredFiles.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+                    <TableCell colSpan={9} className="text-center py-8 text-gray-500">
                       {musicFiles.length === 0 ? 
                         'No music files found. Upload files via the competitor dashboard.' :
                         'No files match the current filters.'
@@ -521,11 +588,12 @@ export default function MusicFileManagement() {
                         </div>
                       </TableCell>
                       <TableCell>
+                        <span>{file.gradeType}</span>
+                      </TableCell>
+                      <TableCell>
                         <div className="flex flex-col">
-                          <span>{file.gradeType}</span>
-                          <span className="text-xs text-gray-500">
-                            {file.gradeCategory} - {file.gradeSegment}
-                          </span>
+                          <span>{file.gradeCategory}</span>
+                          <span className="text-xs text-gray-500">{file.gradeSegment}</span>
                         </div>
                       </TableCell>
                       <TableCell>{file.userName}</TableCell>
@@ -542,7 +610,7 @@ export default function MusicFileManagement() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={() => handleDownload(file.fileId)}
+                            onClick={() => handleDownload(file.fileId, file.originalName)}
                             className="h-8 w-8 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
                             title="Download file"
                           >
@@ -588,6 +656,12 @@ export default function MusicFileManagement() {
           </div>
         </CardContent>
       </Card>
+      
+      {/* Hidden anchor element for downloads */}
+      <a
+        ref={downloadLinkRef}
+        style={{ display: 'none' }}
+      />
     </div>
   )
 }
