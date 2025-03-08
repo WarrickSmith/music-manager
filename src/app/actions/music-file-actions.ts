@@ -3,6 +3,7 @@
 import { databases, storage, ID, Query } from '@/lib/appwrite/server'
 import { revalidatePath } from 'next/cache'
 import * as musicMetadata from 'music-metadata'
+import { Models } from 'node-appwrite'
 
 const databaseId = process.env.APPWRITE_DATABASE_ID!
 const bucketId = process.env.APPWRITE_BUCKET_ID!
@@ -33,21 +34,15 @@ export async function getAllMusicFiles() {
     // Fetch all music files with pagination handling
     const limit = 100 // Maximum allowed by Appwrite
     let offset = 0
-    let allDocuments = []
+    let allDocuments: Models.Document[] = []
     let hasMoreDocuments = true
 
     // Add limit to queries
-    const queriesWithLimit = [
-      Query.orderDesc('uploadedAt'),
-      Query.limit(limit)
-    ]
+    const queriesWithLimit = [Query.orderDesc('uploadedAt'), Query.limit(limit)]
 
     while (hasMoreDocuments) {
       // Add offset to queries
-      const currentQueries = [
-        ...queriesWithLimit, 
-        Query.offset(offset)
-      ]
+      const currentQueries = [...queriesWithLimit, Query.offset(offset)]
 
       const response = await databases.listDocuments(
         databaseId,
