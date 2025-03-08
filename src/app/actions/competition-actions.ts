@@ -4,11 +4,14 @@ import { databases, ID, Query } from '@/lib/appwrite/server'
 import { Models } from 'node-appwrite'
 import { revalidatePath } from 'next/cache'
 import { defaultGrades } from '../../../Docs/default-grades'
+import { storage } from '@/lib/appwrite/server'
 
 const databaseId = process.env.APPWRITE_DATABASE_ID!
 const competitionsCollectionId =
   process.env.APPWRITE_COMPETITIONS_COLLECTION_ID!
 const gradesCollectionId = process.env.APPWRITE_GRADES_COLLECTION_ID!
+const musicFilesCollectionId = process.env.APPWRITE_MUSIC_FILES_COLLECTION_ID!
+const bucketId = process.env.APPWRITE_BUCKET_ID!
 
 /**
  * Utility function to fetch all documents with pagination
@@ -163,6 +166,30 @@ export async function updateCompetitionStatus(
 
 export async function deleteCompetition(competitionId: string) {
   try {
+    // Delete all associated music files using pagination
+    const musicFiles = await getAllDocuments(
+      databaseId,
+      musicFilesCollectionId,
+      [Query.equal('competitionId', competitionId)]
+    )
+
+    // Delete music files from storage and database
+    for (const file of musicFiles) {
+      try {
+        // Delete file from storage
+        await storage.deleteFile(bucketId, file.fileId)
+        // Delete file record from database
+        await databases.deleteDocument(
+          databaseId,
+          musicFilesCollectionId,
+          file.$id
+        )
+      } catch (fileError) {
+        console.error(`Error deleting music file ${file.$id}:`, fileError)
+        // Continue deleting other files even if one fails
+      }
+    }
+
     // Delete all associated grades using pagination
     const grades = await getAllDocuments(databaseId, gradesCollectionId, [
       Query.equal('competitionId', competitionId),

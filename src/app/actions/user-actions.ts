@@ -1,8 +1,10 @@
 'use server'
 
-import { Client, Users, Account } from 'node-appwrite'
+import { Client, Users, Account, Models } from 'node-appwrite'
 import { revalidatePath } from 'next/cache'
 import { getCurrentUser } from '@/lib/auth/auth-service'
+import { databases, Query } from '@/lib/appwrite/server'
+import { storage } from '@/lib/appwrite/server'
 
 // Initialize Appwrite
 const client = new Client()
@@ -11,6 +13,52 @@ const client = new Client()
   .setKey(process.env.APPWRITE_API_KEY!)
 
 const users = new Users(client)
+const databaseId = process.env.APPWRITE_DATABASE_ID!
+const musicFilesCollectionId = process.env.APPWRITE_MUSIC_FILES_COLLECTION_ID!
+const bucketId = process.env.APPWRITE_BUCKET_ID!
+
+/**
+ * Utility function to fetch all documents with pagination
+ * @param databaseId Database ID
+ * @param collectionId Collection ID
+ * @param queries Query parameters
+ * @returns Array of all documents from all pages
+ */
+async function getAllDocuments(
+  databaseId: string,
+  collectionId: string,
+  queries: string[] = []
+) {
+  const limit = 100 // Maximum allowed by Appwrite
+  let offset = 0
+  let allDocuments: Models.Document[] = [] // Using Appwrite Models.Document type
+  let hasMoreDocuments = true
+
+  // Add limit to queries if not already specified
+  const queriesWithLimit = [...queries, Query.limit(limit)]
+
+  while (hasMoreDocuments) {
+    // Add offset to queries
+    const currentQueries = [...queriesWithLimit, Query.offset(offset)]
+
+    const response = await databases.listDocuments(
+      databaseId,
+      collectionId,
+      currentQueries
+    )
+
+    allDocuments = [...allDocuments, ...response.documents]
+
+    // Check if there are more documents
+    if (response.documents.length < limit) {
+      hasMoreDocuments = false
+    } else {
+      offset += limit
+    }
+  }
+
+  return allDocuments
+}
 
 export async function getAllUsers() {
   try {
@@ -99,6 +147,31 @@ export async function updateUserStatus(userId: string, active: boolean) {
 
 export async function deleteUser(userId: string) {
   try {
+    // First, delete all music files associated with this user
+    const musicFiles = await getAllDocuments(
+      databaseId,
+      musicFilesCollectionId,
+      [Query.equal('userId', userId)]
+    )
+
+    // Delete music files from storage and database
+    for (const file of musicFiles) {
+      try {
+        // Delete file from storage
+        await storage.deleteFile(bucketId, file.fileId)
+        // Delete file record from database
+        await databases.deleteDocument(
+          databaseId,
+          musicFilesCollectionId,
+          file.$id
+        )
+      } catch (fileError) {
+        console.error(`Error deleting music file ${file.$id}:`, fileError)
+        // Continue deleting other files even if one fails
+      }
+    }
+
+    // Delete the user account
     await users.delete(userId)
 
     revalidatePath('/admin/dashboard')
