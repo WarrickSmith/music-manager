@@ -95,7 +95,9 @@ export async function createCompetition({
     // Check if Appwrite resources are initialized
     const { isInitialized } = await checkAppwriteInitialization()
     if (!isInitialized) {
-      throw new Error('Appwrite resources are not initialized. Please run the initialization process first.')
+      throw new Error(
+        'Appwrite resources are not initialized. Please run the initialization process first.'
+      )
     }
 
     // Create competition document
@@ -165,7 +167,9 @@ export async function updateCompetitionStatus(
     // Check if Appwrite resources are initialized
     const { isInitialized } = await checkAppwriteInitialization()
     if (!isInitialized) {
-      throw new Error('Appwrite resources are not initialized. Please run the initialization process first.')
+      throw new Error(
+        'Appwrite resources are not initialized. Please run the initialization process first.'
+      )
     }
 
     const result = await databases.updateDocument(
@@ -188,7 +192,9 @@ export async function deleteCompetition(competitionId: string) {
     // Check if Appwrite resources are initialized
     const { isInitialized } = await checkAppwriteInitialization()
     if (!isInitialized) {
-      throw new Error('Appwrite resources are not initialized. Please run the initialization process first.')
+      throw new Error(
+        'Appwrite resources are not initialized. Please run the initialization process first.'
+      )
     }
 
     // Delete all associated music files using pagination

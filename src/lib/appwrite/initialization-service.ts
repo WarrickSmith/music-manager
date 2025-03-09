@@ -13,8 +13,8 @@ const competitionsCollectionId = 'competitions'
 
 // Define an error interface for type checking inside catch blocks
 interface AppwriteError {
-  code?: number;
-  message?: string;
+  code?: number
+  message?: string
 }
 
 /**
@@ -31,7 +31,7 @@ export async function checkAppwriteInitialization() {
     try {
       await databases.get(databaseId)
       databaseExists = true
-      
+
       // If database exists, check if collections exist
       try {
         await databases.getCollection(databaseId, musicFilesCollectionId)
@@ -43,7 +43,7 @@ export async function checkAppwriteInitialization() {
           console.error('Error checking music files collection:', err)
         }
       }
-      
+
       try {
         await databases.getCollection(databaseId, competitionsCollectionId)
         competitionsCollectionExists = true
@@ -71,8 +71,11 @@ export async function checkAppwriteInitialization() {
       }
     }
 
-    const isInitialized = databaseExists && musicFilesCollectionExists && 
-                          competitionsCollectionExists && storageBucketExists
+    const isInitialized =
+      databaseExists &&
+      musicFilesCollectionExists &&
+      competitionsCollectionExists &&
+      storageBucketExists
 
     return {
       isInitialized,
@@ -80,8 +83,8 @@ export async function checkAppwriteInitialization() {
         databaseExists,
         musicFilesCollectionExists,
         competitionsCollectionExists,
-        storageBucketExists
-      }
+        storageBucketExists,
+      },
     }
   } catch (error) {
     console.error('Error checking Appwrite initialization:', error)
@@ -97,7 +100,10 @@ export async function initializeAppwrite() {
     console.log('Running Appwrite initialization script...')
     const result = await execAsync('npm run setup:appwrite')
     console.log('Initialization result:', result.stdout)
-    return { success: true, message: 'Appwrite resources initialized successfully' }
+    return {
+      success: true,
+      message: 'Appwrite resources initialized successfully',
+    }
   } catch (error) {
     console.error('Error initializing Appwrite:', error)
     throw new Error('Failed to initialize Appwrite resources')

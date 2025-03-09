@@ -11,20 +11,20 @@ import { checkAppwriteInitialization } from '@/lib/appwrite/initialization-servi
 
 export default async function AdminDashboardPage() {
   const user = await getCurrentUser()
-  
+
   // Check if Appwrite is initialized to determine default tab
-  let defaultTab = "musicfiles" // Default to music files if everything is okay
-  
+  let defaultTab = 'musicfiles' // Default to music files if everything is okay
+
   try {
     const initStatus = await checkAppwriteInitialization()
     if (!initStatus.isInitialized) {
-      defaultTab = "appwrite" // Switch to appwrite setup tab if not initialized
+      defaultTab = 'appwrite' // Switch to appwrite setup tab if not initialized
     }
   } catch (error) {
-    console.error("Failed to check Appwrite initialization status:", error)
-    defaultTab = "appwrite" // Default to appwrite tab on error as a precaution
+    console.error('Failed to check Appwrite initialization status:', error)
+    defaultTab = 'appwrite' // Default to appwrite tab on error as a precaution
   }
-  
+
   return (
     <>
       <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -76,35 +76,35 @@ export default async function AdminDashboardPage() {
               Appwrite Setup
             </TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="musicfiles" className="mt-6">
             {/* Music File Management Component */}
             <div className="rounded-lg border border-purple-100 bg-white p-8 shadow-sm">
               <MusicFileManagement />
             </div>
           </TabsContent>
-          
+
           <TabsContent value="competitions" className="mt-6">
             {/* Competition & Grade Management Component */}
             <div className="rounded-lg border border-indigo-100 bg-white p-6 shadow-sm">
               <CompetitionManagement />
             </div>
           </TabsContent>
-          
+
           <TabsContent value="users" className="mt-6">
             {/* User Management Component */}
             <div className="rounded-lg border border-blue-100 bg-white p-6 shadow-sm">
               <UserManagement />
             </div>
           </TabsContent>
-          
+
           <TabsContent value="profile" className="mt-6">
             {/* Admin Profile Component */}
             <div className="rounded-lg border border-violet-100 bg-white p-6 shadow-sm">
               <AdminProfileManagement />
             </div>
           </TabsContent>
-          
+
           <TabsContent value="appwrite" className="mt-6">
             {/* Appwrite Initialization Component */}
             <div className="rounded-lg border border-green-100 bg-white p-6 shadow-sm">
@@ -113,7 +113,8 @@ export default async function AdminDashboardPage() {
                   Appwrite Backend Setup
                 </h2>
                 <p className="text-gray-600">
-                  Check the status of your Appwrite backend resources and initialize them if needed.
+                  Check the status of your Appwrite backend resources and
+                  initialize them if needed.
                 </p>
               </div>
               <AppwriteInitializationWrapper />

@@ -1,14 +1,28 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardFooter,
+} from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { checkAppwriteInitialization, initializeAppwrite } from '@/lib/appwrite/initialization-service'
+import {
+  checkAppwriteInitialization,
+  initializeAppwrite,
+} from '@/lib/appwrite/initialization-service'
 import { toast } from 'sonner'
 import { RefreshCw, CheckCircle2, XCircle } from 'lucide-react'
 
 // Creating simple alert components since the import isn't available
-const Alert = ({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) => {
+const Alert = ({
+  className,
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => {
   return (
     <div
       className={`relative w-full rounded-lg border p-4 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground ${className}`}
@@ -19,18 +33,21 @@ const Alert = ({ className, children, ...props }: React.HTMLAttributes<HTMLDivEl
   )
 }
 
-const AlertTitle = ({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) => (
+const AlertTitle = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLHeadingElement>) => (
   <h5
     className={`mb-1 font-medium leading-none tracking-tight ${className}`}
     {...props}
   />
 )
 
-const AlertDescription = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    className={`text-sm opacity-90 ${className}`}
-    {...props}
-  />
+const AlertDescription = ({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) => (
+  <div className={`text-sm opacity-90 ${className}`} {...props} />
 )
 
 export interface InitializationStatus {
@@ -72,7 +89,9 @@ export default function AppwriteInitialization() {
       toast.success('Appwrite initialization successful!')
       await checkStatus()
     } catch (error) {
-      toast.error('Initialization failed. Please check the console for more information.')
+      toast.error(
+        'Initialization failed. Please check the console for more information.'
+      )
       console.error('Initialization error:', error)
     } finally {
       setIsInitializing(false)
@@ -85,7 +104,9 @@ export default function AppwriteInitialization() {
         <CardContent className="p-6 flex items-center justify-center min-h-[200px]">
           <div className="flex flex-col items-center gap-2">
             <RefreshCw className="h-10 w-10 animate-spin text-indigo-600" />
-            <p className="text-indigo-600">Checking Appwrite initialization status...</p>
+            <p className="text-indigo-600">
+              Checking Appwrite initialization status...
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -125,14 +146,16 @@ export default function AppwriteInitialization() {
           </ul>
         </CardContent>
         <CardFooter>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={checkStatus} 
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={checkStatus}
             className="text-indigo-600"
             disabled={isLoading}
           >
-            <RefreshCw className={`h-4 w-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
+            <RefreshCw
+              className={`h-4 w-4 mr-1 ${isLoading ? 'animate-spin' : ''}`}
+            />
             Refresh Status
           </Button>
         </CardFooter>
@@ -148,7 +171,8 @@ export default function AppwriteInitialization() {
           Appwrite Not Initialized
         </CardTitle>
         <CardDescription>
-          Some required Appwrite resources are missing. Please initialize your Appwrite backend.
+          Some required Appwrite resources are missing. Please initialize your
+          Appwrite backend.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -186,23 +210,27 @@ export default function AppwriteInitialization() {
         </Alert>
         <div className="flex flex-col space-y-4">
           <p className="text-sm text-gray-600">
-            Initializing Appwrite will create all necessary database collections and storage buckets required for the application to function properly.
+            Initializing Appwrite will create all necessary database collections
+            and storage buckets required for the application to function
+            properly.
           </p>
         </div>
       </CardContent>
       <CardFooter className="flex justify-between flex-wrap gap-2">
-        <Button 
-          onClick={checkStatus} 
-          variant="outline" 
+        <Button
+          onClick={checkStatus}
+          variant="outline"
           disabled={isLoading}
           className="text-indigo-600"
         >
-          <RefreshCw className={`h-4 w-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
+          <RefreshCw
+            className={`h-4 w-4 mr-1 ${isLoading ? 'animate-spin' : ''}`}
+          />
           Refresh Status
         </Button>
-        <Button 
-          onClick={runInitialization} 
-          className="bg-indigo-600 hover:bg-indigo-700" 
+        <Button
+          onClick={runInitialization}
+          className="bg-indigo-600 hover:bg-indigo-700"
           disabled={isInitializing}
         >
           {isInitializing ? (
