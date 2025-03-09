@@ -274,9 +274,14 @@ export async function updateUserProfile({
         if (currentUser.phone !== formattedPhone) {
           try {
             await users.updatePhone(userId, formattedPhone)
-          } catch (phoneUpdateError: any) {
+          } catch (phoneUpdateError: unknown) {
+            // Type-cast to an object with code and message properties
+            const error = phoneUpdateError as {
+              code?: number
+              message?: string
+            }
             // Check if this is a conflict error (409)
-            if (phoneUpdateError?.code === 409) {
+            if (error?.code === 409) {
               throw new Error(
                 'This phone number is already associated with another account'
               )
