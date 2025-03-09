@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { getUserMusicFiles } from '@/app/actions/music-file-actions'
 import FileCard from './file-card'
-import LoadingOverlay from '@/components/ui/loading-overlay'
+import LocalLoadingCard from '@/components/ui/local-loading-card'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -110,7 +110,7 @@ export default function MyFiles({ userId }: { userId: string }) {
   }
 
   if (isLoading) {
-    return <LoadingOverlay message="Loading your music files..." />
+    return <LocalLoadingCard message="Loading your music files..." minHeight="200px" />
   }
 
   if (files.length === 0) {

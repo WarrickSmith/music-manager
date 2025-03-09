@@ -12,7 +12,6 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import LoadingOverlay from '@/components/ui/loading-overlay'
 import { toast } from 'sonner'
 import {
   Dialog,
@@ -27,6 +26,7 @@ import {
   updateUserProfile,
   changePassword,
 } from '@/app/actions/user-actions'
+import LocalLoadingCard from '@/components/ui/local-loading-card'
 
 interface UserProfile {
   $id: string
@@ -153,185 +153,183 @@ export default function ProfileManagement({
     }
   }
 
-  if (isLoading) {
-    return (
-      <Card className="max-w-2xl mx-auto">
-        <CardHeader>
-          <CardTitle>My Profile</CardTitle>
-          <CardDescription>
-            View and manage your personal information
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="min-h-[300px] relative">
-          <LoadingOverlay message="Loading profile information..." />
-        </CardContent>
-      </Card>
-    )
-  }
-
   return (
-    <>
+    <div>
+      <h2 className="text-2xl font-semibold mb-4 text-violet-500">My Profile</h2>
+
       <Card className="max-w-2xl mx-auto border-violet-100 shadow-sm">
-        <CardHeader className="bg-gradient-to-r from-violet-50 to-purple-50 border-b border-violet-100">
-          <CardTitle className="text-violet-700">My Profile</CardTitle>
-          <CardDescription>
-            View and manage your personal information
-          </CardDescription>
-        </CardHeader>
-
-        {isEditing ? (
-          <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-6 pt-6">
-              <div className="space-y-2">
-                <Label htmlFor="firstName" className="text-violet-700">
-                  First Name
-                </Label>
-                <Input
-                  id="firstName"
-                  value={formData.firstName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, firstName: e.target.value })
-                  }
-                  placeholder="Enter your first name"
-                  className="border-violet-200 focus-visible:ring-violet-500"
-                  disabled={isSubmitting}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="lastName" className="text-violet-700">
-                  Last Name
-                </Label>
-                <Input
-                  id="lastName"
-                  value={formData.lastName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, lastName: e.target.value })
-                  }
-                  placeholder="Enter your last name"
-                  className="border-violet-200 focus-visible:ring-violet-500"
-                  disabled={isSubmitting}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="phone" className="text-violet-700">
-                  Phone Number
-                </Label>
-                <Input
-                  id="phone"
-                  value={formData.phone}
-                  onChange={(e) =>
-                    setFormData({ ...formData, phone: e.target.value })
-                  }
-                  placeholder="Enter phone number with country code (e.g., +14155552671)"
-                  className="border-violet-200 focus-visible:ring-violet-500"
-                  disabled={isSubmitting}
-                />
-                <p className="text-sm text-slate-500 mt-1">
-                  Must start with + followed by country code and number (max 15
-                  digits)
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-violet-700">
-                  Email Address
-                </Label>
-                <Input
-                  id="email"
-                  value={profile?.email || ''}
-                  disabled
-                  className="bg-slate-50 border-violet-100"
-                />
-                <p className="text-sm text-slate-500">
-                  Email address cannot be changed
-                </p>
-              </div>
-            </CardContent>
-
-            <CardFooter className="flex justify-end space-x-2 border-t border-violet-100 bg-violet-50/50 py-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsEditing(false)}
-                disabled={isSubmitting}
-                className="border-violet-200 text-violet-700 hover:bg-violet-100"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
-              >
-                {isSubmitting ? 'Saving...' : 'Save Changes'}
-              </Button>
-            </CardFooter>
-          </form>
+        {isLoading ? (
+          <LocalLoadingCard message="Loading profile..." minHeight="200px" />
         ) : (
           <>
-            <CardContent className="space-y-6 pt-6">
-              <div className="flex items-center gap-2">
-                <p className="text-sm font-medium text-slate-500">Role</p>
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                  Competitor
-                </span>
-              </div>
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-slate-500">
-                    First Name
-                  </p>
-                  <p className="text-lg font-medium text-violet-700">
-                    {profile?.firstName || 'Not set'}
-                  </p>
-                </div>
+            <CardHeader className="bg-gradient-to-r from-violet-50 to-purple-50 border-b border-violet-100">
+              <CardTitle className="text-violet-700">My Profile</CardTitle>
+              <CardDescription>
+                View and manage your personal information
+              </CardDescription>
+            </CardHeader>
 
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-slate-500">
-                    Last Name
-                  </p>
-                  <p className="text-lg font-medium text-violet-700">
-                    {profile?.lastName || 'Not set'}
-                  </p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-slate-500">
-                    Phone Number
-                  </p>
-                  <p className="text-lg font-medium text-violet-700">
-                    {profile?.phone || 'Not set'}
-                  </p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-slate-500">
-                    Email Address
-                  </p>
-                  <p className="text-lg font-medium text-violet-700">
-                    {profile?.email || 'Not available'}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
+            {isEditing ? (
+              <form onSubmit={handleSubmit}>
+                <CardContent className="space-y-6 pt-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName" className="text-violet-700">
+                      First Name
+                    </Label>
+                    <Input
+                      id="firstName"
+                      value={formData.firstName}
+                      onChange={(e) =>
+                        setFormData({ ...formData, firstName: e.target.value })
+                      }
+                      placeholder="Enter your first name"
+                      className="border-violet-200 focus-visible:ring-violet-500"
+                      disabled={isSubmitting}
+                    />
+                  </div>
 
-            <CardFooter className="flex justify-end space-x-2 border-t border-violet-100 bg-violet-50/50 py-4">
-              <Button
-                variant="outline"
-                onClick={() => setShowPasswordDialog(true)}
-                className="border-violet-200 text-violet-700 hover:bg-violet-100"
-              >
-                Change Password
-              </Button>
-              <Button
-                onClick={() => setIsEditing(true)}
-                className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
-              >
-                Edit Profile
-              </Button>
-            </CardFooter>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName" className="text-violet-700">
+                      Last Name
+                    </Label>
+                    <Input
+                      id="lastName"
+                      value={formData.lastName}
+                      onChange={(e) =>
+                        setFormData({ ...formData, lastName: e.target.value })
+                      }
+                      placeholder="Enter your last name"
+                      className="border-violet-200 focus-visible:ring-violet-500"
+                      disabled={isSubmitting}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="phone" className="text-violet-700">
+                      Phone Number
+                    </Label>
+                    <Input
+                      id="phone"
+                      value={formData.phone}
+                      onChange={(e) =>
+                        setFormData({ ...formData, phone: e.target.value })
+                      }
+                      placeholder="Enter phone number with country code (e.g., +14155552671)"
+                      className="border-violet-200 focus-visible:ring-violet-500"
+                      disabled={isSubmitting}
+                    />
+                    <p className="text-sm text-slate-500 mt-1">
+                      Must start with + followed by country code and number (max 15
+                      digits)
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-violet-700">
+                      Email Address
+                    </Label>
+                    <Input
+                      id="email"
+                      value={profile?.email || ''}
+                      disabled
+                      className="bg-slate-50 border-violet-100"
+                    />
+                    <p className="text-sm text-slate-500">
+                      Email address cannot be changed
+                    </p>
+                  </div>
+                </CardContent>
+
+                <CardFooter className="flex justify-end space-x-2 border-t border-violet-100 bg-violet-50/50 py-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsEditing(false)}
+                    disabled={isSubmitting}
+                    className="border-violet-200 text-violet-700 hover:bg-violet-100"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
+                  >
+                    {isSubmitting ? 'Saving...' : 'Save Changes'}
+                  </Button>
+                </CardFooter>
+              </form>
+            ) : (
+              <>
+                <CardContent className="space-y-6 pt-6">
+                  {/* Show local loading spinner when submitting */}
+                  {isSubmitting && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+                      <div className="w-8 h-8 border-3 border-violet-500 border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-medium text-slate-500">Role</p>
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                      Competitor
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-slate-500">
+                        First Name
+                      </p>
+                      <p className="text-lg font-medium text-violet-700">
+                        {profile?.firstName || 'Not set'}
+                      </p>
+                    </div>
+
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-slate-500">
+                        Last Name
+                      </p>
+                      <p className="text-lg font-medium text-violet-700">
+                        {profile?.lastName || 'Not set'}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-slate-500">
+                        Phone Number
+                      </p>
+                      <p className="text-lg font-medium text-violet-700">
+                        {profile?.phone || 'Not set'}
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm font-medium text-slate-500">
+                        Email Address
+                      </p>
+                      <p className="text-lg font-medium text-violet-700">
+                        {profile?.email || 'Not available'}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+
+                <CardFooter className="flex justify-end space-x-2 border-t border-violet-100 bg-violet-50/50 py-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowPasswordDialog(true)}
+                    className="border-violet-200 text-violet-700 hover:bg-violet-100"
+                  >
+                    Change Password
+                  </Button>
+                  <Button
+                    onClick={() => setIsEditing(true)}
+                    className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700"
+                  >
+                    Edit Profile
+                  </Button>
+                </CardFooter>
+              </>
+            )}
           </>
         )}
       </Card>
@@ -427,6 +425,6 @@ export default function ProfileManagement({
           </form>
         </DialogContent>
       </Dialog>
-    </>
+    </div>
   )
 }

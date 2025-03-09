@@ -1,8 +1,10 @@
+import { Suspense } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import MyFiles from './my-files'
 import UploadMusic from './upload-music'
 import ProfileManagement from './profile-management'
 import { FileMusic, Upload, UserCog } from 'lucide-react'
+import LocalLoadingCard from '@/components/ui/local-loading-card'
 
 export default function CompetitorDashboard({
   userId,
@@ -51,19 +53,25 @@ export default function CompetitorDashboard({
 
         <TabsContent value="my-files" className="mt-6">
           <div className="rounded-lg border border-sky-100 bg-white p-6 shadow-sm">
-            <MyFiles userId={userId} />
+            <Suspense fallback={<LocalLoadingCard message="Loading files..." minHeight="200px" />}>
+              <MyFiles userId={userId} />
+            </Suspense>
           </div>
         </TabsContent>
 
         <TabsContent value="upload" className="mt-6">
           <div className="rounded-lg border border-emerald-100 bg-white p-6 shadow-sm">
-            <UploadMusic userId={userId} />
+            <Suspense fallback={<LocalLoadingCard message="Loading upload form..." minHeight="200px" />}>
+              <UploadMusic userId={userId} />
+            </Suspense>
           </div>
         </TabsContent>
 
         <TabsContent value="profile" className="mt-6">
           <div className="rounded-lg border border-violet-100 bg-white p-6 shadow-sm">
-            <ProfileManagement userId={userId} />
+            <Suspense fallback={<LocalLoadingCard message="Loading profile..." minHeight="200px" />}>
+              <ProfileManagement userId={userId} />
+            </Suspense>
           </div>
         </TabsContent>
       </Tabs>
