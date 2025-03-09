@@ -5,6 +5,7 @@ import { Models } from 'node-appwrite'
 import { revalidatePath } from 'next/cache'
 import { defaultGrades } from '../../../Docs/default-grades'
 import { storage } from '@/lib/appwrite/server'
+import { checkAppwriteInitialization } from '@/lib/appwrite/initialization-service'
 
 const databaseId = process.env.APPWRITE_DATABASE_ID!
 const competitionsCollectionId =
@@ -58,6 +59,12 @@ async function getAllDocuments(
 
 export async function getCompetitions() {
   try {
+    // Check if Appwrite resources are initialized
+    const { isInitialized } = await checkAppwriteInitialization()
+    if (!isInitialized) {
+      return []
+    }
+
     const response = await databases.listDocuments(
       databaseId,
       competitionsCollectionId,
@@ -85,6 +92,12 @@ export async function createCompetition({
   cloneFromCompetitionId?: string
 }) {
   try {
+    // Check if Appwrite resources are initialized
+    const { isInitialized } = await checkAppwriteInitialization()
+    if (!isInitialized) {
+      throw new Error('Appwrite resources are not initialized. Please run the initialization process first.')
+    }
+
     // Create competition document
     const competition = await databases.createDocument(
       databaseId,
@@ -149,6 +162,12 @@ export async function updateCompetitionStatus(
   active: boolean
 ) {
   try {
+    // Check if Appwrite resources are initialized
+    const { isInitialized } = await checkAppwriteInitialization()
+    if (!isInitialized) {
+      throw new Error('Appwrite resources are not initialized. Please run the initialization process first.')
+    }
+
     const result = await databases.updateDocument(
       databaseId,
       competitionsCollectionId,
@@ -166,6 +185,12 @@ export async function updateCompetitionStatus(
 
 export async function deleteCompetition(competitionId: string) {
   try {
+    // Check if Appwrite resources are initialized
+    const { isInitialized } = await checkAppwriteInitialization()
+    if (!isInitialized) {
+      throw new Error('Appwrite resources are not initialized. Please run the initialization process first.')
+    }
+
     // Delete all associated music files using pagination
     const musicFiles = await getAllDocuments(
       databaseId,
@@ -220,6 +245,12 @@ export async function deleteCompetition(competitionId: string) {
  */
 export async function getActiveCompetitions() {
   try {
+    // Check if Appwrite resources are initialized
+    const { isInitialized } = await checkAppwriteInitialization()
+    if (!isInitialized) {
+      return []
+    }
+
     const response = await databases.listDocuments(
       databaseId,
       competitionsCollectionId,
@@ -244,6 +275,12 @@ export async function getGradesForCompetition(
   category?: string
 ) {
   try {
+    // Check if Appwrite resources are initialized
+    const { isInitialized } = await checkAppwriteInitialization()
+    if (!isInitialized) {
+      return []
+    }
+
     const queries = [Query.equal('competitionId', competitionId)]
 
     if (category) {
@@ -268,17 +305,24 @@ export async function getGradesForCompetition(
  */
 export async function getGradeCategoriesForCompetition(competitionId: string) {
   try {
-    const grades = await databases.listDocuments(
+    // Check if Appwrite resources are initialized
+    const { isInitialized } = await checkAppwriteInitialization()
+    if (!isInitialized) {
+      return []
+    }
+
+    const response = await databases.listDocuments(
       databaseId,
       gradesCollectionId,
       [Query.equal('competitionId', competitionId)]
     )
 
-    // Extract unique categories
     const categories = new Set<string>()
-    for (const grade of grades.documents) {
-      categories.add(grade.category)
-    }
+    response.documents.forEach((doc) => {
+      if (doc.category) {
+        categories.add(doc.category)
+      }
+    })
 
     return Array.from(categories).sort()
   } catch (error) {

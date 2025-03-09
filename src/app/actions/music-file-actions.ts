@@ -4,6 +4,7 @@ import { databases, storage, ID, Query } from '@/lib/appwrite/server'
 import { revalidatePath } from 'next/cache'
 import * as musicMetadata from 'music-metadata'
 import { Models } from 'node-appwrite'
+import { checkAppwriteInitialization } from '@/lib/appwrite/initialization-service'
 
 const databaseId = process.env.APPWRITE_DATABASE_ID!
 const bucketId = process.env.APPWRITE_BUCKET_ID!
@@ -14,6 +15,12 @@ const musicFilesCollectionId = process.env.APPWRITE_MUSIC_FILES_COLLECTION_ID!
  */
 export async function getUserMusicFiles(userId: string) {
   try {
+    // Check if Appwrite is initialized
+    const { isInitialized } = await checkAppwriteInitialization()
+    if (!isInitialized) {
+      return []
+    }
+
     const response = await databases.listDocuments(
       databaseId,
       musicFilesCollectionId,
@@ -31,6 +38,12 @@ export async function getUserMusicFiles(userId: string) {
  */
 export async function getAllMusicFiles() {
   try {
+    // Check if Appwrite is initialized
+    const { isInitialized } = await checkAppwriteInitialization()
+    if (!isInitialized) {
+      return []
+    }
+
     // Fetch all music files with pagination handling
     const limit = 100 // Maximum allowed by Appwrite
     let offset = 0
