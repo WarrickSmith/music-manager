@@ -20,6 +20,7 @@ export default function RegisterPage() {
   })
   const [loading, setLoading] = useState(false)
   const [initializing, setInitializing] = useState(true)
+  const [isRedirecting, setIsRedirecting] = useState(false)
   const router = useRouter()
 
   // Clear any existing session when the register page loads
@@ -74,8 +75,15 @@ export default function RegisterPage() {
 
       if (result.success) {
         showToast.success(result.message || 'Registration successful!')
+        
         if (result.redirectTo) {
+          // Set redirecting state to true to maintain the loading overlay
+          setIsRedirecting(true)
+          // Navigate to the login page
           router.push(result.redirectTo)
+          // We don't set loading to false here, keeping the overlay visible
+          // during the navigation
+          return
         }
       } else {
         showToast.error(result.error || 'Registration failed')
@@ -83,9 +91,10 @@ export default function RegisterPage() {
     } catch (error) {
       console.error('Registration error:', error)
       showToast.error('An unexpected error occurred')
-    } finally {
-      setLoading(false)
     }
+    
+    // Only set loading to false if we didn't redirect
+    setLoading(false)
   }
 
   if (initializing) {
@@ -94,7 +103,12 @@ export default function RegisterPage() {
 
   return (
     <div className="container max-w-md mx-auto p-6 space-y-8">
-      {loading && <LoadingOverlay message="Creating your account..." />}
+      {/* Show loading overlay during both loading and redirecting states */}
+      {(loading || isRedirecting) && (
+        <LoadingOverlay 
+          message={isRedirecting ? "Registration complete..." : "Creating your account..."}
+        />
+      )}
 
       <div className="flex flex-col items-center mb-8">
         <div className="flex items-center gap-4 mb-4 animate-fade-in">
@@ -217,7 +231,7 @@ export default function RegisterPage() {
 
         <Button
           type="submit"
-          disabled={loading}
+          disabled={loading || isRedirecting}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5"
         >
           Create Account
