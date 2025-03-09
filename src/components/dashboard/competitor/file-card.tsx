@@ -135,7 +135,7 @@ export default function FileCard({ file, onDeleteSuccess }: FileCardProps) {
         </div>
       </CardContent>
 
-      <CardFooter className="flex justify-between">
+      <CardFooter className="flex justify-end space-x-2">
         <Button
           variant="outline"
           onClick={handleDownload}
