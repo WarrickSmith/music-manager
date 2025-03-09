@@ -33,6 +33,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Check, Pencil, Plus, Trash, X } from 'lucide-react'
 import { toast } from 'sonner'
+import LocalLoadingCard from '@/components/ui/local-loading-card'
 import {
   getGradesByCompetition,
   createGrade,
@@ -179,30 +180,30 @@ export default function GradeManagement({
       // Sort by name Z-A first, then by category A-Z, then by segment A-Z
       return [...grades].sort((a, b) => {
         // First sort by name Z-A (descending)
-        const nameComparison = b.name.localeCompare(a.name);
-        if (nameComparison !== 0) return nameComparison;
-        
+        const nameComparison = b.name.localeCompare(a.name)
+        if (nameComparison !== 0) return nameComparison
+
         // If names are the same, sort by category A-Z (ascending)
-        const categoryComparison = a.category.localeCompare(b.category);
-        if (categoryComparison !== 0) return categoryComparison;
-        
+        const categoryComparison = a.category.localeCompare(b.category)
+        if (categoryComparison !== 0) return categoryComparison
+
         // If categories are the same, sort by segment A-Z (ascending)
-        return a.segment.localeCompare(b.segment);
-      });
-    } 
-    
+        return a.segment.localeCompare(b.segment)
+      })
+    }
+
     // When filtering by a specific name, still sort by category and segment
     return grades
       .filter((grade) => grade.name === selectedNameFilter)
       .sort((a, b) => {
         // Sort by category A-Z first
-        const categoryComparison = a.category.localeCompare(b.category);
-        if (categoryComparison !== 0) return categoryComparison;
-        
+        const categoryComparison = a.category.localeCompare(b.category)
+        if (categoryComparison !== 0) return categoryComparison
+
         // Then by segment A-Z
-        return a.segment.localeCompare(b.segment);
-      });
-  }, [grades, selectedNameFilter]);
+        return a.segment.localeCompare(b.segment)
+      })
+  }, [grades, selectedNameFilter])
 
   return (
     <>
@@ -264,9 +265,7 @@ export default function GradeManagement({
           </div>
 
           {isLoading ? (
-            <div className="py-8 text-center text-indigo-500">
-              Loading grades...
-            </div>
+            <LocalLoadingCard message="Loading grades..." minHeight="300px" />
           ) : (
             <Table>
               <TableHeader>
@@ -274,19 +273,25 @@ export default function GradeManagement({
                   <TableHead className="text-indigo-700">
                     <div className="flex items-center">
                       Name
-                      <span className="ml-2 text-xs text-indigo-500">(Z-A)</span>
+                      <span className="ml-2 text-xs text-indigo-500">
+                        (Z-A)
+                      </span>
                     </div>
                   </TableHead>
                   <TableHead className="text-indigo-700">
                     <div className="flex items-center">
                       Category
-                      <span className="ml-2 text-xs text-indigo-500">(A-Z)</span>
+                      <span className="ml-2 text-xs text-indigo-500">
+                        (A-Z)
+                      </span>
                     </div>
                   </TableHead>
                   <TableHead className="text-indigo-700">
                     <div className="flex items-center">
                       Segment
-                      <span className="ml-2 text-xs text-indigo-500">(A-Z)</span>
+                      <span className="ml-2 text-xs text-indigo-500">
+                        (A-Z)
+                      </span>
                     </div>
                   </TableHead>
                   <TableHead className="text-right text-indigo-700">

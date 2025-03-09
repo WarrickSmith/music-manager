@@ -9,6 +9,7 @@ import { getCompetitions } from '@/app/actions/competition-actions'
 import CompetitionList from './competition-list'
 import CreateCompetitionDialog from './create-competition-dialog'
 import GradeManagement from './grade-management'
+import LocalLoadingCard from '@/components/ui/local-loading-card'
 
 interface Competition {
   $id: string
@@ -76,28 +77,29 @@ export default function CompetitionManagement() {
             <Plus className="h-4 w-4" /> Create New
           </Button>
         </div>
-
-        <Card className="border-indigo-100">
-          <CardContent className="p-4">
-            {isLoading ? (
-              <div className="py-8 text-center text-indigo-500">
-                Loading competitions...
-              </div>
-            ) : competitions.length === 0 ? (
-              <div className="py-8 text-center text-indigo-600">
-                No competitions found. Create your first competition!
-              </div>
-            ) : (
-              <CompetitionList
-                competitions={competitions}
-                selectedCompetition={selectedCompetition}
-                onSelectCompetition={setSelectedCompetition}
-                onCompetitionUpdate={loadCompetitions}
-              />
-            )}
-          </CardContent>
-        </Card>
-
+        {isLoading ? (
+          <LocalLoadingCard
+            message="Loading competitions..."
+            minHeight="200px"
+          />
+        ) : (
+          <Card className="border-indigo-100">
+            <CardContent className="p-4">
+              {competitions.length === 0 ? (
+                <div className="py-8 text-center text-indigo-600">
+                  No competitions found. Create your first competition!
+                </div>
+              ) : (
+                <CompetitionList
+                  competitions={competitions}
+                  selectedCompetition={selectedCompetition}
+                  onSelectCompetition={setSelectedCompetition}
+                  onCompetitionUpdate={loadCompetitions}
+                />
+              )}
+            </CardContent>
+          </Card>
+        )}
         {showCreateDialog && (
           <CreateCompetitionDialog
             competitions={competitions}

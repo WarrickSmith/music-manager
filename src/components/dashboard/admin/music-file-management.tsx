@@ -26,7 +26,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import LoadingOverlay from '@/components/ui/loading-overlay'
+import LocalLoadingCard from '@/components/ui/local-loading-card'
 import { Progress } from '@/components/ui/progress'
 import {
   Download,
@@ -381,8 +381,6 @@ export default function MusicFileManagement() {
 
   return (
     <div className="space-y-6">
-      {isLoading && <LoadingOverlay message="Loading music files..." />}
-
       <div className="flex items-center justify-between">
         <h2 className="text-3xl font-bold text-purple-700">
           Music Files Management
@@ -562,202 +560,208 @@ export default function MusicFileManagement() {
       </Card>
 
       {/* Results */}
-      <Card className="border-purple-100">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <div>
-            <CardTitle className="text-lg text-purple-700">
-              Music Files
-            </CardTitle>
-            <CardDescription className="mt-1">
-              {filteredFiles.length}{' '}
-              {filteredFiles.length === 1 ? 'file' : 'files'}{' '}
-              {filteredFiles.length !== musicFiles.length &&
-                `(filtered from ${musicFiles.length})`}
-            </CardDescription>
-          </div>
-
-          {/* Bulk download button */}
-          <Button
-            onClick={handleBulkDownload}
-            className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2"
-            disabled={selectedFileIds.length === 0 || isDownloading}
-          >
-            <FileDown size={16} />
-            <span>
-              {isDownloading
-                ? `Downloading (${currentFileIndex}/${totalFilesToDownload})`
-                : `Download ${
-                    selectedFileIds.length > 0
-                      ? `(${selectedFileIds.length})`
-                      : ''
-                  }`}
-            </span>
-          </Button>
-        </CardHeader>
-
-        <CardContent>
-          {/* Download progress bar */}
-          {isDownloading && (
-            <div className="mb-4 space-y-2">
-              <Progress value={downloadProgress} className="h-2" />
-              <p className="text-sm text-center text-purple-600">
-                Downloading file {currentFileIndex} of {totalFilesToDownload} (
-                {downloadProgress}%)
-              </p>
+      {isLoading ? (
+        <LocalLoadingCard message="Loading music files..." minHeight="400px" />
+      ) : (
+        <Card className="border-purple-100">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <div>
+              <CardTitle className="text-lg text-purple-700">
+                Music Files
+              </CardTitle>
+              <CardDescription className="mt-1">
+                {filteredFiles.length}{' '}
+                {filteredFiles.length === 1 ? 'file' : 'files'}{' '}
+                {filteredFiles.length !== musicFiles.length &&
+                  `(filtered from ${musicFiles.length})`}
+              </CardDescription>
             </div>
-          )}
 
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader className="bg-purple-50">
-                <TableRow>
-                  <TableHead className="w-12 text-center">
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4 rounded border-gray-300"
-                      checked={
-                        selectedFileIds.length > 0 &&
-                        selectedFileIds.length === filteredFiles.length
-                      }
-                      onChange={toggleSelectAll}
-                    />
-                  </TableHead>
-                  <TableHead>File Name</TableHead>
-                  <TableHead>Competition</TableHead>
-                  <TableHead>Grade</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Competitor</TableHead>
-                  <TableHead>Duration</TableHead>
-                  <TableHead>Uploaded</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredFiles.length === 0 ? (
+            {/* Bulk download button */}
+            <Button
+              onClick={handleBulkDownload}
+              className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2"
+              disabled={selectedFileIds.length === 0 || isDownloading}
+            >
+              <FileDown size={16} />
+              <span>
+                {isDownloading
+                  ? `Downloading (${currentFileIndex}/${totalFilesToDownload})`
+                  : `Download ${
+                      selectedFileIds.length > 0
+                        ? `(${selectedFileIds.length})`
+                        : ''
+                    }`}
+              </span>
+            </Button>
+          </CardHeader>
+
+          <CardContent>
+            {/* Download progress bar */}
+            {isDownloading && (
+              <div className="mb-4 space-y-2">
+                <Progress value={downloadProgress} className="h-2" />
+                <p className="text-sm text-center text-purple-600">
+                  Downloading file {currentFileIndex} of {totalFilesToDownload}{' '}
+                  ({downloadProgress}%)
+                </p>
+              </div>
+            )}
+
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader className="bg-purple-50">
                   <TableRow>
-                    <TableCell
-                      colSpan={9}
-                      className="text-center py-8 text-gray-500"
-                    >
-                      {musicFiles.length === 0
-                        ? 'No music files found. Upload files via the competitor dashboard.'
-                        : 'No files match the current filters.'}
-                    </TableCell>
+                    <TableHead className="w-12 text-center">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 rounded border-gray-300"
+                        checked={
+                          selectedFileIds.length > 0 &&
+                          selectedFileIds.length === filteredFiles.length
+                        }
+                        onChange={toggleSelectAll}
+                      />
+                    </TableHead>
+                    <TableHead>File Name</TableHead>
+                    <TableHead>Competition</TableHead>
+                    <TableHead>Grade</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Competitor</TableHead>
+                    <TableHead>Duration</TableHead>
+                    <TableHead>Uploaded</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ) : (
-                  filteredFiles.map((file) => (
-                    <TableRow key={file.$id} className="hover:bg-purple-50/50">
-                      <TableCell className="text-center">
-                        <input
-                          type="checkbox"
-                          className="h-4 w-4 rounded border-gray-300"
-                          checked={selectedFileIds.includes(file.$id)}
-                          onChange={() => toggleFileSelection(file.$id)}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span className="font-medium">{file.fileName}</span>
-                          <span
-                            className="text-xs text-gray-500 truncate max-w-40"
-                            title={file.originalName}
-                          >
-                            {file.originalName}
-                          </span>
-                          <span className="text-xs text-gray-400">
-                            {formatFileSize(file.size || 0)}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span>{file.competitionName}</span>
-                          <span className="text-xs text-gray-500">
-                            {file.competitionYear}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <span>{file.gradeType}</span>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span>{file.gradeCategory}</span>
-                          <span className="text-xs text-gray-500">
-                            {file.gradeSegment}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>{file.userName}</TableCell>
-                      <TableCell>
-                        {file.duration ? `${file.duration}s` : 'N/A'}
-                      </TableCell>
-                      <TableCell>
-                        <div className="whitespace-nowrap">
-                          {file.uploadedAt
-                            ? formatDate(file.uploadedAt)
-                            : 'N/A'}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() =>
-                              handleDownload(file.fileId, file.originalName)
-                            }
-                            className="h-8 w-8 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
-                            title="Download file"
-                          >
-                            <Download size={16} />
-                          </Button>
-
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                title="Delete file"
-                              >
-                                <Trash2 size={16} />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                  Confirm deletion
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Are you sure you want to delete this file?
-                                  This action cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                  className="bg-red-600 hover:bg-red-700"
-                                  onClick={() =>
-                                    handleDelete(file.fileId, file.$id)
-                                  }
-                                >
-                                  Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
+                </TableHeader>
+                <TableBody>
+                  {filteredFiles.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={9}
+                        className="text-center py-8 text-gray-500"
+                      >
+                        {musicFiles.length === 0
+                          ? 'No music files found. Upload files via the competitor dashboard.'
+                          : 'No files match the current filters.'}
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
+                  ) : (
+                    filteredFiles.map((file) => (
+                      <TableRow
+                        key={file.$id}
+                        className="hover:bg-purple-50/50"
+                      >
+                        <TableCell className="text-center">
+                          <input
+                            type="checkbox"
+                            className="h-4 w-4 rounded border-gray-300"
+                            checked={selectedFileIds.includes(file.$id)}
+                            onChange={() => toggleFileSelection(file.$id)}
+                          />
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="font-medium">{file.fileName}</span>
+                            <span
+                              className="text-xs text-gray-500 truncate max-w-40"
+                              title={file.originalName}
+                            >
+                              {file.originalName}
+                            </span>
+                            <span className="text-xs text-gray-400">
+                              {formatFileSize(file.size || 0)}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span>{file.competitionName}</span>
+                            <span className="text-xs text-gray-500">
+                              {file.competitionYear}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <span>{file.gradeType}</span>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span>{file.gradeCategory}</span>
+                            <span className="text-xs text-gray-500">
+                              {file.gradeSegment}
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>{file.userName}</TableCell>
+                        <TableCell>
+                          {file.duration ? `${file.duration}s` : 'N/A'}
+                        </TableCell>
+                        <TableCell>
+                          <div className="whitespace-nowrap">
+                            {file.uploadedAt
+                              ? formatDate(file.uploadedAt)
+                              : 'N/A'}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() =>
+                                handleDownload(file.fileId, file.originalName)
+                              }
+                              className="h-8 w-8 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                              title="Download file"
+                            >
+                              <Download size={16} />
+                            </Button>
 
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                  title="Delete file"
+                                >
+                                  <Trash2 size={16} />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>
+                                    Confirm deletion
+                                  </AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete this file?
+                                    This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    className="bg-red-600 hover:bg-red-700"
+                                    onClick={() =>
+                                      handleDelete(file.fileId, file.$id)
+                                    }
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       {/* Hidden anchor element for downloads */}
       <a ref={downloadLinkRef} style={{ display: 'none' }} />
     </div>

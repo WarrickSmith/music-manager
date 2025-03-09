@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import LoadingOverlay from '@/components/ui/loading-overlay'
+import LocalLoadingCard from '@/components/ui/local-loading-card'
 import { toast } from 'sonner'
 import {
   Dialog,
@@ -150,17 +150,10 @@ export default function AdminProfileManagement() {
 
   if (isLoading) {
     return (
-      <Card className="max-w-2xl mx-auto">
-        <CardHeader>
-          <CardTitle>Admin Profile</CardTitle>
-          <CardDescription>
-            View and manage your personal information
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="min-h-[300px] relative">
-          <LoadingOverlay message="Loading profile information..." />
-        </CardContent>
-      </Card>
+      <LocalLoadingCard
+        message="Loading profile information..."
+        minHeight="400px"
+      />
     )
   }
 

@@ -33,7 +33,7 @@ import {
   updateUserStatus,
   deleteUser,
 } from '@/app/actions/user-actions'
-import LoadingOverlay from '@/components/ui/loading-overlay'
+import LocalLoadingCard from '@/components/ui/local-loading-card'
 
 // Define interface for user object
 interface User {
@@ -158,7 +158,7 @@ export default function UserManagement() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <LoadingOverlay message="Loading users..." />
+            <LocalLoadingCard message="Loading users..." minHeight="300px" />
           ) : (
             <Table>
               <TableHeader>
