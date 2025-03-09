@@ -251,6 +251,16 @@ export async function updateUserProfile({
       lastName,
     })
 
+    // Update the user's full name in the Appwrite authentication system
+    // This ensures that name changes in profile are reflected in the auth system
+    const fullName = `${firstName} ${lastName}`.trim()
+    try {
+      await users.updateName(userId, fullName)
+    } catch (nameUpdateError) {
+      console.error('Error updating user name:', nameUpdateError)
+      // Continue with other updates even if this fails
+    }
+
     // Update phone number using the dedicated method
     if (phone) {
       try {
@@ -348,6 +358,21 @@ export async function updateCompetitorProfile(
     }
 
     if (data.prefs) {
+      // If prefs contains firstName and lastName, also update the full name
+      const prefs = data.prefs as { firstName?: string; lastName?: string }
+      if (prefs.firstName !== undefined || prefs.lastName !== undefined) {
+        // Get current preferences to combine with new values
+        const currentPrefs = await users.getPrefs(userId)
+        const firstName = prefs.firstName ?? currentPrefs.firstName ?? ''
+        const lastName = prefs.lastName ?? currentPrefs.lastName ?? ''
+
+        // Update the full name in the auth system
+        if (firstName || lastName) {
+          const fullName = `${firstName} ${lastName}`.trim()
+          updates.push(users.updateName(userId, fullName))
+        }
+      }
+
       updates.push(users.updatePrefs(userId, data.prefs))
     }
 
