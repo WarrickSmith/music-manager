@@ -176,7 +176,7 @@ export default function UserManagement() {
                     Role
                   </TableHead>
                   <TableHead className="text-blue-500 font-medium">
-                    Status
+                    Enabled
                   </TableHead>
                   <TableHead className="text-blue-500 font-medium text-right">
                     Actions
