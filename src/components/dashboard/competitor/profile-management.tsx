@@ -272,6 +272,12 @@ export default function ProfileManagement({
         ) : (
           <>
             <CardContent className="space-y-6 pt-6">
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-medium text-slate-500">Role</p>
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                  Competitor
+                </span>
+              </div>
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-1">
                   <p className="text-sm font-medium text-slate-500">
@@ -291,31 +297,22 @@ export default function ProfileManagement({
                   </p>
                 </div>
               </div>
-
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-slate-500">
-                  Phone Number
-                </p>
-                <p className="text-lg font-medium text-violet-700">
-                  {profile?.phone || 'Not set'}
-                </p>
-              </div>
-
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-slate-500">
-                  Email Address
-                </p>
-                <p className="text-lg font-medium text-violet-700">
-                  {profile?.email || 'Not available'}
-                </p>
-              </div>
-
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-slate-500">Role</p>
-                <div className="flex items-center">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                    Competitor
-                  </span>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-slate-500">
+                    Phone Number
+                  </p>
+                  <p className="text-lg font-medium text-violet-700">
+                    {profile?.phone || 'Not set'}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-slate-500">
+                    Email Address
+                  </p>
+                  <p className="text-lg font-medium text-violet-700">
+                    {profile?.email || 'Not available'}
+                  </p>
                 </div>
               </div>
             </CardContent>

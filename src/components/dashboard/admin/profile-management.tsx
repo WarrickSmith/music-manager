@@ -12,7 +12,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import LoadingOverlay from '@/components/ui/loading-overlay'
+import LocalLoadingCard from '@/components/ui/local-loading-card'
 import { toast } from 'sonner'
 import {
   Dialog,
@@ -150,17 +150,10 @@ export default function AdminProfileManagement() {
 
   if (isLoading) {
     return (
-      <Card className="max-w-2xl mx-auto">
-        <CardHeader>
-          <CardTitle>Admin Profile</CardTitle>
-          <CardDescription>
-            View and manage your personal information
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="min-h-[300px] relative">
-          <LoadingOverlay message="Loading profile information..." />
-        </CardContent>
-      </Card>
+      <LocalLoadingCard
+        message="Loading profile information..."
+        minHeight="400px"
+      />
     )
   }
 
@@ -267,6 +260,12 @@ export default function AdminProfileManagement() {
         ) : (
           <>
             <CardContent className="space-y-6 pt-6">
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-medium text-slate-500">Role</p>
+                <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-violet-100 text-violet-800">
+                  Administrator
+                </span>
+              </div>
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-1">
                   <p className="text-sm font-medium text-slate-500">
@@ -276,7 +275,6 @@ export default function AdminProfileManagement() {
                     {profile?.firstName || 'Not set'}
                   </p>
                 </div>
-
                 <div className="space-y-1">
                   <p className="text-sm font-medium text-slate-500">
                     Last Name
@@ -286,35 +284,25 @@ export default function AdminProfileManagement() {
                   </p>
                 </div>
               </div>
-
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-slate-500">
-                  Phone Number
-                </p>
-                <p className="text-lg font-medium text-violet-700">
-                  {profile?.phone || 'Not set'}
-                </p>
-              </div>
-
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-slate-500">
-                  Email Address
-                </p>
-                <p className="text-lg font-medium text-violet-700">
-                  {profile?.email || 'Not available'}
-                </p>
-              </div>
-
-              <div className="space-y-1">
-                <p className="text-sm font-medium text-slate-500">Role</p>
-                <div className="flex items-center">
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-violet-100 text-violet-800">
-                    Administrator
-                  </span>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-slate-500">
+                    Phone Number
+                  </p>
+                  <p className="text-lg font-medium text-violet-700">
+                    {profile?.phone || 'Not set'}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-slate-500">
+                    Email Address
+                  </p>
+                  <p className="text-lg font-medium text-violet-700">
+                    {profile?.email || 'Not available'}
+                  </p>
                 </div>
               </div>
             </CardContent>
-
             <CardFooter className="flex justify-end space-x-2 border-t border-violet-100 bg-violet-50/50 py-4">
               <Button
                 variant="outline"

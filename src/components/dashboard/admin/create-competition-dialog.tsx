@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { toast } from 'sonner'
+import { RefreshCw } from 'lucide-react'
 import { createCompetition } from '@/app/actions/competition-actions'
 
 interface Competition {
@@ -219,9 +220,16 @@ export default function CreateCompetitionDialog({
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="bg-indigo-500 hover:bg-indigo-600 text-white"
+              className="bg-indigo-500 hover:bg-indigo-600 text-white flex items-center gap-2"
             >
-              {isSubmitting ? 'Creating...' : 'Create Competition'}
+              {isSubmitting ? (
+                <>
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                  <span>Creating</span>
+                </>
+              ) : (
+                'Create Competition'
+              )}
             </Button>
           </div>
         </form>

@@ -78,24 +78,22 @@ export default function CompetitionCard({
       `}
       onClick={onSelect}
     >
-      <CardContent className="p-3">
+      <CardContent className="p-3 space-y-2">
+        <h3 className="font-medium text-indigo-700 text-lg">
+          {competition.name}
+        </h3>
         <div className="flex justify-between items-center">
-          <div>
-            <h3 className="font-medium text-indigo-700">{competition.name}</h3>
-            <div className="flex items-center mt-1 gap-2">
-              <Badge
-                variant={competition.active ? 'default' : 'outline'}
-                className={
-                  competition.active
-                    ? 'bg-green-500 hover:bg-green-600 text-white'
-                    : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-yellow-300'
-                }
-              >
-                {competition.active ? 'Active' : 'Inactive'}
-              </Badge>
-            </div>
-          </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-3">
+            <Badge
+              variant={competition.active ? 'default' : 'outline'}
+              className={
+                competition.active
+                  ? 'bg-green-500 hover:bg-green-600 text-white'
+                  : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-yellow-300'
+              }
+            >
+              {competition.active ? 'Active' : 'Inactive'}
+            </Badge>
             <Switch
               checked={competition.active}
               onCheckedChange={handleStatusChange}
@@ -107,39 +105,38 @@ export default function CompetitionCard({
                 competition.active ? 'active' : 'inactive'
               }`}
             />
-
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                  onClick={(e: React.MouseEvent) => e.stopPropagation()}
-                >
-                  <Trash className="h-4 w-4" />
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete Competition</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to delete &quot;{competition.name}
-                    &quot;? This action cannot be undone and will also delete
-                    all associated grades.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    className="bg-destructive text-white font-medium hover:bg-red-600"
-                    onClick={handleDeleteCompetition}
-                  >
-                    Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
           </div>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                onClick={(e: React.MouseEvent) => e.stopPropagation()}
+              >
+                <Trash className="h-4 w-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete Competition</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete &quot;{competition.name}
+                  &quot;? This action cannot be undone and will also delete all
+                  associated grades.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  className="bg-destructive text-white font-medium hover:bg-red-600"
+                  onClick={handleDeleteCompetition}
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </CardContent>
     </Card>
