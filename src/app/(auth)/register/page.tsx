@@ -75,7 +75,7 @@ export default function RegisterPage() {
 
       if (result.success) {
         showToast.success(result.message || 'Registration successful!')
-        
+
         if (result.redirectTo) {
           // Set redirecting state to true to maintain the loading overlay
           setIsRedirecting(true)
@@ -92,7 +92,7 @@ export default function RegisterPage() {
       console.error('Registration error:', error)
       showToast.error('An unexpected error occurred')
     }
-    
+
     // Only set loading to false if we didn't redirect
     setLoading(false)
   }
@@ -105,8 +105,12 @@ export default function RegisterPage() {
     <div className="container max-w-md mx-auto p-6 space-y-8">
       {/* Show loading overlay during both loading and redirecting states */}
       {(loading || isRedirecting) && (
-        <LoadingOverlay 
-          message={isRedirecting ? "Registration complete..." : "Creating your account..."}
+        <LoadingOverlay
+          message={
+            isRedirecting
+              ? 'Registration complete...'
+              : 'Creating your account...'
+          }
         />
       )}
 

@@ -48,7 +48,7 @@ export default function LoginPage() {
       if (result.success) {
         // Show toast but keep the loading spinner active
         showToast.login('Logged in successfully')
-        
+
         if (result.redirectTo) {
           // Set redirecting state to true to maintain the loading overlay
           setIsRedirecting(true)
@@ -65,7 +65,7 @@ export default function LoginPage() {
       console.error('Login error:', error)
       showToast.error('An unexpected error occurred')
     }
-    
+
     // Only set loading to false if we didn't redirect
     // (if there was an error or no redirect path)
     setLoading(false)
@@ -84,8 +84,10 @@ export default function LoginPage() {
     <div className="container max-w-md mx-auto p-6 space-y-8">
       {/* Show loading overlay during both loading and redirecting states */}
       {(loading || isRedirecting) && (
-        <LoadingOverlay 
-          message={isRedirecting ? "Taking you to your dashboard..." : "Signing in..."}
+        <LoadingOverlay
+          message={
+            isRedirecting ? 'Taking you to your dashboard...' : 'Signing in...'
+          }
         />
       )}
 
