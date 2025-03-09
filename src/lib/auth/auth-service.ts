@@ -62,13 +62,18 @@ export async function getCurrentUser() {
       // Create a temporary Account instance for getting the current user
       const account = new Account(sessionClient)
 
-      // Try to get the current user, but catch any errors
+      // Try to verify the session is valid first
       try {
+        // We use getSession instead of get() as it's a more targeted check
+        // that verifies if the current session is valid
+        await account.getSession('current')
+
+        // Only if the session check passes, we try to get the full account
         return await account.get()
-      } catch (accountError) {
-        // If we can't get the account, the session is likely invalid
-        // Just log the error and return null, don't try to delete cookies
-        console.error('Account error:', accountError)
+      } catch (sessionVerifyError) {
+        console.log('Invalid or expired session:', sessionVerifyError)
+        // Don't try to delete the cookie here - it can only be done in a Server Action
+        // The invalid session will be handled appropriately when users try to access protected routes
         return null
       }
     } catch (sessionError) {
