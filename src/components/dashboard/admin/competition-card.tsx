@@ -9,7 +9,7 @@ import {
   deleteCompetition,
 } from '@/app/actions/competition-actions'
 import { toast } from 'sonner'
-import { Trash } from 'lucide-react'
+import { Trash, Loader2 } from 'lucide-react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,6 +31,9 @@ interface CompetitionCardProps {
   }
   isSelected: boolean
   onSelect: () => void
+  isDeleting?: boolean
+  onDeleteStart?: () => void
+  onDeleteSuccess?: (competitionId: string) => void
   onUpdate?: () => void // Optional callback to notify parent when competition is updated
 }
 
@@ -38,10 +41,17 @@ export default function CompetitionCard({
   competition: initialCompetition,
   isSelected,
   onSelect,
+  isDeleting = false,
+  onDeleteStart,
+  onDeleteSuccess,
   onUpdate,
 }: CompetitionCardProps) {
   // Use local state to track competition data, allowing for UI updates without refetching
   const [competition, setCompetition] = useState(initialCompetition)
+  const [internalDeleting, setInternalDeleting] = useState(false)
+
+  // Combine external and internal deleting states
+  const showDeleteSpinner = isDeleting || internalDeleting
 
   const handleStatusChange = async (checked: boolean) => {
     try {
@@ -60,12 +70,42 @@ export default function CompetitionCard({
 
   const handleDeleteCompetition = async () => {
     try {
+      // Notify parent component that deletion is starting
+      if (onDeleteStart) {
+        onDeleteStart()
+      }
+
+      // Set internal deleting state as a fallback
+      setInternalDeleting(true)
+
+      // Delete the competition
       await deleteCompetition(competition.$id)
+
       toast.success('Competition and associated grades deleted successfully')
-      if (onUpdate) onUpdate() // Notify parent to refresh competition list
+
+      // Call the onDeleteSuccess callback with the competition ID
+      if (onDeleteSuccess) {
+        onDeleteSuccess(competition.$id)
+      }
     } catch (error) {
       toast.error(`Failed to delete competition: ${(error as Error).message}`)
+      // Reset deleting state if there was an error
+      setInternalDeleting(false)
     }
+  }
+
+  // If the competition is being deleted, show a spinner instead of the card
+  if (showDeleteSpinner) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[100px] bg-indigo-50 rounded-lg border border-indigo-100 animate-pulse">
+        <div className="flex flex-col items-center space-y-3">
+          <Loader2 className="h-8 w-8 text-indigo-500 animate-spin" />
+          <span className="text-sm text-indigo-500 font-medium">
+            Deleting...
+          </span>
+        </div>
+      </div>
+    )
   }
 
   return (
