@@ -155,7 +155,9 @@ export default function ProfileManagement({
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold mb-4 text-violet-500">My Profile</h2>
+      <h2 className="text-2xl font-semibold mb-4 text-violet-500">
+        My Profile
+      </h2>
 
       <Card className="max-w-2xl mx-auto border-violet-100 shadow-sm">
         {isLoading ? (
@@ -219,8 +221,8 @@ export default function ProfileManagement({
                       disabled={isSubmitting}
                     />
                     <p className="text-sm text-slate-500 mt-1">
-                      Must start with + followed by country code and number (max 15
-                      digits)
+                      Must start with + followed by country code and number (max
+                      15 digits)
                     </p>
                   </div>
 

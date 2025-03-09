@@ -26,7 +26,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import LocalLoadingCard from '@/components/ui/local-loading-card'
 import { ProgressIndicator } from '@/components/ui/progress-indicator'
 import {
   getActiveCompetitions,
@@ -91,7 +90,6 @@ export default function UploadMusic({ userId }: { userId: string }) {
   const [categories, setCategories] = useState<string[]>([])
   const [grades, setGrades] = useState<Grade[]>([])
   const [userName, setUserName] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [fileDuration, setFileDuration] = useState<number | null>(null)
   const [extractingMetadata, setExtractingMetadata] = useState(false)
@@ -159,12 +157,17 @@ export default function UploadMusic({ userId }: { userId: string }) {
 
     fetchData()
   }, [userId])
+
+  // Fetch categories when competition changes
+  useEffect(() => {
+    const fetchCategories = async () => {
+      if (!competitionId) {
         setCategories([])
         return
       }
 
       try {
-        setIsLoading(true)
+        setIsLoadingCategories(true)
         const categoriesData = await getGradeCategoriesForCompetition(
           competitionId
         )
@@ -175,7 +178,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
         toast.error('Failed to load categories')
         console.error(error)
       } finally {
-        setIsLoading(false)
+        setIsLoadingCategories(false)
       }
     }
 
@@ -191,7 +194,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
       }
 
       try {
-        setIsLoading(true)
+        setIsLoadingGrades(true)
         const gradesData = await getGradesForCompetition(
           competitionId,
           category
@@ -202,7 +205,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
         toast.error('Failed to load grades')
         console.error(error)
       } finally {
-        setIsLoading(false)
+        setIsLoadingGrades(false)
       }
     }
 
@@ -287,8 +290,6 @@ export default function UploadMusic({ userId }: { userId: string }) {
       </h2>
 
       <Card className="p-6 relative">
-        {isLoading && <LocalLoadingCard message="Loading competitions..." minHeight="200px" />}
-
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Competition Selection */}
@@ -297,10 +298,12 @@ export default function UploadMusic({ userId }: { userId: string }) {
               name="competitionId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-emerald-500">Competition</FormLabel>
+                  <FormLabel className="text-emerald-500">
+                    Competition
+                  </FormLabel>
                   <div className="relative">
                     <Select
-                      disabled={isLoading || status !== 'idle' || competitions.length === 0}
+                      disabled={status !== 'idle' || competitions.length === 0}
                       onValueChange={(value) => {
                         field.onChange(value)
                         form.trigger('competitionId')
@@ -314,13 +317,16 @@ export default function UploadMusic({ userId }: { userId: string }) {
                       </FormControl>
                       <SelectContent>
                         {competitions.map((competition) => (
-                          <SelectItem key={competition.$id} value={competition.$id}>
+                          <SelectItem
+                            key={competition.$id}
+                            value={competition.$id}
+                          >
                             {competition.year} - {competition.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                    {isLoading && competitions.length === 0 && (
+                    {isLoadingCompetitions && (
                       <div className="absolute inset-0 flex items-center justify-center bg-white/80">
                         <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
                       </div>
@@ -343,7 +349,11 @@ export default function UploadMusic({ userId }: { userId: string }) {
                   <FormLabel className="text-emerald-500">Category</FormLabel>
                   <div className="relative">
                     <Select
-                      disabled={isLoading || status !== 'idle' || !competitionId || categories.length === 0}
+                      disabled={
+                        status !== 'idle' ||
+                        !competitionId ||
+                        categories.length === 0
+                      }
                       onValueChange={(value) => {
                         field.onChange(value)
                         form.trigger('category')
@@ -363,7 +373,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
                         ))}
                       </SelectContent>
                     </Select>
-                    {isLoading && competitionId && categories.length === 0 && (
+                    {isLoadingCategories && (
                       <div className="absolute inset-0 flex items-center justify-center bg-white/80">
                         <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
                       </div>
@@ -383,7 +393,9 @@ export default function UploadMusic({ userId }: { userId: string }) {
                   <FormLabel className="text-emerald-500">Grade</FormLabel>
                   <div className="relative">
                     <Select
-                      disabled={isLoading || status !== 'idle' || !category || grades.length === 0}
+                      disabled={
+                        status !== 'idle' || !category || grades.length === 0
+                      }
                       onValueChange={(value) => {
                         field.onChange(value)
                         form.trigger('gradeId')
@@ -403,7 +415,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
                         ))}
                       </SelectContent>
                     </Select>
-                    {isLoading && category && grades.length === 0 && (
+                    {isLoadingGrades && (
                       <div className="absolute inset-0 flex items-center justify-center bg-white/80">
                         <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
                       </div>
@@ -568,7 +580,6 @@ export default function UploadMusic({ userId }: { userId: string }) {
               <Button
                 type="submit"
                 disabled={
-                  isLoading ||
                   status !== 'idle' ||
                   // Only check if the form has been submitted before using isValid
                   (form.formState.submitCount > 0 && !form.formState.isValid) ||

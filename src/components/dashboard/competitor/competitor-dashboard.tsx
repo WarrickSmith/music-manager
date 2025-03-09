@@ -53,7 +53,14 @@ export default function CompetitorDashboard({
 
         <TabsContent value="my-files" className="mt-6">
           <div className="rounded-lg border border-sky-100 bg-white p-6 shadow-sm">
-            <Suspense fallback={<LocalLoadingCard message="Loading files..." minHeight="200px" />}>
+            <Suspense
+              fallback={
+                <LocalLoadingCard
+                  message="Loading files..."
+                  minHeight="200px"
+                />
+              }
+            >
               <MyFiles userId={userId} />
             </Suspense>
           </div>
@@ -61,7 +68,14 @@ export default function CompetitorDashboard({
 
         <TabsContent value="upload" className="mt-6">
           <div className="rounded-lg border border-emerald-100 bg-white p-6 shadow-sm">
-            <Suspense fallback={<LocalLoadingCard message="Loading upload form..." minHeight="200px" />}>
+            <Suspense
+              fallback={
+                <LocalLoadingCard
+                  message="Loading upload form..."
+                  minHeight="200px"
+                />
+              }
+            >
               <UploadMusic userId={userId} />
             </Suspense>
           </div>
@@ -69,7 +83,14 @@ export default function CompetitorDashboard({
 
         <TabsContent value="profile" className="mt-6">
           <div className="rounded-lg border border-violet-100 bg-white p-6 shadow-sm">
-            <Suspense fallback={<LocalLoadingCard message="Loading profile..." minHeight="200px" />}>
+            <Suspense
+              fallback={
+                <LocalLoadingCard
+                  message="Loading profile..."
+                  minHeight="200px"
+                />
+              }
+            >
               <ProfileManagement userId={userId} />
             </Suspense>
           </div>

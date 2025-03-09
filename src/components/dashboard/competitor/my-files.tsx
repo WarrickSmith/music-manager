@@ -110,7 +110,12 @@ export default function MyFiles({ userId }: { userId: string }) {
   }
 
   if (isLoading) {
-    return <LocalLoadingCard message="Loading your music files..." minHeight="200px" />
+    return (
+      <LocalLoadingCard
+        message="Loading your music files..."
+        minHeight="200px"
+      />
+    )
   }
 
   if (files.length === 0) {
