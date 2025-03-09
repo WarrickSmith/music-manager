@@ -35,19 +35,48 @@ type MusicFile = {
 export default function MyFiles({ userId }: { userId: string }) {
   const [files, setFiles] = useState<MusicFile[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const [isRefreshing, setIsRefreshing] = useState(false) // Separate state for refresh operations
   const [selectedYear, setSelectedYear] = useState<string>('all')
   const [selectedCompetition, setSelectedCompetition] = useState<string>('all')
+  // Track files being deleted to avoid full refresh
+  const [deletingFileIds, setDeletingFileIds] = useState<string[]>([])
+
+  // Function to mark a file as being deleted
+  const handleFileDeleting = (fileId: string) => {
+    setDeletingFileIds((prev) => [...prev, fileId])
+  }
 
   // Function to trigger a refresh when a file is deleted
-  const handleFileDeleted = () => {
-    setRefreshTrigger((prev) => prev + 1)
+  const handleFileDeleted = (fileId: string) => {
+    // Use optimistic UI update - remove the file from the local state immediately
+    setFiles((prev) => prev.filter((file) => file.$id !== fileId))
+    // Remove from deleting list
+    setDeletingFileIds((prev) => prev.filter((id) => id !== fileId))
+    // Also trigger a background refresh to ensure data consistency
+    refreshFilesInBackground()
+  }
+
+  // Function to refresh files without showing loading state
+  const refreshFilesInBackground = async () => {
+    try {
+      setIsRefreshing(true)
+      const userFiles = await getUserMusicFiles(userId)
+      setFiles(userFiles as unknown as MusicFile[])
+    } catch (error) {
+      console.error('Background refresh error:', error)
+      // Don't show error toast during background refresh
+    } finally {
+      setIsRefreshing(false)
+    }
   }
 
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        setIsLoading(true)
+        // Only show loading indicator on initial load, not refreshes
+        if (!isRefreshing) {
+          setIsLoading(true)
+        }
         const userFiles = await getUserMusicFiles(userId)
         setFiles(userFiles as unknown as MusicFile[])
       } catch (error) {
@@ -59,7 +88,7 @@ export default function MyFiles({ userId }: { userId: string }) {
     }
 
     fetchFiles()
-  }, [userId, refreshTrigger]) // Added refreshTrigger to dependencies to reload when triggered
+  }, [userId, isRefreshing]) // Updated dependencies
 
   // Extract all unique years and competitions
   const uniqueYears = Array.from(
@@ -253,7 +282,9 @@ export default function MyFiles({ userId }: { userId: string }) {
                     storagePath: file.storagePath,
                     duration: file.duration,
                   }}
-                  onDeleteSuccess={handleFileDeleted}
+                  isDeleting={deletingFileIds.includes(file.$id)}
+                  onDeleteStart={() => handleFileDeleting(file.$id)}
+                  onDeleteSuccess={() => handleFileDeleted(file.$id)}
                 />
               ))}
             </div>
