@@ -267,7 +267,24 @@ export async function updateUserProfile({
           )
         }
 
-        await users.updatePhone(userId, formattedPhone)
+        // Get current user to check if phone number actually changed
+        const currentUser = await users.get(userId)
+
+        // Only update phone if it's different from current phone
+        if (currentUser.phone !== formattedPhone) {
+          try {
+            await users.updatePhone(userId, formattedPhone)
+          } catch (phoneUpdateError: any) {
+            // Check if this is a conflict error (409)
+            if (phoneUpdateError?.code === 409) {
+              throw new Error(
+                'This phone number is already associated with another account'
+              )
+            }
+            // Rethrow other errors
+            throw phoneUpdateError
+          }
+        }
       } catch (phoneError) {
         console.error('Error updating phone:', phoneError)
         // Throw the error to show the toast message
@@ -280,6 +297,7 @@ export async function updateUserProfile({
     }
 
     revalidatePath('/admin/dashboard')
+    revalidatePath('/dashboard') // Also revalidate the competitor dashboard path
     return true
   } catch (error) {
     console.error('Error updating user profile:', error)
