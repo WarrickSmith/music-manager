@@ -83,6 +83,9 @@ export default function MusicFileManagement() {
   const [selectedFileIds, setSelectedFileIds] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState('')
 
+  // Track if this is initial load to avoid showing toast
+  const isInitialLoad = useRef(true)
+
   // Bulk download state
   const [downloadProgress, setDownloadProgress] = useState(0)
   const [currentFileIndex, setCurrentFileIndex] = useState(0)
@@ -109,7 +112,7 @@ export default function MusicFileManagement() {
   const downloadLinkRef = useRef<HTMLAnchorElement | null>(null)
 
   // Fetch all music files
-  const fetchMusicFiles = async () => {
+  const fetchMusicFiles = async (showSuccessToast = false) => {
     try {
       setIsLoading(true)
       const files = await getAllMusicFiles()
@@ -149,17 +152,23 @@ export default function MusicFileManagement() {
       setSegments(uniqueSegments.sort())
       setCompetitors(uniqueCompetitors.sort())
 
-      toast.success('Music files loaded successfully')
+      // Only show success toast if explicitly requested (i.e., not on initial load)
+      if (showSuccessToast) {
+        toast.success('Music files loaded successfully')
+      }
     } catch (error) {
       console.error('Error fetching music files:', error)
       toast.error('Failed to load music files')
     } finally {
       setIsLoading(false)
+      // Initial load is complete
+      isInitialLoad.current = false
     }
   }
 
   useEffect(() => {
-    fetchMusicFiles()
+    // Initial load, don't show success toast
+    fetchMusicFiles(false)
   }, [])
 
   // Apply filters and search
@@ -381,7 +390,7 @@ export default function MusicFileManagement() {
         <div className="flex space-x-2">
           <Button
             variant="outline"
-            onClick={() => fetchMusicFiles()}
+            onClick={() => fetchMusicFiles(true)} // Show success toast on manual refresh
             className="flex items-center gap-1 border-purple-200 hover:bg-purple-50"
           >
             <RefreshCw size={16} />
