@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
@@ -24,43 +24,99 @@ export default function CompetitionManagement() {
     useState<Competition | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
+  // Track IDs of competitions being deleted for optimistic UI updates
+  const [deletingCompetitionIds, setDeletingCompetitionIds] = useState<
+    Set<string>
+  >(new Set())
 
-  useEffect(() => {
-    loadCompetitions()
-  }, [])
-
-  const loadCompetitions = async () => {
+  // Memoize loadCompetitions without selectedCompetition dependency
+  const loadCompetitions = useCallback(async () => {
     setIsLoading(true)
     try {
       const data = await getCompetitions()
       setCompetitions(data as unknown as Competition[])
-
-      // If we have a selected competition, try to find it in the newly loaded data
-      if (selectedCompetition) {
-        const updatedCompetition = data.find(
-          (comp) => comp.$id === selectedCompetition.$id
-        ) as unknown as Competition | undefined
-
-        // Update the selected competition with the latest data if found
-        if (updatedCompetition) {
-          setSelectedCompetition(updatedCompetition)
-        }
-        // If the competition was deleted, select the first one if available
-        else if (data.length > 0) {
-          setSelectedCompetition(data[0] as unknown as Competition)
-        } else {
-          setSelectedCompetition(null)
-        }
-      }
-      // For initial load, select the first competition if available
-      else if (data.length > 0 && !selectedCompetition) {
-        setSelectedCompetition(data[0] as unknown as Competition)
-      }
     } catch (error) {
       toast.error(`Failed to load competitions: ${(error as Error).message}`)
     } finally {
       setIsLoading(false)
     }
+  }, []) // No dependencies needed
+
+  // Separate effect to handle selection updates when competitions change
+  useEffect(() => {
+    if (selectedCompetition) {
+      // Try to find the current selection in the updated competitions
+      const updatedCompetition = competitions.find(
+        (comp) => comp.$id === selectedCompetition.$id
+      )
+
+      if (updatedCompetition) {
+        // Update selected competition with latest data
+        setSelectedCompetition(updatedCompetition)
+      } else if (competitions.length > 0) {
+        // If not found, select the first available competition
+        setSelectedCompetition(competitions[0])
+      } else {
+        // If no competitions available, clear selection
+        setSelectedCompetition(null)
+      }
+    } else if (competitions.length > 0 && !selectedCompetition) {
+      // For initial load, select the first competition if available
+      setSelectedCompetition(competitions[0])
+    }
+  }, [competitions, selectedCompetition])
+
+  // Load competitions on mount
+  useEffect(() => {
+    loadCompetitions()
+  }, [loadCompetitions])
+
+  // Handle starting the deletion process - for optimistic UI
+  const handleDeleteStart = (competitionId: string) => {
+    setDeletingCompetitionIds((prev) => {
+      const newSet = new Set(prev)
+      newSet.add(competitionId)
+      return newSet
+    })
+
+    // If the competition being deleted is selected, show loading state in grades panel
+    if (selectedCompetition && selectedCompetition.$id === competitionId) {
+      // We keep the selected competition, but the grades panel will show its own loading state
+    }
+  }
+
+  // Handle successful deletion - remove from local state
+  const handleDeleteSuccess = (competitionId: string) => {
+    // Update local state optimistically
+    setCompetitions((prevCompetitions) =>
+      prevCompetitions.filter((c) => c.$id !== competitionId)
+    )
+
+    // If the deleted competition was selected, select another one
+    if (selectedCompetition && selectedCompetition.$id === competitionId) {
+      // Find the next competition to select
+      const remainingCompetitions = competitions.filter(
+        (c) => c.$id !== competitionId && !deletingCompetitionIds.has(c.$id)
+      )
+
+      if (remainingCompetitions.length > 0) {
+        setSelectedCompetition(remainingCompetitions[0])
+      } else {
+        setSelectedCompetition(null)
+      }
+    }
+
+    // Remove from the deleting set
+    setDeletingCompetitionIds((prev) => {
+      const newSet = new Set(prev)
+      newSet.delete(competitionId)
+      return newSet
+    })
+  }
+
+  // Check if a competition is being deleted
+  const isCompetitionDeleting = (competitionId: string) => {
+    return deletingCompetitionIds.has(competitionId)
   }
 
   return (
@@ -95,6 +151,9 @@ export default function CompetitionManagement() {
                   selectedCompetition={selectedCompetition}
                   onSelectCompetition={setSelectedCompetition}
                   onCompetitionUpdate={loadCompetitions}
+                  isCompetitionDeleting={isCompetitionDeleting}
+                  onDeleteStart={handleDeleteStart}
+                  onDeleteSuccess={handleDeleteSuccess}
                 />
               )}
             </CardContent>
@@ -118,6 +177,10 @@ export default function CompetitionManagement() {
           <GradeManagement
             competition={selectedCompetition}
             onCompetitionUpdate={loadCompetitions}
+            isCompetitionDeleting={
+              selectedCompetition &&
+              deletingCompetitionIds.has(selectedCompetition.$id)
+            }
           />
         ) : (
           <Card className="border-indigo-100">

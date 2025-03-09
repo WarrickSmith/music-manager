@@ -21,7 +21,11 @@ interface CompetitionListProps {
   competitions: Competition[]
   selectedCompetition: Competition | null
   onSelectCompetition: (competition: Competition) => void
-  onCompetitionUpdate?: () => void // Add this to allow refreshing from parent
+  onCompetitionUpdate?: () => void
+  // New props for optimistic UI
+  isCompetitionDeleting: (id: string) => boolean
+  onDeleteStart: (id: string) => void
+  onDeleteSuccess: (id: string) => void
 }
 
 export default function CompetitionList({
@@ -29,6 +33,9 @@ export default function CompetitionList({
   selectedCompetition,
   onSelectCompetition,
   onCompetitionUpdate,
+  isCompetitionDeleting,
+  onDeleteStart,
+  onDeleteSuccess,
 }: CompetitionListProps) {
   // Get unique years from competitions
   const uniqueYears = useMemo(() => {
@@ -123,6 +130,10 @@ export default function CompetitionList({
                       isSelected={selectedCompetition?.$id === competition.$id}
                       onSelect={() => onSelectCompetition(competition)}
                       onUpdate={onCompetitionUpdate}
+                      // New props for optimistic UI
+                      isDeleting={isCompetitionDeleting(competition.$id)}
+                      onDeleteStart={() => onDeleteStart(competition.$id)}
+                      onDeleteSuccess={() => onDeleteSuccess(competition.$id)}
                     />
                   ))}
                 </div>

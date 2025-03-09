@@ -59,6 +59,7 @@ interface Grade {
 interface GradeManagementProps {
   competition: Competition
   onCompetitionUpdate: () => void
+  isCompetitionDeleting?: boolean
 }
 
 interface EditableGrade {
@@ -72,6 +73,7 @@ interface EditableGrade {
 export default function GradeManagement({
   competition,
   onCompetitionUpdate,
+  isCompetitionDeleting = false,
 }: GradeManagementProps) {
   const [grades, setGrades] = useState<Grade[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -205,6 +207,22 @@ export default function GradeManagement({
       })
   }, [grades, selectedNameFilter])
 
+  // If the competition is being deleted, show a loading state
+  if (isCompetitionDeleting) {
+    return (
+      <Card className="border-indigo-100">
+        <CardContent className="p-6">
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+            <p className="text-indigo-600 font-medium">
+              Deleting competition and associated grades...
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <>
       <Card className="border-indigo-100">
@@ -223,7 +241,7 @@ export default function GradeManagement({
           <Button
             onClick={() => handleStartEditing(null)}
             className="bg-indigo-500 hover:bg-indigo-600"
-            disabled={editingGradeId !== null}
+            disabled={editingGradeId !== null || isCompetitionDeleting}
           >
             <Plus className="h-4 w-4 mr-2" /> Add Grade
           </Button>
@@ -239,7 +257,7 @@ export default function GradeManagement({
             <Select
               value={selectedNameFilter}
               onValueChange={setSelectedNameFilter}
-              disabled={editingGradeId !== null}
+              disabled={editingGradeId !== null || isCompetitionDeleting}
             >
               <SelectTrigger
                 id="name-filter"
@@ -451,7 +469,9 @@ export default function GradeManagement({
                               size="icon"
                               onClick={() => handleStartEditing(grade)}
                               className="text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50"
-                              disabled={editingGradeId !== null}
+                              disabled={
+                                editingGradeId !== null || isCompetitionDeleting
+                              }
                             >
                               <Pencil className="h-4 w-4" />
                             </Button>
@@ -462,7 +482,10 @@ export default function GradeManagement({
                                   variant="ghost"
                                   size="icon"
                                   className="text-destructive"
-                                  disabled={editingGradeId !== null}
+                                  disabled={
+                                    editingGradeId !== null ||
+                                    isCompetitionDeleting
+                                  }
                                 >
                                   <Trash className="h-4 w-4" />
                                 </Button>

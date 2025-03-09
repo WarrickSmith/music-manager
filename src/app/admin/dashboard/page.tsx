@@ -45,35 +45,35 @@ export default async function AdminDashboardPage() {
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-400 data-[state=active]:text-white"
             >
               <Music className="h-4 w-4 mr-2" />
-              Music Files
+              Music
             </TabsTrigger>
             <TabsTrigger
               value="competitions"
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-indigo-400 data-[state=active]:text-white"
             >
               <Trophy className="h-4 w-4 mr-2" />
-              Competition & Grades
+              Competitions
             </TabsTrigger>
             <TabsTrigger
               value="users"
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-400 data-[state=active]:text-white"
             >
               <Users className="h-4 w-4 mr-2" />
-              User Management
+              Users
             </TabsTrigger>
             <TabsTrigger
               value="profile"
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500 data-[state=active]:to-violet-400 data-[state=active]:text-white"
             >
               <UserCog className="h-4 w-4 mr-2" />
-              Admin Profile
+              My Profile
             </TabsTrigger>
             <TabsTrigger
               value="appwrite"
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-green-400 data-[state=active]:text-white"
             >
               <Database className="h-4 w-4 mr-2" />
-              Appwrite Setup
+              Setup
             </TabsTrigger>
           </TabsList>
 

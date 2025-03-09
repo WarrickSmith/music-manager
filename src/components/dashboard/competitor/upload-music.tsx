@@ -26,7 +26,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import LoadingOverlay from '@/components/ui/loading-overlay'
 import { ProgressIndicator } from '@/components/ui/progress-indicator'
 import {
   getActiveCompetitions,
@@ -91,7 +90,6 @@ export default function UploadMusic({ userId }: { userId: string }) {
   const [categories, setCategories] = useState<string[]>([])
   const [grades, setGrades] = useState<Grade[]>([])
   const [userName, setUserName] = useState('')
-  const [isLoading, setIsLoading] = useState(true)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [fileDuration, setFileDuration] = useState<number | null>(null)
   const [extractingMetadata, setExtractingMetadata] = useState(false)
@@ -105,6 +103,11 @@ export default function UploadMusic({ userId }: { userId: string }) {
     setError,
     reset: resetProgress,
   } = useUploadProgress()
+
+  // Add separate loading states for each select component
+  const [isLoadingCompetitions, setIsLoadingCompetitions] = useState(true)
+  const [isLoadingCategories, setIsLoadingCategories] = useState(false)
+  const [isLoadingGrades, setIsLoadingGrades] = useState(false)
 
   // Initialize form with mode = 'onSubmit' to prevent initial validation
   const form = useForm<FormValues>({
@@ -136,7 +139,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setIsLoading(true)
+        setIsLoadingCompetitions(true)
         const [competitionsData, userProfile] = await Promise.all([
           getActiveCompetitions(),
           getUserProfile(userId),
@@ -145,10 +148,10 @@ export default function UploadMusic({ userId }: { userId: string }) {
         setCompetitions(competitionsData as Competition[])
         setUserName(userProfile.name)
       } catch (error) {
-        toast.error('Failed to load data')
+        toast.error('Failed to load competitions')
         console.error(error)
       } finally {
-        setIsLoading(false)
+        setIsLoadingCompetitions(false)
       }
     }
 
@@ -164,7 +167,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
       }
 
       try {
-        setIsLoading(true)
+        setIsLoadingCategories(true)
         const categoriesData = await getGradeCategoriesForCompetition(
           competitionId
         )
@@ -175,7 +178,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
         toast.error('Failed to load categories')
         console.error(error)
       } finally {
-        setIsLoading(false)
+        setIsLoadingCategories(false)
       }
     }
 
@@ -191,7 +194,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
       }
 
       try {
-        setIsLoading(true)
+        setIsLoadingGrades(true)
         const gradesData = await getGradesForCompetition(
           competitionId,
           category
@@ -202,7 +205,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
         toast.error('Failed to load grades')
         console.error(error)
       } finally {
-        setIsLoading(false)
+        setIsLoadingGrades(false)
       }
     }
 
@@ -287,8 +290,6 @@ export default function UploadMusic({ userId }: { userId: string }) {
       </h2>
 
       <Card className="p-6 relative">
-        {isLoading && <LoadingOverlay message="Loading..." />}
-
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Competition Selection */}
@@ -300,35 +301,37 @@ export default function UploadMusic({ userId }: { userId: string }) {
                   <FormLabel className="text-emerald-500">
                     Competition
                   </FormLabel>
-                  <Select
-                    disabled={
-                      isLoading ||
-                      status !== 'idle' ||
-                      competitions.length === 0
-                    }
-                    onValueChange={(value) => {
-                      field.onChange(value)
-                      // Only trigger validation for the current field
-                      form.trigger('competitionId')
-                    }}
-                    value={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a competition" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {competitions.map((competition) => (
-                        <SelectItem
-                          key={competition.$id}
-                          value={competition.$id}
-                        >
-                          {competition.year} - {competition.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="relative">
+                    <Select
+                      disabled={status !== 'idle' || competitions.length === 0}
+                      onValueChange={(value) => {
+                        field.onChange(value)
+                        form.trigger('competitionId')
+                      }}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a competition" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {competitions.map((competition) => (
+                          <SelectItem
+                            key={competition.$id}
+                            value={competition.$id}
+                          >
+                            {competition.year} - {competition.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {isLoadingCompetitions && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-white/80">
+                        <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                      </div>
+                    )}
+                  </div>
                   <FormDescription className="text-emerald-400">
                     Only active competitions are shown
                   </FormDescription>
@@ -344,33 +347,38 @@ export default function UploadMusic({ userId }: { userId: string }) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-emerald-500">Category</FormLabel>
-                  <Select
-                    disabled={
-                      isLoading ||
-                      status !== 'idle' ||
-                      !competitionId ||
-                      categories.length === 0
-                    }
-                    onValueChange={(value) => {
-                      field.onChange(value)
-                      // Only trigger validation for the current field
-                      form.trigger('category')
-                    }}
-                    value={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat} value={cat}>
-                          {cat}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="relative">
+                    <Select
+                      disabled={
+                        status !== 'idle' ||
+                        !competitionId ||
+                        categories.length === 0
+                      }
+                      onValueChange={(value) => {
+                        field.onChange(value)
+                        form.trigger('category')
+                      }}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a category" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {categories.map((cat) => (
+                          <SelectItem key={cat} value={cat}>
+                            {cat}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {isLoadingCategories && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-white/80">
+                        <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                      </div>
+                    )}
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
@@ -383,33 +391,36 @@ export default function UploadMusic({ userId }: { userId: string }) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-emerald-500">Grade</FormLabel>
-                  <Select
-                    disabled={
-                      isLoading ||
-                      status !== 'idle' ||
-                      !category ||
-                      grades.length === 0
-                    }
-                    onValueChange={(value) => {
-                      field.onChange(value)
-                      // Only trigger validation for the current field
-                      form.trigger('gradeId')
-                    }}
-                    value={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a grade" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {grades.map((grade) => (
-                        <SelectItem key={grade.$id} value={grade.$id}>
-                          {grade.name} - {grade.segment}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <div className="relative">
+                    <Select
+                      disabled={
+                        status !== 'idle' || !category || grades.length === 0
+                      }
+                      onValueChange={(value) => {
+                        field.onChange(value)
+                        form.trigger('gradeId')
+                      }}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a grade" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {grades.map((grade) => (
+                          <SelectItem key={grade.$id} value={grade.$id}>
+                            {grade.name} - {grade.segment}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {isLoadingGrades && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-white/80">
+                        <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                      </div>
+                    )}
+                  </div>
                   <FormMessage />
                 </FormItem>
               )}
@@ -569,7 +580,6 @@ export default function UploadMusic({ userId }: { userId: string }) {
               <Button
                 type="submit"
                 disabled={
-                  isLoading ||
                   status !== 'idle' ||
                   // Only check if the form has been submitted before using isValid
                   (form.formState.submitCount > 0 && !form.formState.isValid) ||

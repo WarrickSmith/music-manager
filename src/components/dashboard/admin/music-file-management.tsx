@@ -36,7 +36,7 @@ import {
   Trash2,
   FileDown,
 } from 'lucide-react'
-import { formatFileSize, formatDate } from '@/lib/utils'
+import { formatFileSize, formatDate, formatDuration } from '@/lib/utils'
 import {
   getMusicFileDownloadUrl,
   deleteMusicFile,
@@ -694,7 +694,9 @@ export default function MusicFileManagement() {
                         </TableCell>
                         <TableCell>{file.userName}</TableCell>
                         <TableCell>
-                          {file.duration ? `${file.duration}s` : 'N/A'}
+                          {file.duration
+                            ? formatDuration(file.duration)
+                            : 'N/A'}
                         </TableCell>
                         <TableCell>
                           <div className="whitespace-nowrap">

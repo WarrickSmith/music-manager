@@ -14,6 +14,7 @@ export default function LoginPage() {
   const [formState, setFormState] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [initializing, setInitializing] = useState(true)
+  const [isRedirecting, setIsRedirecting] = useState(false)
   const router = useRouter()
 
   // Clear any existing session when the login page loads
@@ -43,10 +44,19 @@ export default function LoginPage() {
       formData.append('password', formState.password)
 
       const result = await loginAction(formData)
+
       if (result.success) {
+        // Show toast but keep the loading spinner active
         showToast.login('Logged in successfully')
+
         if (result.redirectTo) {
+          // Set redirecting state to true to maintain the loading overlay
+          setIsRedirecting(true)
+          // Navigate to the dashboard
           router.push(result.redirectTo)
+          // We don't set loading to false here, keeping the overlay visible
+          // during the navigation
+          return
         }
       } else {
         showToast.error(result.error || 'Login failed')
@@ -54,9 +64,11 @@ export default function LoginPage() {
     } catch (error) {
       console.error('Login error:', error)
       showToast.error('An unexpected error occurred')
-    } finally {
-      setLoading(false)
     }
+
+    // Only set loading to false if we didn't redirect
+    // (if there was an error or no redirect path)
+    setLoading(false)
   }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,7 +82,14 @@ export default function LoginPage() {
 
   return (
     <div className="container max-w-md mx-auto p-6 space-y-8">
-      {loading && <LoadingOverlay message="Signing in..." />}
+      {/* Show loading overlay during both loading and redirecting states */}
+      {(loading || isRedirecting) && (
+        <LoadingOverlay
+          message={
+            isRedirecting ? 'Taking you to your dashboard...' : 'Signing in...'
+          }
+        />
+      )}
 
       <div className="flex flex-col items-center mb-8">
         <div className="flex items-center gap-4 mb-4 animate-fade-in">
@@ -138,7 +157,7 @@ export default function LoginPage() {
 
         <Button
           type="submit"
-          disabled={loading}
+          disabled={loading || isRedirecting}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5"
         >
           Sign In

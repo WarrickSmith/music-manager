@@ -25,8 +25,7 @@ import {
 } from '@/app/actions/music-file-actions'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import LoadingOverlay from '@/components/ui/loading-overlay'
-import { Download, Trash2 } from 'lucide-react'
+import { Download, Trash2, Loader2 } from 'lucide-react'
 
 type MusicFileProps = {
   id: string
@@ -47,11 +46,22 @@ type MusicFileProps = {
 
 interface FileCardProps {
   file: MusicFileProps
-  onDeleteSuccess?: () => void
+  isDeleting?: boolean
+  onDeleteStart?: () => void
+  onDeleteSuccess?: (fileId: string) => void
 }
 
-export default function FileCard({ file, onDeleteSuccess }: FileCardProps) {
-  const [isLoading, setIsLoading] = useState(false)
+export default function FileCard({
+  file,
+  isDeleting = false,
+  onDeleteStart,
+  onDeleteSuccess,
+}: FileCardProps) {
+  const [isDownloading, setIsDownloading] = useState(false)
+  const [internalDeleting, setInternalDeleting] = useState(false)
+
+  // Combine external and internal deleting states
+  const showDeleteSpinner = isDeleting || internalDeleting
 
   // Extract fileId from storagePath
   const storagePath = file.storagePath || ''
@@ -59,7 +69,7 @@ export default function FileCard({ file, onDeleteSuccess }: FileCardProps) {
 
   const handleDownload = async () => {
     try {
-      setIsLoading(true)
+      setIsDownloading(true)
       const { url } = await getMusicFileDownloadUrl(fileId)
 
       // Create a temporary anchor element to trigger download
@@ -75,32 +85,53 @@ export default function FileCard({ file, onDeleteSuccess }: FileCardProps) {
       toast.error('Failed to download file')
       console.error(error)
     } finally {
-      setIsLoading(false)
+      setIsDownloading(false)
     }
   }
 
   const handleDelete = async () => {
     try {
-      setIsLoading(true)
+      // Notify parent component that deletion is starting
+      if (onDeleteStart) {
+        onDeleteStart()
+      }
+
+      // Set internal deleting state as a fallback
+      setInternalDeleting(true)
+
+      // Delete the file
       await deleteMusicFile(fileId, file.id)
+
       toast.success('File deleted successfully')
 
-      // Call the onDeleteSuccess callback to refresh the parent component
+      // Call the onDeleteSuccess callback with the file ID
       if (onDeleteSuccess) {
-        onDeleteSuccess()
+        onDeleteSuccess(file.id)
       }
     } catch (error) {
       toast.error('Failed to delete file')
       console.error(error)
-    } finally {
-      setIsLoading(false)
+      // Reset deleting state if there was an error
+      setInternalDeleting(false)
+      // Note: we don't need to reset the parent's state because the parent
+      // component isn't responsible for monitoring errors in the child
     }
   }
 
-  return (
-    <Card className="relative">
-      {isLoading && <LoadingOverlay message="Processing..." />}
+  // If the file is being deleted, show a spinner instead of the card
+  if (showDeleteSpinner) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[240px] bg-sky-50 rounded-lg border border-sky-100 animate-pulse">
+        <div className="flex flex-col items-center space-y-3">
+          <Loader2 className="h-10 w-10 text-sky-500 animate-spin" />
+          <span className="text-sm text-sky-500 font-medium">Deleting...</span>
+        </div>
+      </div>
+    )
+  }
 
+  return (
+    <Card>
       <CardHeader>
         <CardTitle className="text-lg">{file.fileName}</CardTitle>
         <CardDescription>Original: {file.originalName}</CardDescription>
@@ -142,8 +173,13 @@ export default function FileCard({ file, onDeleteSuccess }: FileCardProps) {
           className="cursor-pointer"
           size="icon"
           title="Download"
+          disabled={isDownloading}
         >
-          <Download className="h-4 w-4" />
+          {isDownloading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Download className="h-4 w-4" />
+          )}
         </Button>
 
         <AlertDialog>
@@ -153,6 +189,7 @@ export default function FileCard({ file, onDeleteSuccess }: FileCardProps) {
               className="cursor-pointer"
               size="icon"
               title="Delete"
+              disabled={showDeleteSpinner}
             >
               <Trash2 className="h-4 w-4" />
             </Button>
