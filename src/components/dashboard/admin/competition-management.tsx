@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
@@ -122,17 +122,6 @@ export default function CompetitionManagement() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
       <div className="md:col-span-4">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-indigo-700">
-            Competitions
-          </h2>
-          <Button
-            onClick={() => setShowCreateDialog(true)}
-            className="flex items-center gap-1 bg-indigo-500 hover:bg-indigo-600"
-          >
-            <Plus className="h-4 w-4" /> Create New
-          </Button>
-        </div>
         {isLoading ? (
           <LocalLoadingCard
             message="Loading competitions..."
@@ -140,6 +129,17 @@ export default function CompetitionManagement() {
           />
         ) : (
           <Card className="border-indigo-100">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-xl font-semibold text-indigo-700">
+                Competitions
+              </CardTitle>
+              <Button
+                onClick={() => setShowCreateDialog(true)}
+                className="flex items-center gap-1 bg-indigo-500 hover:bg-indigo-600"
+              >
+                <Plus className="h-4 w-4" /> Create New
+              </Button>
+            </CardHeader>
             <CardContent className="p-4">
               {competitions.length === 0 ? (
                 <div className="py-8 text-center text-indigo-600">
