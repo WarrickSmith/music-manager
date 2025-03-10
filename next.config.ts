@@ -16,6 +16,8 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '15mb',
     },
   },
+  // Tell Next.js to output a full server build rather than static
+  output: 'standalone',
 }
 
 export default nextConfig
