@@ -106,10 +106,10 @@ export function useAudioPlayer({
             })
             .catch((e) => {
               console.error('Auto-play failed:', e)
-              setPlayerState('paused')
+              setPlayerState('idle')
             })
         } else {
-          setPlayerState('paused')
+          setPlayerState('idle')
         }
       }
 
@@ -121,11 +121,8 @@ export function useAudioPlayer({
 
       const pauseHandler = () => {
         console.log('Audio paused event')
-        if (audio.currentTime > 0 && audio.currentTime < audio.duration) {
-          setPlayerState('paused')
-        } else if (audio.currentTime >= audio.duration) {
-          setPlayerState('idle')
-        }
+        // Always set to idle state when paused
+        setPlayerState('idle')
         if (onPlayStateChange) onPlayStateChange(false)
       }
 
@@ -173,9 +170,11 @@ export function useAudioPlayer({
     }
   }, [fileId, cleanup, onPlayStateChange])
 
-  // Play/pause toggle function
+  // Play function - only handles starting playback
   const togglePlayPause = useCallback(async () => {
     try {
+      console.log('togglePlayPause called, current state:', playerState)
+
       // If not initialized, set flag to play on init and initialize
       if (!isInitializedRef.current || !audioRef.current || !urlRef.current) {
         console.log('First click - initializing audio and setting play flag')
@@ -186,11 +185,9 @@ export function useAudioPlayer({
 
       const audio = audioRef.current
 
-      if (playerState === 'playing') {
-        console.log('Pausing audio')
-        audio.pause()
-      } else if (playerState === 'paused' || playerState === 'idle') {
-        console.log('Playing audio')
+      // Only handle play functionality here
+      if (playerState === 'idle' || playerState === 'paused') {
+        console.log('Playing audio - current time:', audio.currentTime)
         try {
           const playPromise = audio.play()
           if (playPromise !== undefined) {
@@ -211,19 +208,26 @@ export function useAudioPlayer({
         await initAudio()
       }
     } catch (err) {
-      console.error('Error toggling play/pause:', err)
+      console.error('Error toggling play/stop:', err)
       setPlayerState('error')
       setError(err instanceof Error ? err.message : 'Failed to play audio file')
     }
-  }, [playerState, initAudio])
+  }, [playerState, initAudio, onPlayStateChange])
 
   // Stop function
-  const stop = useCallback(() => {
+  const stop = useCallback(async () => {
+    console.log('Stop function called')
     if (audioRef.current) {
-      audioRef.current.pause()
-      audioRef.current.currentTime = 0
+      const audio = audioRef.current
+      audio.pause()
+      audio.currentTime = 0
+
+      // Ensure state is updated
       setPlayerState('idle')
       if (onPlayStateChange) onPlayStateChange(false)
+
+      // Add a small delay to ensure state is updated
+      await new Promise((resolve) => setTimeout(resolve, 50))
     }
   }, [onPlayStateChange])
 
