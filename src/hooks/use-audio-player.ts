@@ -212,7 +212,7 @@ export function useAudioPlayer({
       setPlayerState('error')
       setError(err instanceof Error ? err.message : 'Failed to play audio file')
     }
-  }, [playerState, initAudio, onPlayStateChange])
+  }, [playerState, initAudio]) // Removed onPlayStateChange as it's not directly used in this function
 
   // Stop function
   const stop = useCallback(async () => {

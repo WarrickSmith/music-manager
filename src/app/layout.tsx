@@ -5,6 +5,9 @@ import './globals.css'
 import Navbar from '@/components/layout/navbar'
 import { getCurrentUser } from '@/lib/auth/auth-service'
 
+// Force dynamic rendering for all routes
+export const dynamic = 'force-dynamic'
+
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
