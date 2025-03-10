@@ -33,7 +33,7 @@ export default function CompetitorDashboard({
             className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-500 data-[state=active]:to-sky-400 data-[state=active]:text-white"
           >
             <FileMusic className="h-4 w-4 mr-2" />
-            My Files
+            Music
           </TabsTrigger>
           <TabsTrigger
             value="upload"

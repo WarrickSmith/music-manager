@@ -155,16 +155,12 @@ export default function ProfileManagement({
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold mb-4 text-violet-500">
-        My Profile
-      </h2>
-
       <Card className="max-w-2xl mx-auto border-violet-100 shadow-sm">
         {isLoading ? (
           <LocalLoadingCard message="Loading profile..." minHeight="200px" />
         ) : (
           <>
-            <CardHeader className="bg-gradient-to-r from-violet-50 to-purple-50 border-b border-violet-100">
+            <CardHeader className="bg-gradient-to-r from-violet-50 to-purple-50 border-b border-violet-100 py-6">
               <CardTitle className="text-violet-700">My Profile</CardTitle>
               <CardDescription>
                 View and manage your personal information

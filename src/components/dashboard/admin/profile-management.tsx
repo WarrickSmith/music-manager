@@ -160,7 +160,7 @@ export default function AdminProfileManagement() {
   return (
     <>
       <Card className="max-w-2xl mx-auto border-violet-100 shadow-sm">
-        <CardHeader className="bg-gradient-to-r from-violet-50 to-purple-50 border-b border-violet-100">
+        <CardHeader className="bg-gradient-to-r from-violet-50 to-purple-50 border-b border-violet-100 py-6">
           <CardTitle className="text-violet-700">Admin Profile</CardTitle>
           <CardDescription>
             View and manage your personal information
