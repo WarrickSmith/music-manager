@@ -42,6 +42,7 @@ import {
   deleteMusicFile,
 } from '@/app/actions/music-file-actions'
 import { getAllMusicFiles } from '@/app/actions/music-file-actions'
+import AudioPlayerButton from '@/components/ui/audio-player-button'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -660,17 +661,26 @@ export default function MusicFileManagement() {
                           />
                         </TableCell>
                         <TableCell>
-                          <div className="flex flex-col">
-                            <span className="font-medium">{file.fileName}</span>
-                            <span
-                              className="text-xs text-gray-500 truncate max-w-40"
-                              title={file.originalName}
-                            >
-                              {file.originalName}
-                            </span>
-                            <span className="text-xs text-gray-400">
-                              {formatFileSize(file.size || 0)}
-                            </span>
+                          <div className="flex flex-row items-center gap-2">
+                            <AudioPlayerButton
+                              fileId={file.fileId}
+                              variant="admin"
+                              size="icon"
+                            />
+                            <div className="flex flex-col">
+                              <span className="font-medium">
+                                {file.fileName}
+                              </span>
+                              <span
+                                className="text-xs text-gray-500 truncate max-w-40"
+                                title={file.originalName}
+                              >
+                                {file.originalName}
+                              </span>
+                              <span className="text-xs text-gray-400">
+                                {formatFileSize(file.size || 0)}
+                              </span>
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell>
