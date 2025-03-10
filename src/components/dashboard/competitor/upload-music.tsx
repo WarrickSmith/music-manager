@@ -285,7 +285,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold mb-4 text-emerald-500">
+      <h2 className="text-2xl font-semibold mb-4 text-emerald-700">
         Upload Music
       </h2>
 
@@ -298,7 +298,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
               name="competitionId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-emerald-500">
+                  <FormLabel className="text-emerald-700">
                     Competition
                   </FormLabel>
                   <div className="relative">
@@ -328,11 +328,11 @@ export default function UploadMusic({ userId }: { userId: string }) {
                     </Select>
                     {isLoadingCompetitions && (
                       <div className="absolute inset-0 flex items-center justify-center bg-white/80">
-                        <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                        <div className="w-5 h-5 border-2 border-emerald-700 border-t-transparent rounded-full animate-spin" />
                       </div>
                     )}
                   </div>
-                  <FormDescription className="text-emerald-400">
+                  <FormDescription className="text-emerald-600">
                     Only active competitions are shown
                   </FormDescription>
                   <FormMessage />
@@ -346,7 +346,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
               name="category"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-emerald-500">Category</FormLabel>
+                  <FormLabel className="text-emerald-700">Category</FormLabel>
                   <div className="relative">
                     <Select
                       disabled={
@@ -375,7 +375,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
                     </Select>
                     {isLoadingCategories && (
                       <div className="absolute inset-0 flex items-center justify-center bg-white/80">
-                        <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                        <div className="w-5 h-5 border-2 border-emerald-700 border-t-transparent rounded-full animate-spin" />
                       </div>
                     )}
                   </div>
@@ -390,7 +390,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
               name="gradeId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-emerald-500">Grade</FormLabel>
+                  <FormLabel className="text-emerald-700">Grade</FormLabel>
                   <div className="relative">
                     <Select
                       disabled={
@@ -417,7 +417,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
                     </Select>
                     {isLoadingGrades && (
                       <div className="absolute inset-0 flex items-center justify-center bg-white/80">
-                        <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                        <div className="w-5 h-5 border-2 border-emerald-700 border-t-transparent rounded-full animate-spin" />
                       </div>
                     )}
                   </div>
@@ -432,7 +432,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
               name="file"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-emerald-500">Music File</FormLabel>
+                  <FormLabel className="text-emerald-700">Music File</FormLabel>
                   <FormControl>
                     <Input
                       type="file"
@@ -533,7 +533,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
                     />
                   </FormControl>
                   <div className="space-y-2">
-                    <FormDescription className="text-emerald-400">
+                    <FormDescription className="text-emerald-600">
                       Max file size: 15MB. Supported formats: MP3, WAV, M4A, AAC
                     </FormDescription>
 
@@ -544,7 +544,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
                       </div>
                     )}
                     {fileDuration !== null && selectedFile && (
-                      <div className="text-sm text-emerald-600">
+                      <div className="text-sm text-emerald-800">
                         File duration: {formatDuration(fileDuration)}
                       </div>
                     )}
@@ -605,7 +605,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
                   })
                 }}
                 variant="default"
-                className="w-1/2 !bg-emerald-500 hover:!bg-emerald-600 cursor-pointer flex items-center justify-center gap-2"
+                className="w-1/2 !bg-emerald-700 hover:!bg-emerald-800 cursor-pointer flex items-center justify-center gap-2"
               >
                 <Upload className="h-4 w-4" />
                 <span>
@@ -618,10 +618,10 @@ export default function UploadMusic({ userId }: { userId: string }) {
       </Card>
 
       <div className="mt-6">
-        <h3 className="text-lg font-medium mb-2 text-emerald-500">
+        <h3 className="text-lg font-medium mb-2 text-emerald-700">
           File Naming Convention
         </h3>
-        <p className="text-sm text-emerald-400">
+        <p className="text-sm text-emerald-600">
           Your file will be automatically renamed using the following format:
           <code className="block p-2 my-2 bg-gray-100 rounded text-xs">
             [YEAR]-[COMPETITION]-[CATEGORY]-[SEGMENT]-[FIRSTNAME]-[LASTNAME

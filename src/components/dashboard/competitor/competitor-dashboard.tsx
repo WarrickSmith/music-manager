@@ -37,7 +37,7 @@ export default function CompetitorDashboard({
           </TabsTrigger>
           <TabsTrigger
             value="upload"
-            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-emerald-400 data-[state=active]:text-white"
+            className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-700 data-[state=active]:to-emerald-600 data-[state=active]:text-white"
           >
             <Upload className="h-4 w-4 mr-2" />
             Upload Music
@@ -67,7 +67,7 @@ export default function CompetitorDashboard({
         </TabsContent>
 
         <TabsContent value="upload" className="mt-6">
-          <div className="rounded-lg border border-emerald-100 bg-white p-6 shadow-sm">
+          <div className="rounded-lg border border-emerald-200 bg-white p-6 shadow-sm">
             <Suspense
               fallback={
                 <LocalLoadingCard
