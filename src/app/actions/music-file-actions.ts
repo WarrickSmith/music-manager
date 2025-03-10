@@ -334,3 +334,37 @@ export async function getMusicFileDownloadUrl(fileId: string) {
     throw new Error('Failed to generate download URL')
   }
 }
+
+/**
+ * Get file view URL for streaming audio with proper authentication
+ */
+export async function getMusicFileViewUrl(fileId: string) {
+  try {
+    console.log('Getting streaming URL for file:', fileId)
+    console.log('Bucket ID:', bucketId)
+
+    // First, verify the file exists using the server API key
+    await storage.getFile(bucketId, fileId)
+
+    // Generate the view URL for streaming
+    const endpoint = process.env.APPWRITE_ENDPOINT!
+    const projectId = process.env.APPWRITE_PROJECT_ID!
+
+    // Remove any trailing slash from the endpoint
+    const baseUrl = endpoint.endsWith('/') ? endpoint.slice(0, -1) : endpoint
+
+    // Check if the endpoint already includes the /v1 path and avoid duplicating it
+    const apiPath = baseUrl.endsWith('/v1') ? '' : '/v1'
+
+    // Create a properly formed URL with admin mode authentication for streaming
+    // Using 'view' instead of 'download' for streaming
+    const url = `${baseUrl}${apiPath}/storage/buckets/${bucketId}/files/${fileId}/view?project=${projectId}&project=${projectId}&mode=admin`
+
+    console.log('Generated streaming URL with server authentication:', url)
+
+    return { url }
+  } catch (error) {
+    console.error('Error generating streaming URL:', error)
+    throw new Error('Failed to generate streaming URL')
+  }
+}

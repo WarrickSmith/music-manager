@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { formatFileSize, formatDate, formatDuration } from '@/lib/utils'
+import AudioPlayerButton from '@/components/ui/audio-player-button'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -167,6 +168,7 @@ export default function FileCard({
       </CardContent>
 
       <CardFooter className="flex justify-end space-x-2">
+        <AudioPlayerButton fileId={fileId} variant="competitor" size="icon" />
         <Button
           variant="outline"
           onClick={handleDownload}
