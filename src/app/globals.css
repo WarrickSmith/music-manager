@@ -126,6 +126,22 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Fix for scrollbar issues */
+  html,
+  body {
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  html {
+    height: 100%;
+  }
+
+  body {
+    height: 100%;
+    margin: 0;
+  }
 }
 
 @layer utilities {

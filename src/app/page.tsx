@@ -32,7 +32,7 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8 bg-gradient-to-b from-background to-background/95">
+    <main className="flex flex-col items-center justify-center p-8 bg-gradient-to-b from-background to-background/95">
       <div className="flex flex-col items-center text-center max-w-3xl mx-auto">
         <div className="flex items-center gap-4 mb-6 animate-fade-in">
           <Image

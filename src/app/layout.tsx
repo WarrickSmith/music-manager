@@ -28,22 +28,24 @@ export default async function RootLayout({
   const user = await getCurrentUser()
 
   return (
-    <html lang="en">
+    <html lang="en" className="h-full overflow-x-hidden">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased h-full overflow-x-hidden`}
       >
-        <Navbar user={user} />
-        <main className="min-h-screen">{children}</main>
-        <Toaster
-          position="bottom-right"
-          closeButton
-          richColors
-          className="toast-container"
-          toastOptions={{
-            className: 'toast-base shadow-md border',
-            duration: 4000,
-          }}
-        />
+        <div className="flex flex-col h-full">
+          <Navbar user={user} />
+          <main className="flex-grow">{children}</main>
+          <Toaster
+            position="bottom-right"
+            closeButton
+            richColors
+            className="toast-container"
+            toastOptions={{
+              className: 'toast-base shadow-md border',
+              duration: 4000,
+            }}
+          />
+        </div>
       </body>
     </html>
   )
