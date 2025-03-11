@@ -217,13 +217,12 @@ export function useAudioPlayer({
       setError(err instanceof Error ? err.message : 'Failed to load audio file')
       if (onPlayStateChange) onPlayStateChange(false)
     }
-  }, [fileId, cleanup, onPlayStateChange])
+  }, [fileId, cleanup, onPlayStateChange, playerState])
 
   // Play function - only handles starting playback
   const togglePlayPause = useCallback(async () => {
     try {
       console.log('togglePlayPause called, current state:', playerState)
-
       // If not initialized, set flag to play on init and initialize
       if (!isInitializedRef.current || !audioRef.current || !urlRef.current) {
         console.log('First click - initializing audio and setting play flag')
@@ -231,9 +230,7 @@ export function useAudioPlayer({
         await initAudio()
         return
       }
-
       const audio = audioRef.current
-
       // Only handle play functionality here
       if (playerState === 'idle' || playerState === 'paused') {
         console.log('Playing audio - current time:', audio.currentTime)
@@ -242,7 +239,6 @@ export function useAudioPlayer({
           if (audio.ended || audio.currentTime >= audio.duration - 0.1) {
             audio.currentTime = 0
           }
-
           const playPromise = audio.play()
           if (playPromise !== undefined) {
             playPromise.catch((err) => {
