@@ -1,5 +1,4 @@
 import type { NextConfig } from 'next'
-
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
@@ -18,6 +17,7 @@ const nextConfig: NextConfig = {
   },
   // Tell Next.js to output a full server build rather than static
   output: 'standalone',
+  // Add crossOrigin setting to prevent CORS issues
+  crossOrigin: 'anonymous',
 }
-
 export default nextConfig
