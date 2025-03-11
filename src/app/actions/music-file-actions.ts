@@ -324,7 +324,8 @@ export async function getMusicFileDownloadUrl(fileId: string) {
     const apiPath = baseUrl.endsWith('/v1') ? '' : '/v1'
 
     // Create a properly formed URL with admin mode authentication
-    const url = `${baseUrl}${apiPath}/storage/buckets/${bucketId}/files/${fileId}/download?project=${projectId}&project=${projectId}&mode=admin`
+    // Fix: Remove duplicate project parameter for consistency
+    const url = `${baseUrl}${apiPath}/storage/buckets/${bucketId}/files/${fileId}/download?project=${projectId}&mode=admin`
 
     console.log('Generated download URL with server authentication:', url)
 
@@ -356,9 +357,9 @@ export async function getMusicFileViewUrl(fileId: string) {
     // Check if the endpoint already includes the /v1 path and avoid duplicating it
     const apiPath = baseUrl.endsWith('/v1') ? '' : '/v1'
 
-    // Create a properly formed URL with admin mode authentication for streaming
-    // Using 'view' instead of 'download' for streaming
-    const url = `${baseUrl}${apiPath}/storage/buckets/${bucketId}/files/${fileId}/view?project=${projectId}&project=${projectId}&mode=admin`
+    // Create a properly formed URL with server-side authentication for streaming
+    // Fix: Remove duplicate project parameter and ensure we're using the correct mode
+    const url = `${baseUrl}${apiPath}/storage/buckets/${bucketId}/files/${fileId}/view?project=${projectId}&mode=admin`
 
     console.log('Generated streaming URL with server authentication:', url)
 
