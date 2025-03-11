@@ -10,6 +10,9 @@ import { registerAction, logoutAction } from '@/app/actions/auth-actions'
 import { showToast } from '@/components/ui/toast'
 import LoadingOverlay from '@/components/ui/loading-overlay'
 
+// Import logo at the component level for stability
+import logoSrc from '../../../../public/mm-logo.png'
+
 export default function RegisterPage() {
   const [formState, setFormState] = useState({
     firstName: '',
@@ -28,7 +31,7 @@ export default function RegisterPage() {
     const clearExistingSession = async () => {
       try {
         await logoutAction()
-        // No need for a toast notification here since this is just clean-up
+        // No toast notification needed for clean-up
       } catch (error) {
         console.error('Session cleanup error:', error)
       } finally {
@@ -117,7 +120,7 @@ export default function RegisterPage() {
       <div className="flex flex-col items-center mb-8">
         <div className="flex items-center gap-4 mb-4 animate-fade-in">
           <Image
-            src="/mm-logo.png"
+            src={logoSrc}
             alt="Music Manager Logo"
             width={48}
             height={48}

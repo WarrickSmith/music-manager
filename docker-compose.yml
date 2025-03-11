@@ -1,3 +1,16 @@
+# services:
+#   music-manager:
+#     build: .
+#     container_name: music-manager
+#     restart: unless-stopped
+#     ports:
+#       - '3333:3000'
+#     environment:
+#       - NODE_ENV=production
+#     env_file:
+#       - stack.env
+#       - .env.local
+
 services:
   music-manager:
     build: .
@@ -6,6 +19,6 @@ services:
     ports:
       - '3333:3000'
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=${NODE_ENV:-production}
     env_file:
-      - stack.env
+      - ${ENV_FILE:-.env.local}
