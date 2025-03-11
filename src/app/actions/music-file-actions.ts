@@ -357,11 +357,14 @@ export async function getMusicFileViewUrl(fileId: string) {
     // Check if the endpoint already includes the /v1 path and avoid duplicating it
     const apiPath = baseUrl.endsWith('/v1') ? '' : '/v1'
 
-    // Create a properly formed URL with server-side authentication for streaming
-    // Fix: Remove duplicate project parameter and ensure we're using the correct mode
-    const url = `${baseUrl}${apiPath}/storage/buckets/${bucketId}/files/${fileId}/view?project=${projectId}&mode=admin`
+    // Add cache busting parameter to prevent caching issues with audio streaming
+    const cacheBuster = new Date().getTime()
 
-    console.log('Generated streaming URL with server authentication:', url)
+    // Create a public URL with no authentication required for streaming
+    // Since we updated bucket permissions to allow public reads, we don't need admin mode
+    const url = `${baseUrl}${apiPath}/storage/buckets/${bucketId}/files/${fileId}/view?project=${projectId}&cache=${cacheBuster}&disposition=inline`
+
+    console.log('Generated streaming URL for public access:', url)
 
     return { url }
   } catch (error) {

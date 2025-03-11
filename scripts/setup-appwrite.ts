@@ -541,18 +541,37 @@ async function setupStorage(
 ): Promise<boolean> {
   try {
     const bucketId = process.env.APPWRITE_BUCKET_ID!
-
     try {
       await storage.getBucket(bucketId)
       results.push(`Storage bucket '${bucketId}' already exists`)
+
+      // Update existing bucket permissions to include public read access
+      await storage.updateBucket(
+        bucketId,
+        'Music Manager Files',
+        [
+          Permission.read(Role.any()), // Allow public read access for streaming
+          Permission.read(Role.team('admin')),
+          Permission.read(Role.team('competitor')),
+          Permission.write(Role.team('admin')),
+          Permission.write(Role.team('competitor')),
+          Permission.delete(Role.team('admin')),
+          Permission.delete(Role.team('competitor')),
+        ],
+        true // fileSecurity
+      )
+      results.push(
+        `Updated storage bucket '${bucketId}' with public read permissions`
+      )
     } catch (error: unknown) {
       const appwriteError = error as AppwriteError
       if (appwriteError.code === 404) {
-        // Create bucket with proper parameters according to SDK
+        // Create bucket with public read permissions
         await storage.createBucket(
           bucketId,
           'Music Manager Files',
           [
+            Permission.read(Role.any()), // Allow public read access for streaming
             Permission.read(Role.team('admin')),
             Permission.read(Role.team('competitor')),
             Permission.write(Role.team('admin')),
@@ -562,12 +581,13 @@ async function setupStorage(
           ],
           true // fileSecurity
         )
-        results.push(`Created storage bucket '${bucketId}'`)
+        results.push(
+          `Created storage bucket '${bucketId}' with public read permissions`
+        )
       } else {
         throw error
       }
     }
-
     return true
   } catch (error: unknown) {
     const appwriteError = error as AppwriteError

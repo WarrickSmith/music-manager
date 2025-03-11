@@ -22,6 +22,7 @@ interface ExtendedAudioElement extends HTMLAudioElement {
   pauseHandler?: EventListener
   endedHandler?: EventListener
   errorHandler?: EventListener
+  timeUpdateHandler?: EventListener
 }
 
 export function useAudioPlayer({
@@ -34,6 +35,8 @@ export function useAudioPlayer({
   const urlRef = useRef<string | null>(null)
   const isInitializedRef = useRef(false)
   const shouldPlayOnInitRef = useRef(false)
+  const retryCountRef = useRef(0)
+  const maxRetries = 3
 
   // Improved cleanup function to remove all event listeners
   const cleanup = useCallback(() => {
@@ -56,6 +59,9 @@ export function useAudioPlayer({
       if (audio.errorHandler) {
         audio.removeEventListener('error', audio.errorHandler)
       }
+      if (audio.timeUpdateHandler) {
+        audio.removeEventListener('timeupdate', audio.timeUpdateHandler)
+      }
 
       // Pause and reset
       audio.pause()
@@ -67,6 +73,7 @@ export function useAudioPlayer({
     urlRef.current = null
     isInitializedRef.current = false
     shouldPlayOnInitRef.current = false
+    retryCountRef.current = 0
     setPlayerState('idle')
     if (onPlayStateChange) onPlayStateChange(false)
   }, [onPlayStateChange])
@@ -86,13 +93,18 @@ export function useAudioPlayer({
       const { url } = await getMusicFileViewUrl(fileId)
       urlRef.current = url
 
-      // Create new audio element without setting src yet
+      // Create new audio element
       const audio = new Audio() as ExtendedAudioElement
+
+      // Set required attributes for better streaming performance
+      audio.crossOrigin = 'anonymous' // Enable CORS for cross-origin resources
+      audio.preload = 'auto' // Preload audio data
 
       // Define event handlers
       const canPlayHandler = () => {
         console.log('Audio can play now')
         isInitializedRef.current = true
+        retryCountRef.current = 0 // Reset retry counter on success
 
         // If we should play on init, do it now
         if (shouldPlayOnInitRef.current) {
@@ -132,10 +144,45 @@ export function useAudioPlayer({
         if (onPlayStateChange) onPlayStateChange(false)
       }
 
-      const errorHandler = (e: Event) => {
-        // Only log error if component is still mounted
+      // Regular timeupdate handler to detect and handle stalled playback
+      const timeUpdateHandler = () => {
+        // Audio is playing if we get timeupdate events
+        // This helps recover from some stalled states
+        if (playerState === 'loading' && audio.currentTime > 0) {
+          setPlayerState('playing')
+          if (onPlayStateChange) onPlayStateChange(true)
+        }
+      }
+
+      const errorHandler = async (e: Event) => {
+        // Only handle error if component is still mounted
         if (audioRef.current === audio) {
           console.error('Audio playback error:', e)
+
+          // Try to recover with retry logic
+          if (retryCountRef.current < maxRetries) {
+            retryCountRef.current++
+            console.log(
+              `Retrying audio initialization (${retryCountRef.current}/${maxRetries})`
+            )
+
+            // Wait a moment before retrying
+            await new Promise((resolve) => setTimeout(resolve, 1000))
+
+            // Get a fresh URL with a new cache buster
+            try {
+              const { url: freshUrl } = await getMusicFileViewUrl(fileId)
+
+              // Set the new URL and try again
+              audio.src = freshUrl
+              audio.load()
+              return
+            } catch (refreshError) {
+              console.error('Error refreshing streaming URL:', refreshError)
+            }
+          }
+
+          // If we reach here, all retries failed
           setPlayerState('error')
           setError('Failed to play audio file')
           if (onPlayStateChange) onPlayStateChange(false)
@@ -148,6 +195,7 @@ export function useAudioPlayer({
       audio.pauseHandler = pauseHandler
       audio.endedHandler = endedHandler
       audio.errorHandler = errorHandler
+      audio.timeUpdateHandler = timeUpdateHandler
 
       // Add event listeners
       audio.addEventListener('canplay', canPlayHandler)
@@ -155,6 +203,7 @@ export function useAudioPlayer({
       audio.addEventListener('pause', pauseHandler)
       audio.addEventListener('ended', endedHandler)
       audio.addEventListener('error', errorHandler)
+      audio.addEventListener('timeupdate', timeUpdateHandler)
 
       // Set the source and store the reference
       audio.src = url
@@ -189,6 +238,11 @@ export function useAudioPlayer({
       if (playerState === 'idle' || playerState === 'paused') {
         console.log('Playing audio - current time:', audio.currentTime)
         try {
+          // Reset playback position if at the end
+          if (audio.ended || audio.currentTime >= audio.duration - 0.1) {
+            audio.currentTime = 0
+          }
+
           const playPromise = audio.play()
           if (playPromise !== undefined) {
             playPromise.catch((err) => {
@@ -202,6 +256,12 @@ export function useAudioPlayer({
           setPlayerState('error')
           setError('Failed to play audio file')
         }
+      } else if (playerState === 'playing') {
+        // Add support for pausing
+        console.log('Pausing audio - current time:', audio.currentTime)
+        audio.pause()
+        setPlayerState('idle')
+        if (onPlayStateChange) onPlayStateChange(false)
       } else if (playerState === 'error') {
         // Try to reinitialize on error
         shouldPlayOnInitRef.current = true
@@ -212,7 +272,7 @@ export function useAudioPlayer({
       setPlayerState('error')
       setError(err instanceof Error ? err.message : 'Failed to play audio file')
     }
-  }, [playerState, initAudio]) // Removed onPlayStateChange as it's not directly used in this function
+  }, [playerState, initAudio, onPlayStateChange])
 
   // Stop function
   const stop = useCallback(async () => {
