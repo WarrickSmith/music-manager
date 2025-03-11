@@ -8,4 +8,4 @@ services:
     environment:
       - NODE_ENV=production
     env_file:
-      - .env.local
+      - stack.env
