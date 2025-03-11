@@ -1,0 +1,11 @@
+services:
+  music-manager:
+    build: .
+    container_name: music-manager
+    restart: unless-stopped
+    ports:
+      - '3333:3000'
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - .env.local
