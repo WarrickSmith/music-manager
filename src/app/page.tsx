@@ -37,7 +37,7 @@ export default function Home() {
   return (
     <main className="flex flex-col items-center justify-center p-8 bg-gradient-to-b from-background to-background/95">
       <div className="flex flex-col items-center text-center max-w-3xl mx-auto">
-        <div className="flex items-center gap-4 mb-6 animate-fade-in">
+        <div className="flex items-center gap-4 mb-6 animate-fade-in min-h-[10px]">
           <Image
             src={logoSrc}
             alt="Music Manager Logo"
@@ -46,7 +46,7 @@ export default function Home() {
             priority
             className="rounded-lg shadow-md"
           />
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+          <h1 className="text-5xl font-bold leading-[1.2] pb-1 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             Music Manager
           </h1>
         </div>
