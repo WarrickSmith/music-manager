@@ -18,6 +18,9 @@ type NavbarProps = {
   } | null
 }
 
+// Import logo at the component level for stability
+import logoSrc from '../../../public/mm-logo.png'
+
 export default function Navbar({ user }: NavbarProps) {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
@@ -99,7 +102,7 @@ export default function Navbar({ user }: NavbarProps) {
               <div className="relative">
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
                 <Image
-                  src="/mm-logo.png"
+                  src={logoSrc}
                   alt="Music Manager Logo"
                   width={36}
                   height={36}
@@ -120,7 +123,7 @@ export default function Navbar({ user }: NavbarProps) {
               <div className="relative">
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
                 <Image
-                  src="/mm-logo.png"
+                  src={logoSrc}
                   alt="Music Manager Logo"
                   width={36}
                   height={36}

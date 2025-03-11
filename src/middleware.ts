@@ -1,31 +1,43 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { NextResponse, NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  const pathname = request.nextUrl.pathname
-  const sessionCookie = request.cookies.get('mm-session')
-
-  // Public routes that don't require authentication
-  const publicRoutes = ['/', '/login', '/register']
-  if (publicRoutes.includes(pathname)) {
-    // Allow access to public routes without redirection
-    // This prevents redirect loops when a session cookie exists but is invalid
-    return NextResponse.next()
+  // Add cache control headers for static image files
+  if (request.nextUrl.pathname.match(/\.(png|jpg|jpeg|gif|svg|ico)$/)) {
+    const response = NextResponse.next()
+    response.headers.set('Cache-Control', 'public, max-age=86400, immutable')
+    return response
   }
 
-  // Protected routes that require authentication
-  if (!sessionCookie) {
-    return NextResponse.redirect(new URL('/login', request.url))
+  // Your existing middleware logic
+  const response = NextResponse.next()
+
+  try {
+    // Check for Appwrite session cookie (mm-session)
+    const authCookieName = 'mm-session'
+    const authCookie = request.cookies.get(authCookieName)
+
+    // If there's an auth cookie, pass it along to the response
+    if (authCookie) {
+      // Spread the cookie properties first, then override specific ones if needed
+      const cookieOptions = {
+        path: '/',
+        ...authCookie,
+      }
+
+      response.cookies.set(authCookieName, authCookie.value, cookieOptions)
+    }
+  } catch (error) {
+    console.error('Middleware auth error:', error)
   }
 
-  // For role-based routing, we'll handle this in the layout components
-  // since we can't reliably check roles in middleware without making API calls
-
-  return NextResponse.next()
+  return response
 }
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|api/|images/|fonts/).*)',
+    // Match all paths except those starting with /api/, /_next/, /public/
+    '/((?!api|_next/static|_next/image|public/|favicon.ico).*)',
+    // Match all image files
+    '/(.*\\.(?:png|jpg|jpeg|gif|svg|ico)$)',
   ],
 }

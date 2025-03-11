@@ -8,6 +8,9 @@ import { useEffect, useState } from 'react'
 import { logoutAction } from '@/app/actions/auth-actions'
 import LoadingOverlay from '@/components/ui/loading-overlay'
 
+// Import logo at the component level for stability
+import logoSrc from '../../public/mm-logo.png'
+
 export default function Home() {
   const [initializing, setInitializing] = useState(true)
 
@@ -34,16 +37,16 @@ export default function Home() {
   return (
     <main className="flex flex-col items-center justify-center p-8 bg-gradient-to-b from-background to-background/95">
       <div className="flex flex-col items-center text-center max-w-3xl mx-auto">
-        <div className="flex items-center gap-4 mb-6 animate-fade-in">
+        <div className="flex items-center gap-4 mb-6 animate-fade-in min-h-[10px]">
           <Image
-            src="/mm-logo.png"
+            src={logoSrc}
             alt="Music Manager Logo"
             width={64}
             height={64}
             priority
             className="rounded-lg shadow-md"
           />
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+          <h1 className="text-5xl font-bold leading-[1.2] pb-1 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             Music Manager
           </h1>
         </div>
