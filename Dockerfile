@@ -30,10 +30,16 @@ WORKDIR /app
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
 
+# Install tsx globally for runtime script execution
+RUN npm install -g tsx
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 COPY --from=builder /app/public ./public
+
+# Copy scripts directory for runtime initialization
+COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
 
 # Set Cache-Control headers for static assets
 RUN mkdir -p /app/public && \
