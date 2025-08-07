@@ -31,4 +31,4 @@ services:
       - APPWRITE_MUSIC_FILES_COLLECTION_ID
       - APPWRITE_BUCKET_ID
     env_file:
-      - .env
+      - ${COMPOSE_ENV_FILE:-.env}
