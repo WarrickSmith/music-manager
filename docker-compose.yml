@@ -32,4 +32,3 @@ services:
       - APPWRITE_BUCKET_ID
     env_file:
       - .env
-      - .env.local
