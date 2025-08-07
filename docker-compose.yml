@@ -1,24 +1,35 @@
-# services:
-#   music-manager:
-#     build: .
-#     container_name: music-manager
-#     restart: unless-stopped
-#     ports:
-#       - '3333:3000'
-#     environment:
-#       - NODE_ENV=production
-#     env_file:
-#       - stack.env
-#       - .env.local
-
 services:
   music-manager:
-    build: .
+    build:
+      context: .
+      args:
+        # Client-side variables (MUST be at build time)
+        - NEXT_PUBLIC_APPWRITE_ENDPOINT
+        - NEXT_PUBLIC_APPWRITE_PROJECT_ID
+        # Server-side variables (needed for build-time compilation)
+        - APPWRITE_ENDPOINT
+        - APPWRITE_PROJECT_ID
+        - APPWRITE_API_KEY
+        - APPWRITE_DATABASE_ID
+        - APPWRITE_COMPETITIONS_COLLECTION_ID
+        - APPWRITE_GRADES_COLLECTION_ID
+        - APPWRITE_MUSIC_FILES_COLLECTION_ID
+        - APPWRITE_BUCKET_ID
     container_name: music-manager
     restart: unless-stopped
     ports:
       - '3333:3000'
     environment:
+      # Runtime server-side variables
       - NODE_ENV=${NODE_ENV:-production}
+      - APPWRITE_ENDPOINT
+      - APPWRITE_PROJECT_ID
+      - APPWRITE_API_KEY
+      - APPWRITE_DATABASE_ID
+      - APPWRITE_COMPETITIONS_COLLECTION_ID
+      - APPWRITE_GRADES_COLLECTION_ID
+      - APPWRITE_MUSIC_FILES_COLLECTION_ID
+      - APPWRITE_BUCKET_ID
     env_file:
-      - ${ENV_FILE:-.env.local}
+      - .env
+      - .env.local
