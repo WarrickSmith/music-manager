@@ -30,5 +30,3 @@ services:
       - APPWRITE_GRADES_COLLECTION_ID
       - APPWRITE_MUSIC_FILES_COLLECTION_ID
       - APPWRITE_BUCKET_ID
-    env_file:
-      - .env

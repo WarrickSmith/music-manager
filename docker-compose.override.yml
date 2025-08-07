@@ -1,0 +1,8 @@
+# docker-compose.override.yml
+# This file is automatically used by Docker Compose for local development
+# It adds the env_file configuration that's needed for local dev but not Portainer
+
+services:
+  music-manager:
+    env_file:
+      - .env
