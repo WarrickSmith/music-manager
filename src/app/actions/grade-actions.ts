@@ -2,6 +2,7 @@
 
 import { databases, ID, Query } from '@/lib/appwrite/server'
 import { revalidatePath } from 'next/cache'
+import { toPlainObject } from '@/lib/utils'
 
 const databaseId = process.env.APPWRITE_DATABASE_ID!
 const gradesCollectionId = process.env.APPWRITE_GRADES_COLLECTION_ID!
@@ -14,7 +15,7 @@ export async function getGradesByCompetition(competitionId: string) {
       [Query.equal('competitionId', competitionId), Query.limit(100)]
     )
 
-    return response.documents
+    return toPlainObject(response.documents)
   } catch (error) {
     console.error('Error fetching grades:', error)
     throw new Error('Failed to fetch grades')
@@ -46,7 +47,7 @@ export async function createGrade({
     )
 
     revalidatePath('/admin/dashboard')
-    return result
+    return toPlainObject(result)
   } catch (error) {
     console.error('Error creating grade:', error)
     throw new Error('Failed to create grade')
@@ -70,7 +71,7 @@ export async function updateGrade(
     )
 
     revalidatePath('/admin/dashboard')
-    return result
+    return toPlainObject(result)
   } catch (error) {
     console.error('Error updating grade:', error)
     throw new Error('Failed to update grade')

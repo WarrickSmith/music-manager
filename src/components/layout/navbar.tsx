@@ -2,14 +2,21 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { FaUser, FaSignOutAlt, FaMusic } from 'react-icons/fa'
-import { useState } from 'react'
+import { User, LogOut, Music, Moon, Sun } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { logoutAction } from '@/app/actions/auth-actions'
 import { showToast } from '@/components/ui/toast'
 import LoadingOverlay from '@/components/ui/loading-overlay'
+import {
+  DEFAULT_THEME,
+  THEME_COOKIE_MAX_AGE,
+  THEME_COOKIE_NAME,
+  type Theme,
+} from '@/lib/theme'
 
 type NavbarProps = {
+  initialTheme: Theme
   user?: {
     $id: string
     name: string
@@ -21,7 +28,8 @@ type NavbarProps = {
 // Import logo at the component level for stability
 import logoSrc from '../../../public/mm-logo.png'
 
-export default function Navbar({ user }: NavbarProps) {
+export default function Navbar({ initialTheme, user }: NavbarProps) {
+  const [theme, setTheme] = useState<Theme>(initialTheme ?? DEFAULT_THEME)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const router = useRouter()
@@ -36,6 +44,14 @@ export default function Navbar({ user }: NavbarProps) {
   const closeUserMenu = () => {
     setIsUserMenuOpen(false)
   }
+
+  useEffect(() => {
+    applyThemeClass(theme)
+  }, [theme])
+
+  useEffect(() => {
+    setTheme(initialTheme)
+  }, [initialTheme])
 
   const handleLogout = async () => {
     setIsLoggingOut(true)
@@ -67,6 +83,7 @@ export default function Navbar({ user }: NavbarProps) {
         const result = await logoutAction()
         if (result.success) {
           showToast.logout('Logged out successfully')
+          closeUserMenu()
           router.push('/')
         } else {
           showToast.error(result.error || 'Logout failed')
@@ -83,34 +100,43 @@ export default function Navbar({ user }: NavbarProps) {
 
   // Determine button color based on user status - explicitly set blue when logged out
   const buttonColorClass = !user
-    ? 'text-blue-600 hover:bg-blue-50'
+    ? 'text-blue-600 hover:bg-blue-50 dark:text-sky-300 dark:hover:bg-sky-400/10'
     : userRole === 'admin'
-    ? 'text-purple-600 hover:bg-purple-50'
-    : 'text-green-600 hover:bg-green-50'
+    ? 'text-purple-600 hover:bg-purple-50 dark:text-violet-300 dark:hover:bg-violet-400/10'
+    : 'text-green-600 hover:bg-green-50 dark:text-emerald-300 dark:hover:bg-emerald-400/10'
+
+  const nextTheme = theme === 'dark' ? 'light' : 'dark'
+
+  const toggleTheme = () => {
+    setTheme((currentTheme) => {
+      const updatedTheme: Theme =
+        currentTheme === 'dark' ? 'light' : 'dark'
+      persistThemePreference(updatedTheme)
+      return updatedTheme
+    })
+  }
 
   return (
     <>
       {isLoggingOut && <LoadingOverlay message="Signing out..." />}
-      <nav className="w-full py-4 px-6 bg-gradient-to-r from-blue-50 to-purple-50 border-b border-blue-100 sticky top-0 z-50 shadow-sm backdrop-blur-md">
+      <nav className="sticky top-0 z-50 w-full border-b border-slate-200/70 bg-gradient-to-r from-white/95 via-slate-50/90 to-indigo-50/90 px-6 py-4 shadow-sm backdrop-blur-xl transition-colors duration-300 dark:border-white/10 dark:from-slate-950/95 dark:via-slate-900/90 dark:to-indigo-950/75">
         <div className="container mx-auto flex justify-between items-center">
           {user ? (
             // If user is logged in, use a button with click handler
             <button
               onClick={handleLogoClick}
-              className="flex items-center gap-3 transition-transform hover:scale-105 text-left cursor-pointer"
+              className="group flex cursor-pointer items-center gap-3 text-left transition-transform hover:scale-105"
             >
-              <div className="relative">
-                <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+              <div className="relative flex h-9 w-9 items-center justify-center">
+                <div className="absolute -inset-1 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 opacity-30 blur transition duration-300 group-hover:opacity-100 dark:from-sky-400 dark:to-violet-400"></div>
                 <Image
                   src={logoSrc}
                   alt="Music Manager Logo"
-                  width={36}
-                  height={36}
                   priority
-                  className="rounded-md relative"
+                  className="relative z-10 h-auto w-9 rounded-md"
                 />
               </div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-xl font-bold text-transparent dark:from-sky-300 dark:to-violet-300">
                 Music Manager
               </h1>
             </button>
@@ -118,20 +144,18 @@ export default function Navbar({ user }: NavbarProps) {
             // If no user is logged in, use regular Link
             <Link
               href="/"
-              className="flex items-center gap-3 transition-transform hover:scale-105"
+              className="group flex items-center gap-3 transition-transform hover:scale-105"
             >
-              <div className="relative">
-                <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+              <div className="relative flex h-9 w-9 items-center justify-center">
+                <div className="absolute -inset-1 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 opacity-30 blur transition duration-300 group-hover:opacity-100 dark:from-sky-400 dark:to-violet-400"></div>
                 <Image
                   src={logoSrc}
                   alt="Music Manager Logo"
-                  width={36}
-                  height={36}
                   priority
-                  className="rounded-md relative"
+                  className="relative z-10 h-auto w-9 rounded-md"
                 />
               </div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-xl font-bold text-transparent dark:from-sky-300 dark:to-violet-300">
                 Music Manager
               </h1>
             </Link>
@@ -141,51 +165,71 @@ export default function Navbar({ user }: NavbarProps) {
             {user && (
               <Link
                 href={userRole === 'admin' ? '/admin/dashboard' : '/dashboard'}
-                className="hidden md:flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+                className="hidden items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-sky-300 md:flex"
               >
-                <FaMusic className="w-4 h-4" />
+                <Music className="w-4 h-4" />
                 <span>My Music</span>
               </Link>
             )}
 
+            <button
+              onClick={toggleTheme}
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/70 bg-white/80 text-slate-700 shadow-sm transition-all duration-200 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:text-amber-200"
+              aria-label={`Switch to ${nextTheme} mode`}
+              title={`Switch to ${nextTheme} mode`}
+              type="button"
+            >
+              {theme === 'dark' ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
+            </button>
+
             <div className="relative">
               <button
                 onClick={toggleUserMenu}
-                className={`p-2.5 rounded-full bg-white transition-colors duration-200 flex items-center justify-center border border-blue-100 shadow-sm hover:shadow-md ${buttonColorClass}`}
+                className={`flex items-center justify-center rounded-full border border-slate-200/70 bg-white/80 p-2.5 shadow-sm transition-all duration-200 hover:shadow-md dark:border-white/10 dark:bg-white/5 ${buttonColorClass}`}
                 aria-label={user ? 'User menu' : 'Login'}
+                type="button"
               >
                 {isLoggingOut ? (
                   <div className="w-5 h-5 border-2 border-t-current border-r-transparent border-b-current border-l-transparent rounded-full animate-spin"></div>
                 ) : (
-                  <FaUser className="w-5 h-5" />
+                  <User className="w-5 h-5" />
                 )}
               </button>
 
               {isUserMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-blue-100 py-2 z-50">
+                <div className="absolute right-0 z-50 mt-2 w-52 rounded-xl border border-slate-200/80 bg-white/95 py-2 shadow-lg backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/95">
                   {user ? (
                     <>
-                      <div className="px-4 py-2 border-b border-blue-50">
-                        <p className="text-sm font-medium text-gray-700">
+                      <div className="border-b border-slate-200/70 px-4 py-2 dark:border-white/10">
+                        <p className="text-sm font-medium text-slate-800 dark:text-slate-100">
                           {user.name}
                         </p>
-                        <p className="text-xs text-gray-500 truncate">
+                        <p className="truncate text-xs text-slate-500 dark:text-slate-400">
                           {user.email}
                         </p>
                         <p className="text-xs font-medium mt-1 capitalize">
                           {userRole === 'admin' ? (
-                            <span className="text-purple-600">Admin</span>
+                            <span className="text-purple-600 dark:text-violet-300">
+                              Admin
+                            </span>
                           ) : (
-                            <span className="text-green-600">Competitor</span>
+                            <span className="text-green-600 dark:text-emerald-300">
+                              Competitor
+                            </span>
                           )}
                         </p>
                       </div>
                       <button
                         onClick={handleLogout}
                         disabled={isLoggingOut}
-                        className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                        className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 transition-colors hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-500/10"
+                        type="button"
                       >
-                        <FaSignOutAlt className="w-4 h-4" />
+                        <LogOut className="w-4 h-4" />
                         <span>Logout</span>
                       </button>
                     </>
@@ -194,17 +238,17 @@ export default function Navbar({ user }: NavbarProps) {
                       <Link
                         href="/login"
                         onClick={closeUserMenu}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-blue-600 transition-colors hover:bg-blue-50 dark:text-sky-300 dark:hover:bg-sky-500/10"
                       >
-                        <FaUser className="w-4 h-4" />
+                        <User className="w-4 h-4" />
                         <span>Login</span>
                       </Link>
                       <Link
                         href="/register"
                         onClick={closeUserMenu}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-green-600 hover:bg-green-50 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-green-600 transition-colors hover:bg-green-50 dark:text-emerald-300 dark:hover:bg-emerald-500/10"
                       >
-                        <FaUser className="w-4 h-4" />
+                        <User className="w-4 h-4" />
                         <span>Register</span>
                       </Link>
                     </>
@@ -217,4 +261,17 @@ export default function Navbar({ user }: NavbarProps) {
       </nav>
     </>
   )
+}
+
+function applyThemeClass(theme: Theme) {
+  document.documentElement.classList.toggle('dark', theme === 'dark')
+  document.documentElement.style.colorScheme = theme
+}
+
+function persistThemePreference(theme: Theme) {
+  try {
+    document.cookie = `${THEME_COOKIE_NAME}=${theme}; path=/; max-age=${THEME_COOKIE_MAX_AGE}; samesite=lax`
+  } catch (error) {
+    console.error('Failed to persist theme preference:', error)
+  }
 }

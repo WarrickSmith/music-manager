@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import * as dotenv from 'dotenv'
-// Load environment variables from .env.local
-dotenv.config({ path: '.env.local' })
+dotenv.config({ path: ['.env.local', '.env'] })
 
 import {
   Client,
@@ -10,6 +9,7 @@ import {
   Permission,
   Role,
   Teams,
+  type DatabasesIndexType,
 } from 'node-appwrite'
 
 // Custom error type for better type safety
@@ -505,7 +505,7 @@ async function createIndexIfNotExists(
           databaseId,
           collectionId,
           indexId,
-          attributesObject as unknown as IndexType,
+          attributesObject as unknown as DatabasesIndexType,
           ['key'] // Use string literal directly
         )
       } else if (type === 'fulltext') {
@@ -513,7 +513,7 @@ async function createIndexIfNotExists(
           databaseId,
           collectionId,
           indexId,
-          attributesObject as unknown as IndexType,
+          attributesObject as unknown as DatabasesIndexType,
           ['fulltext'] // Use string literal directly
         )
       } else if (type === 'unique') {
@@ -521,7 +521,7 @@ async function createIndexIfNotExists(
           databaseId,
           collectionId,
           indexId,
-          attributesObject as unknown as IndexType,
+          attributesObject as unknown as DatabasesIndexType,
           ['unique'] // Use string literal directly
         )
       }

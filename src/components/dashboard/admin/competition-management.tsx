@@ -128,21 +128,21 @@ export default function CompetitionManagement() {
             minHeight="200px"
           />
         ) : (
-          <Card className="border-indigo-100">
+          <Card className="border-indigo-100 dark:border-indigo-500/20 dark:bg-indigo-950/10">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-xl font-semibold text-indigo-700">
+              <CardTitle className="text-xl font-semibold text-indigo-700 dark:text-indigo-200">
                 Competitions
               </CardTitle>
               <Button
                 onClick={() => setShowCreateDialog(true)}
-                className="flex items-center gap-1 bg-indigo-500 hover:bg-indigo-600"
+                className="flex items-center gap-1 bg-indigo-500 hover:bg-indigo-600 dark:bg-indigo-500 dark:hover:bg-indigo-400"
               >
                 <Plus className="h-4 w-4" /> Create New
               </Button>
             </CardHeader>
             <CardContent className="p-4">
               {competitions.length === 0 ? (
-                <div className="py-8 text-center text-indigo-600">
+                <div className="py-8 text-center text-indigo-600 dark:text-indigo-200/80">
                   No competitions found. Create your first competition!
                 </div>
               ) : (
@@ -183,9 +183,9 @@ export default function CompetitionManagement() {
             }
           />
         ) : (
-          <Card className="border-indigo-100">
+          <Card className="border-indigo-100 dark:border-indigo-500/20 dark:bg-indigo-950/10">
             <CardContent className="p-6 text-center">
-              <p className="text-indigo-400">
+              <p className="text-indigo-400 dark:text-indigo-200/70">
                 Select a competition to manage its grades
               </p>
             </CardContent>

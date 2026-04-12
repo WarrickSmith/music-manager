@@ -40,9 +40,9 @@ import { Upload } from 'lucide-react'
 
 // Form validation schema
 const formSchema = z.object({
-  competitionId: z.string({ required_error: 'Please select a competition' }),
-  category: z.string({ required_error: 'Please select a category' }),
-  gradeId: z.string({ required_error: 'Please select a grade' }),
+  competitionId: z.string({ error: 'Please select a competition' }),
+  category: z.string({ error: 'Please select a category' }),
+  gradeId: z.string({ error: 'Please select a grade' }),
   file: z
     .any()
     .refine((value) => value instanceof File, {
@@ -70,14 +70,14 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>
 
-interface Competition extends Models.Document {
+interface Competition extends Models.DefaultDocument {
   $id: string
   name: string
   year: number
   active: boolean
 }
 
-interface Grade extends Models.Document {
+interface Grade extends Models.DefaultDocument {
   $id: string
   name: string
   category: string
@@ -285,11 +285,11 @@ export default function UploadMusic({ userId }: { userId: string }) {
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold mb-4 text-emerald-700">
+      <h2 className="mb-4 text-2xl font-semibold text-emerald-700 dark:text-emerald-300">
         Upload Music
       </h2>
 
-      <Card className="p-6 relative">
+      <Card className="relative border-emerald-100 bg-emerald-50/20 p-6 dark:border-emerald-500/20 dark:bg-emerald-950/10">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Competition Selection */}
@@ -298,7 +298,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
               name="competitionId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-emerald-700">
+                  <FormLabel className="text-emerald-700 dark:text-emerald-200">
                     Competition
                   </FormLabel>
                   <div className="relative">
@@ -311,15 +311,16 @@ export default function UploadMusic({ userId }: { userId: string }) {
                       value={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="border-emerald-200 bg-background/80 text-emerald-800 dark:border-emerald-500/30 dark:bg-background dark:text-emerald-100">
                           <SelectValue placeholder="Select a competition" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className="border-emerald-200 dark:border-emerald-500/30">
                         {competitions.map((competition) => (
                           <SelectItem
                             key={competition.$id}
                             value={competition.$id}
+                            className="text-emerald-800 dark:text-emerald-100"
                           >
                             {competition.year} - {competition.name}
                           </SelectItem>
@@ -327,12 +328,12 @@ export default function UploadMusic({ userId }: { userId: string }) {
                       </SelectContent>
                     </Select>
                     {isLoadingCompetitions && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-white/80">
+                      <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
                         <div className="w-5 h-5 border-2 border-emerald-700 border-t-transparent rounded-full animate-spin" />
                       </div>
                     )}
                   </div>
-                  <FormDescription className="text-emerald-600">
+                  <FormDescription className="text-emerald-600 dark:text-emerald-200/80">
                     Only active competitions are shown
                   </FormDescription>
                   <FormMessage />
@@ -346,7 +347,9 @@ export default function UploadMusic({ userId }: { userId: string }) {
               name="category"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-emerald-700">Category</FormLabel>
+                  <FormLabel className="text-emerald-700 dark:text-emerald-200">
+                    Category
+                  </FormLabel>
                   <div className="relative">
                     <Select
                       disabled={
@@ -361,20 +364,24 @@ export default function UploadMusic({ userId }: { userId: string }) {
                       value={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="border-emerald-200 bg-background/80 text-emerald-800 dark:border-emerald-500/30 dark:bg-background dark:text-emerald-100">
                           <SelectValue placeholder="Select a category" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className="border-emerald-200 dark:border-emerald-500/30">
                         {categories.map((cat) => (
-                          <SelectItem key={cat} value={cat}>
+                          <SelectItem
+                            key={cat}
+                            value={cat}
+                            className="text-emerald-800 dark:text-emerald-100"
+                          >
                             {cat}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                     {isLoadingCategories && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-white/80">
+                      <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
                         <div className="w-5 h-5 border-2 border-emerald-700 border-t-transparent rounded-full animate-spin" />
                       </div>
                     )}
@@ -390,7 +397,9 @@ export default function UploadMusic({ userId }: { userId: string }) {
               name="gradeId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-emerald-700">Grade</FormLabel>
+                  <FormLabel className="text-emerald-700 dark:text-emerald-200">
+                    Grade
+                  </FormLabel>
                   <div className="relative">
                     <Select
                       disabled={
@@ -403,20 +412,24 @@ export default function UploadMusic({ userId }: { userId: string }) {
                       value={field.value}
                     >
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="border-emerald-200 bg-background/80 text-emerald-800 dark:border-emerald-500/30 dark:bg-background dark:text-emerald-100">
                           <SelectValue placeholder="Select a grade" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                      <SelectContent className="border-emerald-200 dark:border-emerald-500/30">
                         {grades.map((grade) => (
-                          <SelectItem key={grade.$id} value={grade.$id}>
+                          <SelectItem
+                            key={grade.$id}
+                            value={grade.$id}
+                            className="text-emerald-800 dark:text-emerald-100"
+                          >
                             {grade.name} - {grade.segment}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                     {isLoadingGrades && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-white/80">
+                      <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
                         <div className="w-5 h-5 border-2 border-emerald-700 border-t-transparent rounded-full animate-spin" />
                       </div>
                     )}
@@ -432,7 +445,9 @@ export default function UploadMusic({ userId }: { userId: string }) {
               name="file"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-emerald-700">Music File</FormLabel>
+                  <FormLabel className="text-emerald-700 dark:text-emerald-200">
+                    Music File
+                  </FormLabel>
                   <FormControl>
                     <Input
                       type="file"
@@ -533,18 +548,18 @@ export default function UploadMusic({ userId }: { userId: string }) {
                     />
                   </FormControl>
                   <div className="space-y-2">
-                    <FormDescription className="text-emerald-600">
+                    <FormDescription className="text-emerald-600 dark:text-emerald-200/80">
                       Max file size: 15MB. Supported formats: MP3, WAV, M4A, AAC
                     </FormDescription>
 
                     {/* Show metadata extraction status and duration */}
                     {extractingMetadata && (
-                      <div className="text-sm text-amber-500">
+                      <div className="text-sm text-amber-500 dark:text-amber-300">
                         Extracting file metadata...
                       </div>
                     )}
                     {fileDuration !== null && selectedFile && (
-                      <div className="text-sm text-emerald-800">
+                      <div className="text-sm text-emerald-800 dark:text-emerald-100">
                         File duration: {formatDuration(fileDuration)}
                       </div>
                     )}
@@ -617,13 +632,13 @@ export default function UploadMusic({ userId }: { userId: string }) {
         </Form>
       </Card>
 
-      <div className="mt-6">
-        <h3 className="text-lg font-medium mb-2 text-emerald-700">
+      <div className="mt-6 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 dark:border-emerald-500/20 dark:bg-emerald-950/20">
+        <h3 className="mb-2 text-lg font-medium text-emerald-700 dark:text-emerald-300">
           File Naming Convention
         </h3>
-        <p className="text-sm text-emerald-600">
+        <p className="text-sm text-emerald-600 dark:text-emerald-200/80">
           Your file will be automatically renamed using the following format:
-          <code className="block p-2 my-2 bg-gray-100 rounded text-xs">
+          <code className="my-2 block rounded border border-emerald-100 bg-white/80 p-2 text-xs text-emerald-900 dark:border-emerald-500/20 dark:bg-slate-950/70 dark:text-emerald-100">
             [YEAR]-[COMPETITION]-[CATEGORY]-[SEGMENT]-[FIRSTNAME]-[LASTNAME
             INITIAL]
           </code>

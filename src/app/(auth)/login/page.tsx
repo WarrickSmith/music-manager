@@ -84,7 +84,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="container max-w-md mx-auto p-6 space-y-8">
+    <div className="container mx-auto max-w-md space-y-8 p-6">
       {/* Show loading overlay during both loading and redirecting states */}
       {(loading || isRedirecting) && (
         <LoadingOverlay
@@ -95,29 +95,26 @@ export default function LoginPage() {
       )}
 
       <div className="flex flex-col items-center mb-8">
-        <div className="flex items-center gap-4 mb-4 animate-fade-in min-h-[90px]">
+        <div className="mb-4 flex min-h-[90px] items-center gap-4 animate-fade-in">
           <Image
             src={logoSrc}
             alt="Music Manager Logo"
-            width={48}
-            height={48}
             priority
-            className="rounded-lg shadow-md"
+            className="h-auto w-12 rounded-2xl shadow-lg shadow-slate-950/10"
           />
-          <h1 className="text-4xl font-bold  leading-[1.2] pb-1 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text pb-1 text-4xl font-bold leading-[1.2] text-transparent dark:from-sky-300 dark:to-violet-300">
             Music Manager
           </h1>
         </div>
-        <p className="text-xl font-medium text-blue-600">Welcome Back</p>
-        <p className="text-gray-600">Sign in to your account</p>
+        <p className="text-xl font-medium text-blue-600 dark:text-sky-300">
+          Welcome Back
+        </p>
+        <p className="text-muted-foreground">Sign in to your account</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
-          <label
-            htmlFor="email"
-            className="block text-sm font-medium text-gray-700"
-          >
+          <label htmlFor="email" className="block text-sm font-medium">
             Email
           </label>
           <Input
@@ -129,19 +126,19 @@ export default function LoginPage() {
             placeholder="your@email.com"
             value={formState.email}
             onChange={handleChange}
-            className="w-full"
+            className="w-full bg-background/70"
           />
         </div>
 
         <div className="space-y-2">
           <div className="flex justify-between">
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="password" className="block text-sm font-medium">
               Password
             </label>
-            <a href="#" className="text-sm text-blue-600 hover:underline">
+            <a
+              href="#"
+              className="text-sm text-blue-600 hover:underline dark:text-sky-300"
+            >
               Forgot password?
             </a>
           </div>
@@ -154,25 +151,25 @@ export default function LoginPage() {
             placeholder="Enter your password"
             value={formState.password}
             onChange={handleChange}
-            className="w-full"
+            className="w-full bg-background/70"
           />
         </div>
 
         <Button
           type="submit"
           disabled={loading || isRedirecting}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5"
+          className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 py-2.5 font-medium text-white hover:from-blue-500 hover:to-violet-500 dark:from-sky-500 dark:to-indigo-500 dark:hover:from-sky-400 dark:hover:to-violet-400"
         >
           Sign In
         </Button>
       </form>
 
       <div className="text-center mt-8">
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-muted-foreground">
           Don&apos;t have an account?{' '}
           <Link
             href="/register"
-            className="font-medium text-blue-600 hover:underline"
+            className="font-medium text-blue-600 hover:underline dark:text-sky-300"
           >
             Register
           </Link>

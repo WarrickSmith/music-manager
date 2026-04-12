@@ -155,13 +155,15 @@ export default function ProfileManagement({
 
   return (
     <div>
-      <Card className="max-w-2xl mx-auto border-violet-100 shadow-sm">
+      <Card className="relative mx-auto max-w-2xl border-violet-100 shadow-sm dark:border-violet-500/20 dark:bg-slate-950/60">
         {isLoading ? (
           <LocalLoadingCard message="Loading profile..." minHeight="200px" />
         ) : (
           <>
-            <CardHeader className="bg-gradient-to-r from-violet-50 to-purple-50 border-b border-violet-100 py-6">
-              <CardTitle className="text-violet-700">My Profile</CardTitle>
+            <CardHeader className="border-b border-violet-100 bg-gradient-to-r from-violet-50 to-purple-50 py-6 dark:border-violet-500/20 dark:from-violet-950/45 dark:to-slate-950">
+              <CardTitle className="text-violet-700 dark:text-violet-100">
+                My Profile
+              </CardTitle>
               <CardDescription>
                 View and manage your personal information
               </CardDescription>
@@ -171,7 +173,7 @@ export default function ProfileManagement({
               <form onSubmit={handleSubmit}>
                 <CardContent className="space-y-6 pt-6">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName" className="text-violet-700">
+                    <Label htmlFor="firstName" className="text-violet-700 dark:text-violet-200">
                       First Name
                     </Label>
                     <Input
@@ -181,13 +183,13 @@ export default function ProfileManagement({
                         setFormData({ ...formData, firstName: e.target.value })
                       }
                       placeholder="Enter your first name"
-                      className="border-violet-200 focus-visible:ring-violet-500"
+                      className="border-violet-200 focus-visible:ring-violet-500 dark:border-violet-500/30 dark:focus-visible:ring-violet-400"
                       disabled={isSubmitting}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="lastName" className="text-violet-700">
+                    <Label htmlFor="lastName" className="text-violet-700 dark:text-violet-200">
                       Last Name
                     </Label>
                     <Input
@@ -197,13 +199,13 @@ export default function ProfileManagement({
                         setFormData({ ...formData, lastName: e.target.value })
                       }
                       placeholder="Enter your last name"
-                      className="border-violet-200 focus-visible:ring-violet-500"
+                      className="border-violet-200 focus-visible:ring-violet-500 dark:border-violet-500/30 dark:focus-visible:ring-violet-400"
                       disabled={isSubmitting}
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-violet-700">
+                    <Label htmlFor="phone" className="text-violet-700 dark:text-violet-200">
                       Phone Number
                     </Label>
                     <Input
@@ -213,38 +215,38 @@ export default function ProfileManagement({
                         setFormData({ ...formData, phone: e.target.value })
                       }
                       placeholder="Enter phone number with country code (e.g., +14155552671)"
-                      className="border-violet-200 focus-visible:ring-violet-500"
+                      className="border-violet-200 focus-visible:ring-violet-500 dark:border-violet-500/30 dark:focus-visible:ring-violet-400"
                       disabled={isSubmitting}
                     />
-                    <p className="text-sm text-slate-500 mt-1">
+                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                       Must start with + followed by country code and number (max
                       15 digits)
                     </p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="email" className="text-violet-700">
+                    <Label htmlFor="email" className="text-violet-700 dark:text-violet-200">
                       Email Address
                     </Label>
                     <Input
                       id="email"
                       value={profile?.email || ''}
                       disabled
-                      className="bg-slate-50 border-violet-100"
+                      className="border-violet-100 bg-slate-50 dark:border-violet-500/20 dark:bg-slate-900/70"
                     />
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
                       Email address cannot be changed
                     </p>
                   </div>
                 </CardContent>
 
-                <CardFooter className="flex justify-end space-x-2 border-t border-violet-100 bg-violet-50/50 py-4">
+                <CardFooter className="flex justify-end space-x-2 border-t border-violet-100 bg-violet-50/50 py-4 dark:border-violet-500/20 dark:bg-violet-950/10">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => setIsEditing(false)}
                     disabled={isSubmitting}
-                    className="border-violet-200 text-violet-700 hover:bg-violet-100"
+                    className="border-violet-200 text-violet-700 hover:bg-violet-100 dark:border-violet-500/30 dark:text-violet-200 dark:hover:bg-violet-500/10"
                   >
                     Cancel
                   </Button>
@@ -262,13 +264,13 @@ export default function ProfileManagement({
                 <CardContent className="space-y-6 pt-6">
                   {/* Show local loading spinner when submitting */}
                   {isSubmitting && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+                    <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/80 backdrop-blur-sm">
                       <div className="w-8 h-8 border-3 border-violet-500 border-t-transparent rounded-full animate-spin" />
                     </div>
                   )}
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium text-slate-500">Role</p>
-                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                    <span className="inline-flex items-center rounded-full border border-green-200 bg-green-100 px-3 py-1 text-sm font-medium text-green-800 dark:border-green-500/30 dark:bg-green-500/15 dark:text-green-100">
                       Competitor
                     </span>
                   </div>
@@ -277,7 +279,7 @@ export default function ProfileManagement({
                       <p className="text-sm font-medium text-slate-500">
                         First Name
                       </p>
-                      <p className="text-lg font-medium text-violet-700">
+                      <p className="text-lg font-medium text-violet-700 dark:text-violet-100">
                         {profile?.firstName || 'Not set'}
                       </p>
                     </div>
@@ -286,7 +288,7 @@ export default function ProfileManagement({
                       <p className="text-sm font-medium text-slate-500">
                         Last Name
                       </p>
-                      <p className="text-lg font-medium text-violet-700">
+                      <p className="text-lg font-medium text-violet-700 dark:text-violet-100">
                         {profile?.lastName || 'Not set'}
                       </p>
                     </div>
@@ -296,7 +298,7 @@ export default function ProfileManagement({
                       <p className="text-sm font-medium text-slate-500">
                         Phone Number
                       </p>
-                      <p className="text-lg font-medium text-violet-700">
+                      <p className="text-lg font-medium text-violet-700 dark:text-violet-100">
                         {profile?.phone || 'Not set'}
                       </p>
                     </div>
@@ -304,18 +306,18 @@ export default function ProfileManagement({
                       <p className="text-sm font-medium text-slate-500">
                         Email Address
                       </p>
-                      <p className="text-lg font-medium text-violet-700">
+                      <p className="text-lg font-medium text-violet-700 dark:text-violet-100">
                         {profile?.email || 'Not available'}
                       </p>
                     </div>
                   </div>
                 </CardContent>
 
-                <CardFooter className="flex justify-end space-x-2 border-t border-violet-100 bg-violet-50/50 py-4">
+                <CardFooter className="flex justify-end space-x-2 border-t border-violet-100 bg-violet-50/50 py-4 dark:border-violet-500/20 dark:bg-violet-950/10">
                   <Button
                     variant="outline"
                     onClick={() => setShowPasswordDialog(true)}
-                    className="border-violet-200 text-violet-700 hover:bg-violet-100"
+                    className="border-violet-200 text-violet-700 hover:bg-violet-100 dark:border-violet-500/30 dark:text-violet-200 dark:hover:bg-violet-500/10"
                   >
                     Change Password
                   </Button>
@@ -334,7 +336,7 @@ export default function ProfileManagement({
 
       {/* Change Password Dialog */}
       <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] dark:border-violet-500/20">
           <DialogHeader>
             <DialogTitle>Change Password</DialogTitle>
             <DialogDescription>
@@ -345,7 +347,7 @@ export default function ProfileManagement({
           <form onSubmit={handlePasswordChange}>
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="currentPassword" className="text-violet-700">
+                <Label htmlFor="currentPassword" className="text-violet-700 dark:text-violet-200">
                   Current Password
                 </Label>
                 <Input
@@ -358,13 +360,13 @@ export default function ProfileManagement({
                       currentPassword: e.target.value,
                     })
                   }
-                  className="border-violet-200 focus-visible:ring-violet-500"
+                  className="border-violet-200 focus-visible:ring-violet-500 dark:border-violet-500/30 dark:focus-visible:ring-violet-400"
                   disabled={isChangingPassword}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="newPassword" className="text-violet-700">
+                <Label htmlFor="newPassword" className="text-violet-700 dark:text-violet-200">
                   New Password
                 </Label>
                 <Input
@@ -377,13 +379,13 @@ export default function ProfileManagement({
                       newPassword: e.target.value,
                     })
                   }
-                  className="border-violet-200 focus-visible:ring-violet-500"
+                  className="border-violet-200 focus-visible:ring-violet-500 dark:border-violet-500/30 dark:focus-visible:ring-violet-400"
                   disabled={isChangingPassword}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-violet-700">
+                <Label htmlFor="confirmPassword" className="text-violet-700 dark:text-violet-200">
                   Confirm New Password
                 </Label>
                 <Input
@@ -396,7 +398,7 @@ export default function ProfileManagement({
                       confirmPassword: e.target.value,
                     })
                   }
-                  className="border-violet-200 focus-visible:ring-violet-500"
+                  className="border-violet-200 focus-visible:ring-violet-500 dark:border-violet-500/30 dark:focus-visible:ring-violet-400"
                   disabled={isChangingPassword}
                   required
                 />
@@ -408,7 +410,7 @@ export default function ProfileManagement({
                 variant="outline"
                 onClick={() => setShowPasswordDialog(false)}
                 disabled={isChangingPassword}
-                className="border-violet-200 text-violet-700 hover:bg-violet-100"
+                className="border-violet-200 text-violet-700 hover:bg-violet-100 dark:border-violet-500/30 dark:text-violet-200 dark:hover:bg-violet-500/10"
               >
                 Cancel
               </Button>

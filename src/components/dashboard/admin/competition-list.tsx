@@ -86,26 +86,29 @@ export default function CompetitionList({
       <div className="mb-4">
         <Label
           htmlFor="year-filter"
-          className="text-xs text-indigo-800 font-semibold mb-1 block"
+          className="mb-1 block text-xs font-semibold text-indigo-800 dark:text-indigo-200"
         >
           Filter by Year
         </Label>
         <Select value={selectedYear} onValueChange={setSelectedYear}>
           <SelectTrigger
             id="year-filter"
-            className="bg-white border-indigo-100 text-indigo-800 font-medium"
+            className="border-indigo-100 bg-background/80 font-medium text-indigo-800 dark:border-indigo-500/30 dark:bg-background dark:text-indigo-100"
           >
             <SelectValue placeholder="Select year" />
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all" className="text-indigo-800 font-medium">
+          <SelectContent className="border-indigo-100 dark:border-indigo-500/30">
+            <SelectItem
+              value="all"
+              className="font-medium text-indigo-800 dark:text-indigo-100"
+            >
               All Years
             </SelectItem>
             {uniqueYears.map((year) => (
               <SelectItem
                 key={year}
                 value={year.toString()}
-                className="text-indigo-800"
+                className="text-indigo-800 dark:text-indigo-100"
               >
                 {year}
               </SelectItem>
@@ -119,7 +122,7 @@ export default function CompetitionList({
           {sortedYears.length > 0 ? (
             sortedYears.map((year) => (
               <div key={year}>
-                <h3 className="font-medium text-sm text-indigo-700 mb-2">
+                <h3 className="mb-2 text-sm font-medium text-indigo-700 dark:text-indigo-200">
                   {year}
                 </h3>
                 <div className="space-y-2">
@@ -140,7 +143,7 @@ export default function CompetitionList({
               </div>
             ))
           ) : (
-            <div className="text-center py-4 text-indigo-600">
+            <div className="py-4 text-center text-indigo-600 dark:text-indigo-200/80">
               No competitions found for the selected year.
             </div>
           )}

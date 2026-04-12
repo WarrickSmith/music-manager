@@ -10,23 +10,30 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
 - shadcn/UI components
 - Appwrite for backend and storage (server-side Node.js SDK)
 - Sonner for toast notifications
-- React Icons
+- Lucide for icons
 
 ## Getting Started
 
 1. Clone the repository
 2. Install dependencies: `npm install`
-3. Set up environment variables in `.env.local`
+3. Set up environment variables in `.env.local` for `npm run dev`, or in `.env` for Docker and Portainer deployments
 4. Run the development server: `npm run dev`
+
+## Deployment
+
+- GitHub Actions publishes `registry.wsapz.com/music-manager:latest` from `.github/workflows/publish-image.yml` on pushes to `main` and manual runs.
+- `docker-compose.yml` is the Portainer stack definition. It pulls the published image from Zot and expects Portainer stack variables to be imported from the project `.env` file before deployment.
+- The GitHub workflow only requires the `REGISTRY_PASSWORD` repository secret for Zot login.
+- Runtime configuration stays in the Portainer stack `.env` import, including `APPWRITE_ENDPOINT`, `APPWRITE_PROJECT_ID`, `APPWRITE_API_KEY`, `APPWRITE_DATABASE_ID`, `APPWRITE_COMPETITIONS_COLLECTION_ID`, `APPWRITE_GRADES_COLLECTION_ID`, `APPWRITE_MUSIC_FILES_COLLECTION_ID`, and `APPWRITE_BUCKET_ID`.
 
 ## Project Structure
 
-- `src/app`: Next.js App Router pages and layouts
+- `src/app`: Next.js App Router pages, layouts, and server actions
 - `src/components`: Reusable UI components
 - `src/lib`: Utility functions and Appwrite configuration
 - `src/hooks`: Custom React hooks
-- `src/types`: TypeScript type definitions
-- `Docs`: Project documentation and Appwrite setup files
+- `scripts`: Appwrite setup and admin scripts
+- `docs`: Project documentation and reference materials
 
 ## Authentication and Role-based Access
 
