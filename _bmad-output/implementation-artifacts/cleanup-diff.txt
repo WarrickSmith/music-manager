@@ -1,0 +1,1877 @@
+diff --git a/Docs/README.md b/Docs/README.md
+deleted file mode 100644
+index db6dad5..0000000
+--- a/Docs/README.md
++++ /dev/null
+@@ -1,10 +0,0 @@
+-# Music Manager Documentation
+-
+-This directory contains documentation and setup files for the Music Manager application.
+-
+-## Contents
+-
+-- `music-manager-data-model.md`: Data model definitions for the application
+-- `setup-appwrite.ts`: Script for setting up Appwrite collections and permissions
+-- `default-grades.ts`: Default grade definitions for competitions
+-- `appwrite-ss-auth.md`: Next.js server-side authentication code examples
+diff --git a/Docs/default-grades.ts b/Docs/default-grades.ts
+deleted file mode 100644
+index 3df9efd..0000000
+--- a/Docs/default-grades.ts
++++ /dev/null
+@@ -1,95 +0,0 @@
+-export const defaultGrades = [
+-  // Singles
+-  { name: 'Singles', category: 'Kiwi Skate', segment: 'Free Skate' },
+-  { name: 'Singles', category: 'Pre Elementary Under 12', segment: 'Free Skate' },
+-  { name: 'Singles', category: 'Pre Elementary Girls 12 & Over', segment: 'Free Skate' },
+-  { name: 'Singles', category: 'Pre Elementary Boys 12 & Over', segment: 'Free Skate' },
+-  { name: 'Singles', category: 'Elementary Under 12', segment: 'Free Skate' },
+-  { name: 'Singles', category: 'Elementary Girls 12 & Over', segment: 'Free Skate' },
+-  { name: 'Singles', category: 'Elementary Boys 12 & Over', segment: 'Free Skate' },
+-  { name: 'Singles', category: 'Juvenile Under 12', segment: 'Free Skate' },
+-  { name: 'Singles', category: 'Juvenile Girls 12 & Over', segment: 'Free Skate' },
+-  { name: 'Singles', category: 'Juvenile Boys 12 & Over', segment: 'Free Skate' },
+-  { name: 'Singles', category: 'Basic Novice Girls', segment: 'Short Program' },
+-  { name: 'Singles', category: 'Basic Novice Girls', segment: 'Free Skate' },
+-  { name: 'Singles', category: 'Basic Novice Boys', segment: 'Short Program' },
+-  { name: 'Singles', category: 'Basic Novice Boys', segment: 'Free Skate' },
+-  { name: 'Singles', category: 'Intermediate Novice Girls', segment: 'Short Program' },
+-  { name: 'Singles', category: 'Intermediate Novice Girls', segment: 'Free Skate' },
+-  { name: 'Singles', category: 'Intermediate Novice Boys', segment: 'Short Program' },
+-  { name: 'Singles', category: 'Intermediate Novice Boys', segment: 'Free Skate' },
+-  { name: 'Singles', category: 'Advanced Novice Girls', segment: 'Short Program' },
+-  { name: 'Singles', category: 'Advanced Novice Girls', segment: 'Free Skate' },
+-  { name: 'Singles', category: 'Advanced Novice Boys', segment: 'Short Program' },
+-  { name: 'Singles', category: 'Advanced Novice Boys', segment: 'Free Skate' },
+-  { name: 'Singles', category: 'Junior Girls', segment: 'Short Program' },
+-  { name: 'Singles', category: 'Junior Girls', segment: 'Free Skate' },
+-  { name: 'Singles', category: 'Junior Boys', segment: 'Short Program' },
+-  { name: 'Singles', category: 'Junior Boys', segment: 'Free Skate' },
+-  { name: 'Singles', category: 'Senior Women', segment: 'Short Program' },
+-  { name: 'Singles', category: 'Senior Women', segment: 'Free Skate' },
+-  { name: 'Singles', category: 'Senior Men', segment: 'Short Program' },
+-  { name: 'Singles', category: 'Senior Men', segment: 'Free Skate' },
+-  
+-  // Adult Singles
+-  { name: 'Adult Singles', category: 'Bronze Women', segment: 'Free Skate' },
+-  { name: 'Adult Singles', category: 'Bronze Men', segment: 'Free Skate' },
+-  { name: 'Adult Singles', category: 'Silver Women', segment: 'Free Skate' },
+-  { name: 'Adult Singles', category: 'Silver Men', segment: 'Free Skate' },
+-  { name: 'Adult Singles', category: 'Gold Women', segment: 'Free Skate' },
+-  { name: 'Adult Singles', category: 'Gold Men', segment: 'Free Skate' },
+-  { name: 'Adult Singles', category: 'Elite Women', segment: 'Free Skate' },
+-  { name: 'Adult Singles', category: 'Elite Men', segment: 'Free Skate' },
+-  
+-  // Masters Singles
+-  { name: 'Masters Singles', category: 'Women', segment: 'Free Skate' },
+-  { name: 'Masters Singles', category: 'Men', segment: 'Free Skate' },
+-
+-  // Ice Dance
+-  { name: 'Ice Dance', category: 'Juvenile', segment: 'Pattern Dance' },
+-  { name: 'Ice Dance', category: 'Intermediate', segment: 'Pattern Dance' },
+-  { name: 'Ice Dance', category: 'Basic Novice', segment: 'Pattern Dance' },
+-  { name: 'Ice Dance', category: 'Intermediate Novice', segment: 'Pattern Dance' },
+-  { name: 'Ice Dance', category: 'Advanced Novice', segment: 'Pattern Dance' },
+-  { name: 'Ice Dance', category: 'Advanced Novice', segment: 'Free Dance' },
+-  { name: 'Ice Dance', category: 'Junior', segment: 'Rhythm Dance' },
+-  { name: 'Ice Dance', category: 'Junior', segment: 'Free Dance' },
+-  { name: 'Ice Dance', category: 'Senior', segment: 'Rhythm Dance' },
+-  { name: 'Ice Dance', category: 'Senior', segment: 'Free Dance' },
+-  { name: 'Adult Ice Dance', category: 'Adult', segment: 'Pattern Dance' },
+-  { name: 'Adult Ice Dance', category: 'Adult', segment: 'Free Dance' },
+-
+-  // Pairs
+-  { name: 'Pairs', category: 'Juvenile', segment: 'Free Skate' },
+-  { name: 'Pairs', category: 'Intermediate', segment: 'Free Skate' },
+-  { name: 'Pairs', category: 'Novice', segment: 'Free Skate' },
+-  { name: 'Pairs', category: 'Junior', segment: 'Short Program' },
+-  { name: 'Pairs', category: 'Junior', segment: 'Free Skate' },
+-  { name: 'Pairs', category: 'Senior', segment: 'Short Program' },
+-  { name: 'Pairs', category: 'Senior', segment: 'Free Skate' },
+-  { name: 'Adult Pairs', category: 'Adult', segment: 'Free Skate' },
+-  
+-  // Synchronized Skating
+-  { name: 'Synchronized Skating', category: 'Basic Novice', segment: 'Free Skate' },
+-  { name: 'Synchronized Skating', category: 'Mixed Age', segment: 'Free Skate' },
+-  { name: 'Synchronized Skating', category: 'Advanced Novice', segment: 'Free Skate' },
+-  { name: 'Synchronized Skating', category: 'Junior', segment: 'Short Program' },
+-  { name: 'Synchronized Skating', category: 'Junior', segment: 'Free Skate' },
+-  { name: 'Synchronized Skating', category: 'Senior', segment: 'Short Program' },
+-  { name: 'Synchronized Skating', category: 'Senior', segment: 'Free Skate' },
+-  { name: 'Synchronized Skating', category: 'Adult', segment: 'Free Skate' },
+-  
+-  // Showcase & Artistic Events
+-  { name: 'Individual Showcase', category: 'Beginner Mixed', segment: 'Performance' },
+-  { name: 'Individual Showcase', category: 'Beginner Women', segment: 'Performance' },
+-  { name: 'Individual Showcase', category: 'Beginner Men', segment: 'Performance' },
+-  { name: 'Individual Showcase', category: 'Intermediate Mixed', segment: 'Performance' },
+-  { name: 'Individual Showcase', category: 'Intermediate Women', segment: 'Performance' },
+-  { name: 'Individual Showcase', category: 'Intermediate Men', segment: 'Performance' },
+-  { name: 'Individual Showcase', category: 'Advanced Mixed', segment: 'Performance' },
+-  { name: 'Individual Showcase', category: 'Advanced Women', segment: 'Performance' },
+-  { name: 'Individual Showcase', category: 'Advanced Men', segment: 'Performance' },
+-  { name: 'Duet Showcase', category: 'Duet', segment: 'Performance' },
+-  { name: 'Group Showcase', category: 'Group', segment: 'Performance' },
+-  { name: 'Theatre on Ice', category: 'Theatre on Ice', segment: 'Performance' },
+-]
+diff --git a/Docs/setup-appwrite.ts b/Docs/setup-appwrite.ts
+deleted file mode 100644
+index a96a255..0000000
+--- a/Docs/setup-appwrite.ts
++++ /dev/null
+@@ -1,266 +0,0 @@
+-import { Client, Databases, Storage, Permission, Role } from 'node-appwrite'
+-
+-if (!process.env.APPWRITE_ENDPOINT)
+-  throw new Error('APPWRITE_ENDPOINT is required')
+-if (!process.env.APPWRITE_PROJECT_ID)
+-  throw new Error('APPWRITE_PROJECT_ID is required')
+-if (!process.env.APPWRITE_SECRET_KEY)
+-  throw new Error('APPWRITE_API_KEY is required')
+-
+-const client = new Client()
+-  .setEndpoint(process.env.APPWRITE_ENDPOINT)
+-  .setProject(process.env.APPWRITE_PROJECT_ID)
+-  .setKey(process.env.APPWRITE_SECRET_KEY)
+-
+-const databases = new Databases(client)
+-const storage = new Storage(client)
+-
+-const DATABASE_ID = 'MusicManagerDB'
+-const STORAGE_BUCKET_ID = 'mmfiles'
+-
+-interface SetupResult {
+-  success: boolean
+-  results: string[]
+-  error?: unknown
+-}
+-
+-interface Attribute {
+-  key: string
+-  type: 'string' | 'integer' | 'boolean'
+-  size?: number
+-  required: boolean
+-}
+-
+-interface AppwriteAttribute {
+-  key: string
+-  type: string
+-  size?: number
+-  required: boolean
+-  status: string
+-  array: boolean
+-}
+-
+-interface AppwriteAttributeList {
+-  total: number
+-  attributes: AppwriteAttribute[]
+-}
+-
+-async function ensureAttributes(
+-  databaseId: string,
+-  collectionId: string,
+-  attributes: Attribute[],
+-  results: string[]
+-) {
+-  // Get existing attributes and safely cast to our expected type
+-  const response = await databases.listAttributes(databaseId, collectionId)
+-  const attributeList = response as unknown as AppwriteAttributeList
+-  const existingKeys = new Set(
+-    attributeList.attributes?.map((attr) => attr.key) || []
+-  )
+-
+-  // Create missing attributes
+-  for (const attr of attributes) {
+-    if (!existingKeys.has(attr.key)) {
+-      switch (attr.type) {
+-        case 'string':
+-          await databases.createStringAttribute(
+-            databaseId,
+-            collectionId,
+-            attr.key,
+-            attr.size || 255,
+-            attr.required
+-          )
+-          results.push(
+-            `Created string attribute '${attr.key}' in collection '${collectionId}'`
+-          )
+-          break
+-        case 'integer':
+-          await databases.createIntegerAttribute(
+-            databaseId,
+-            collectionId,
+-            attr.key,
+-            attr.required
+-          )
+-          results.push(
+-            `Created integer attribute '${attr.key}' in collection '${collectionId}'`
+-          )
+-          break
+-        case 'boolean':
+-          await databases.createBooleanAttribute(
+-            databaseId,
+-            collectionId,
+-            attr.key,
+-            attr.required
+-          )
+-          results.push(
+-            `Created boolean attribute '${attr.key}' in collection '${collectionId}'`
+-          )
+-          break
+-      }
+-    }
+-  }
+-}
+-
+-export async function setupAppwrite(): Promise<SetupResult> {
+-  const results: string[] = []
+-  try {
+-    // Create database if it doesn't exist
+-    try {
+-      await databases.get(DATABASE_ID)
+-      results.push('Database already exists')
+-    } catch {
+-      await databases.create(DATABASE_ID, 'Music Manager Database')
+-      results.push('Database created successfully')
+-    }
+-
+-    // Set up competitions collection
+-    try {
+-      await databases.getCollection(DATABASE_ID, 'competitions')
+-      results.push('Competitions collection exists, checking attributes...')
+-      await ensureAttributes(
+-        DATABASE_ID,
+-        'competitions',
+-        [
+-          { key: 'name', type: 'string', size: 255, required: true },
+-          { key: 'year', type: 'integer', required: true },
+-          { key: 'active', type: 'boolean', required: true },
+-        ],
+-        results
+-      )
+-    } catch {
+-      await databases.createCollection(
+-        DATABASE_ID,
+-        'competitions',
+-        'Competitions Collection',
+-        [Permission.read(Role.any()), Permission.write(Role.any())]
+-      )
+-      results.push('Competitions collection created')
+-      await ensureAttributes(
+-        DATABASE_ID,
+-        'competitions',
+-        [
+-          { key: 'name', type: 'string', size: 255, required: true },
+-          { key: 'year', type: 'integer', required: true },
+-          { key: 'active', type: 'boolean', required: true },
+-        ],
+-        results
+-      )
+-    }
+-
+-    // Set up grades collection
+-    try {
+-      await databases.getCollection(DATABASE_ID, 'grades')
+-      results.push('Grades collection exists, checking attributes...')
+-      await ensureAttributes(
+-        DATABASE_ID,
+-        'grades',
+-        [
+-          { key: 'name', type: 'string', size: 255, required: true },
+-          { key: 'category', type: 'string', size: 255, required: true },
+-          { key: 'segment', type: 'string', size: 255, required: true },
+-          { key: 'competitionId', type: 'string', size: 255, required: true },
+-        ],
+-        results
+-      )
+-    } catch {
+-      await databases.createCollection(
+-        DATABASE_ID,
+-        'grades',
+-        'Grades Collection',
+-        [Permission.read(Role.any()), Permission.write(Role.any())]
+-      )
+-      results.push('Grades collection created')
+-      await ensureAttributes(
+-        DATABASE_ID,
+-        'grades',
+-        [
+-          { key: 'name', type: 'string', size: 255, required: true },
+-          { key: 'category', type: 'string', size: 255, required: true },
+-          { key: 'segment', type: 'string', size: 255, required: true },
+-          { key: 'competitionId', type: 'string', size: 255, required: true },
+-        ],
+-        results
+-      )
+-    }
+-
+-    // Set up music_files collection with complete schema from data model
+-    try {
+-      await databases.getCollection(DATABASE_ID, 'musicfiles')
+-      results.push('Music files collection exists, checking attributes...')
+-      await ensureAttributes(
+-        DATABASE_ID,
+-        'musicfiles',
+-        [
+-          { key: 'originalName', type: 'string', size: 255, required: true },
+-          { key: 'fileName', type: 'string', size: 255, required: true },
+-          { key: 'storagePath', type: 'string', size: 255, required: true },
+-          { key: 'competitionId', type: 'string', size: 255, required: true },
+-          { key: 'competitionName', type: 'string', size: 255, required: true },
+-          { key: 'competitionYear', type: 'integer', required: true },
+-          { key: 'gradeId', type: 'string', size: 255, required: true },
+-          { key: 'gradeType', type: 'string', size: 255, required: true },
+-          { key: 'gradeCategory', type: 'string', size: 255, required: true },
+-          { key: 'gradeSegment', type: 'string', size: 255, required: true },
+-          { key: 'userId', type: 'string', size: 255, required: true },
+-          { key: 'userName', type: 'string', size: 255, required: true },
+-          { key: 'uploadedAt', type: 'string', size: 255, required: true },
+-          { key: 'duration', type: 'integer', required: false },
+-          { key: 'size', type: 'integer', required: true },
+-          { key: 'status', type: 'string', size: 255, required: true },
+-          { key: 'fileId', type: 'string', size: 255, required: true },
+-        ],
+-        results
+-      )
+-    } catch {
+-      await databases.createCollection(
+-        DATABASE_ID,
+-        'musicfiles',
+-        'Music Files Collection',
+-        [Permission.read(Role.any()), Permission.write(Role.any())]
+-      )
+-      results.push('Music files collection created')
+-      await ensureAttributes(
+-        DATABASE_ID,
+-        'musicfiles',
+-        [
+-          { key: 'originalName', type: 'string', size: 255, required: true },
+-          { key: 'fileName', type: 'string', size: 255, required: true },
+-          { key: 'storagePath', type: 'string', size: 255, required: true },
+-          { key: 'competitionId', type: 'string', size: 255, required: true },
+-          { key: 'competitionName', type: 'string', size: 255, required: true },
+-          { key: 'competitionYear', type: 'integer', required: true },
+-          { key: 'gradeId', type: 'string', size: 255, required: true },
+-          { key: 'gradeType', type: 'string', size: 255, required: true },
+-          { key: 'gradeCategory', type: 'string', size: 255, required: true },
+-          { key: 'gradeSegment', type: 'string', size: 255, required: true },
+-          { key: 'userId', type: 'string', size: 255, required: true },
+-          { key: 'userName', type: 'string', size: 255, required: true },
+-          { key: 'uploadedAt', type: 'string', size: 255, required: true },
+-          { key: 'duration', type: 'integer', required: false },
+-          { key: 'size', type: 'integer', required: true },
+-          { key: 'status', type: 'string', size: 255, required: true },
+-          { key: 'fileId', type: 'string', size: 255, required: true },
+-        ],
+-        results
+-      )
+-    }
+-
+-    // Set up storage bucket
+-    try {
+-      await storage.getBucket(STORAGE_BUCKET_ID)
+-      results.push('Storage bucket already exists')
+-    } catch {
+-      await storage.createBucket(STORAGE_BUCKET_ID, 'MM Files', [
+-        Permission.read(Role.any()),
+-        Permission.write(Role.any()),
+-      ])
+-      results.push('Storage bucket created successfully')
+-    }
+-
+-    results.push('Database setup completed successfully')
+-    return { success: true, results }
+-  } catch (error) {
+-    console.error('Error setting up database:', error)
+-    return { success: false, error, results }
+-  }
+-}
+diff --git a/Docs/AppwriteAPI/appwrite-database-server-api.md b/docs/AppwriteAPI/appwrite-database-server-api.md
+similarity index 100%
+rename from Docs/AppwriteAPI/appwrite-database-server-api.md
+rename to docs/AppwriteAPI/appwrite-database-server-api.md
+diff --git a/Docs/AppwriteAPI/appwrite-storage-server-api.md b/docs/AppwriteAPI/appwrite-storage-server-api.md
+similarity index 100%
+rename from Docs/AppwriteAPI/appwrite-storage-server-api.md
+rename to docs/AppwriteAPI/appwrite-storage-server-api.md
+diff --git a/Docs/AppwriteAPI/appwrite-users-server-api.md b/docs/AppwriteAPI/appwrite-users-server-api.md
+similarity index 100%
+rename from Docs/AppwriteAPI/appwrite-users-server-api.md
+rename to docs/AppwriteAPI/appwrite-users-server-api.md
+diff --git a/docs/README.md b/docs/README.md
+new file mode 100644
+index 0000000..c543229
+--- /dev/null
++++ b/docs/README.md
+@@ -0,0 +1,13 @@
++# Music Manager Documentation
++
++This directory contains documentation and setup files for the Music Manager application.
++
++## Contents
++
++- `music-manager-data-model.md`: Data model definitions for the application
++- `appwrite-ss-auth.md`: Next.js server-side authentication code examples
++- `AppwriteAPI/`: Appwrite server API reference (database, storage, users)
++- `mm-plan.md`, `mm-plan-p5.md`, `mm-plan-p5-brief.md`: Historical planning notes
++- `portainer-error.jpg`: Reference screenshot
++
++The Appwrite setup script lives at `scripts/setup-appwrite.ts` and is run via the `setup:appwrite*` npm scripts. Default grade definitions live at `src/lib/appwrite/default-grades.ts`.
+diff --git a/Docs/appwrite-ss-auth.md b/docs/appwrite-ss-auth.md
+similarity index 100%
+rename from Docs/appwrite-ss-auth.md
+rename to docs/appwrite-ss-auth.md
+diff --git a/mm-plan-p5-brief.md b/docs/mm-plan-p5-brief.md
+similarity index 100%
+rename from mm-plan-p5-brief.md
+rename to docs/mm-plan-p5-brief.md
+diff --git a/mm-plan-p5.md b/docs/mm-plan-p5.md
+similarity index 100%
+rename from mm-plan-p5.md
+rename to docs/mm-plan-p5.md
+diff --git a/Docs/mm-plan.md b/docs/mm-plan.md
+similarity index 96%
+rename from Docs/mm-plan.md
+rename to docs/mm-plan.md
+index ae61dd6..8a09859 100644
+--- a/Docs/mm-plan.md
++++ b/docs/mm-plan.md
+@@ -133,7 +133,7 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
+    - Secure endpoints and storage accordingly via server-side operations.
+ 
+ 4. **Master Grades Template**
+-   - There are default grades defined in the Docs directory in the default-grades.ts file.
++   - There are default grades defined at `src/lib/appwrite/default-grades.ts`.
+ 
+ ---
+ 
+@@ -187,7 +187,7 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
+ 2. **Admin Dashboard Features**
+ 
+    - Manage user roles, see all competitions, create new competitions, delete competitions, and manage Grades (CRUD) via server-side operations.
+-   - Creating a new competition will initially create associated grades from a default list of grades. There are default template grade Documents in the grades collection created by the setup-appwrite.ts script at project initiation. It may be better to remove this from the script and just create the default grades for a new competition directly from the Docs/default-grades.ts file as there will need to be a way to maintian the default grades after initial setup..
++   - Creating a new competition will initially create associated grades from a default list of grades. There are default template grade Documents in the grades collection created by the setup-appwrite.ts script at project initiation. It may be better to remove this from the script and just create the default grades for a new competition directly from `src/lib/appwrite/default-grades.ts` as there will need to be a way to maintian the default grades after initial setup..
+    - Provide bulk updates or deletions for user accounts and associated data.
+    - Provide a data view of MusicFile submissions.
+    - Dashboard should display active and inactive competitions separately.
+diff --git a/Docs/music-manager-data-model.md b/docs/music-manager-data-model.md
+similarity index 100%
+rename from Docs/music-manager-data-model.md
+rename to docs/music-manager-data-model.md
+diff --git a/portainer error.jpg b/docs/portainer-error.jpg
+similarity index 100%
+rename from portainer error.jpg
+rename to docs/portainer-error.jpg
+diff --git a/package.json b/package.json
+index 69bfd40..a12f59c 100644
+--- a/package.json
++++ b/package.json
+@@ -20,7 +20,6 @@
+     "@hookform/resolvers": "^4.1.3",
+     "@radix-ui/react-alert-dialog": "^1.1.6",
+     "@radix-ui/react-dialog": "^1.1.6",
+-    "@radix-ui/react-dropdown-menu": "^2.1.6",
+     "@radix-ui/react-label": "^2.1.2",
+     "@radix-ui/react-progress": "^1.1.2",
+     "@radix-ui/react-radio-group": "^1.2.3",
+@@ -38,7 +37,6 @@
+     "react": "19.0.3",
+     "react-dom": "19.0.3",
+     "react-hook-form": "^7.54.2",
+-    "react-icons": "^5.5.0",
+     "sonner": "^2.0.1",
+     "tailwind-merge": "^3.0.2",
+     "tailwindcss-animate": "^1.0.7",
+diff --git a/public/file.svg b/public/file.svg
+deleted file mode 100644
+index 004145c..0000000
+--- a/public/file.svg
++++ /dev/null
+@@ -1 +0,0 @@
+-<svg fill="none" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M14.5 13.5V5.41a1 1 0 0 0-.3-.7L9.8.29A1 1 0 0 0 9.08 0H1.5v13.5A2.5 2.5 0 0 0 4 16h8a2.5 2.5 0 0 0 2.5-2.5m-1.5 0v-7H8v-5H3v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1M9.5 5V2.12L12.38 5zM5.13 5h-.62v1.25h2.12V5zm-.62 3h7.12v1.25H4.5zm.62 3h-.62v1.25h7.12V11z" clip-rule="evenodd" fill="#666" fill-rule="evenodd"/></svg>
+\ No newline at end of file
+diff --git a/public/globe.svg b/public/globe.svg
+deleted file mode 100644
+index 567f17b..0000000
+--- a/public/globe.svg
++++ /dev/null
+@@ -1 +0,0 @@
+-<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><g clip-path="url(#a)"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.27 14.1a6.5 6.5 0 0 0 3.67-3.45q-1.24.21-2.7.34-.31 1.83-.97 3.1M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.48-1.52a7 7 0 0 1-.96 0H7.5a4 4 0 0 1-.84-1.32q-.38-.89-.63-2.08a40 40 0 0 0 3.92 0q-.25 1.2-.63 2.08a4 4 0 0 1-.84 1.31zm2.94-4.76q1.66-.15 2.95-.43a7 7 0 0 0 0-2.58q-1.3-.27-2.95-.43a18 18 0 0 1 0 3.44m-1.27-3.54a17 17 0 0 1 0 3.64 39 39 0 0 1-4.3 0 17 17 0 0 1 0-3.64 39 39 0 0 1 4.3 0m1.1-1.17q1.45.13 2.69.34a6.5 6.5 0 0 0-3.67-3.44q.65 1.26.98 3.1M8.48 1.5l.01.02q.41.37.84 1.31.38.89.63 2.08a40 40 0 0 0-3.92 0q.25-1.2.63-2.08a4 4 0 0 1 .85-1.32 7 7 0 0 1 .96 0m-2.75.4a6.5 6.5 0 0 0-3.67 3.44 29 29 0 0 1 2.7-.34q.31-1.83.97-3.1M4.58 6.28q-1.66.16-2.95.43a7 7 0 0 0 0 2.58q1.3.27 2.95.43a18 18 0 0 1 0-3.44m.17 4.71q-1.45-.12-2.69-.34a6.5 6.5 0 0 0 3.67 3.44q-.65-1.27-.98-3.1" fill="#666"/></g><defs><clipPath id="a"><path fill="#fff" d="M0 0h16v16H0z"/></clipPath></defs></svg>
+\ No newline at end of file
+diff --git a/public/next.svg b/public/next.svg
+deleted file mode 100644
+index 5174b28..0000000
+--- a/public/next.svg
++++ /dev/null
+@@ -1 +0,0 @@
+-<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 394 80"><path fill="#000" d="M262 0h68.5v12.7h-27.2v66.6h-13.6V12.7H262V0ZM149 0v12.7H94v20.4h44.3v12.6H94v21h55v12.6H80.5V0h68.7zm34.3 0h-17.8l63.8 79.4h17.9l-32-39.7 32-39.6h-17.9l-23 28.6-23-28.6zm18.3 56.7-9-11-27.1 33.7h17.8l18.3-22.7z"/><path fill="#000" d="M81 79.3 17 0H0v79.3h13.6V17l50.2 62.3H81Zm252.6-.4c-1 0-1.8-.4-2.5-1s-1.1-1.6-1.1-2.6.3-1.8 1-2.5 1.6-1 2.6-1 1.8.3 2.5 1a3.4 3.4 0 0 1 .6 4.3 3.7 3.7 0 0 1-3 1.8zm23.2-33.5h6v23.3c0 2.1-.4 4-1.3 5.5a9.1 9.1 0 0 1-3.8 3.5c-1.6.8-3.5 1.3-5.7 1.3-2 0-3.7-.4-5.3-1s-2.8-1.8-3.7-3.2c-.9-1.3-1.4-3-1.4-5h6c.1.8.3 1.6.7 2.2s1 1.2 1.6 1.5c.7.4 1.5.5 2.4.5 1 0 1.8-.2 2.4-.6a4 4 0 0 0 1.6-1.8c.3-.8.5-1.8.5-3V45.5zm30.9 9.1a4.4 4.4 0 0 0-2-3.3 7.5 7.5 0 0 0-4.3-1.1c-1.3 0-2.4.2-3.3.5-.9.4-1.6 1-2 1.6a3.5 3.5 0 0 0-.3 4c.3.5.7.9 1.3 1.2l1.8 1 2 .5 3.2.8c1.3.3 2.5.7 3.7 1.2a13 13 0 0 1 3.2 1.8 8.1 8.1 0 0 1 3 6.5c0 2-.5 3.7-1.5 5.1a10 10 0 0 1-4.4 3.5c-1.8.8-4.1 1.2-6.8 1.2-2.6 0-4.9-.4-6.8-1.2-2-.8-3.4-2-4.5-3.5a10 10 0 0 1-1.7-5.6h6a5 5 0 0 0 3.5 4.6c1 .4 2.2.6 3.4.6 1.3 0 2.5-.2 3.5-.6 1-.4 1.8-1 2.4-1.7a4 4 0 0 0 .8-2.4c0-.9-.2-1.6-.7-2.2a11 11 0 0 0-2.1-1.4l-3.2-1-3.8-1c-2.8-.7-5-1.7-6.6-3.2a7.2 7.2 0 0 1-2.4-5.7 8 8 0 0 1 1.7-5 10 10 0 0 1 4.3-3.5c2-.8 4-1.2 6.4-1.2 2.3 0 4.4.4 6.2 1.2 1.8.8 3.2 2 4.3 3.4 1 1.4 1.5 3 1.5 5h-5.8z"/></svg>
+\ No newline at end of file
+diff --git a/public/vercel.svg b/public/vercel.svg
+deleted file mode 100644
+index 7705396..0000000
+--- a/public/vercel.svg
++++ /dev/null
+@@ -1 +0,0 @@
+-<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1155 1000"><path d="m577.3 0 577.4 1000H0z" fill="#fff"/></svg>
+\ No newline at end of file
+diff --git a/public/window.svg b/public/window.svg
+deleted file mode 100644
+index b2b2a44..0000000
+--- a/public/window.svg
++++ /dev/null
+@@ -1 +0,0 @@
+-<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.5 2.5h13v10a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1zM0 1h16v11.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 0 12.5zm3.75 4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5M7 4.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0m1.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5" fill="#666"/></svg>
+\ No newline at end of file
+diff --git a/src/app/(auth)/login/page.config.ts b/src/app/(auth)/login/page.config.ts
+deleted file mode 100644
+index 1b8b1e9..0000000
+--- a/src/app/(auth)/login/page.config.ts
++++ /dev/null
+@@ -1,2 +0,0 @@
+-// Mark the login page as dynamic to avoid cookie errors
+-export const dynamic = 'force-dynamic'
+diff --git a/src/app/(auth)/register/page.config.ts b/src/app/(auth)/register/page.config.ts
+deleted file mode 100644
+index 655cf85..0000000
+--- a/src/app/(auth)/register/page.config.ts
++++ /dev/null
+@@ -1,2 +0,0 @@
+-// Mark the register page as dynamic to avoid cookie errors
+-export const dynamic = 'force-dynamic'
+diff --git a/src/app/actions/competition-actions.ts b/src/app/actions/competition-actions.ts
+index 88970e7..e9aa6da 100644
+--- a/src/app/actions/competition-actions.ts
++++ b/src/app/actions/competition-actions.ts
+@@ -3,7 +3,7 @@
+ import { databases, ID, Query } from '@/lib/appwrite/server'
+ import { Models } from 'node-appwrite'
+ import { revalidatePath } from 'next/cache'
+-import { defaultGrades } from '../../../Docs/default-grades'
++import { defaultGrades } from '@/lib/appwrite/default-grades'
+ import { storage } from '@/lib/appwrite/server'
+ import { checkAppwriteInitialization } from '@/lib/appwrite/initialization-service'
+ 
+diff --git a/src/app/admin/dashboard/page.config.ts b/src/app/admin/dashboard/page.config.ts
+deleted file mode 100644
+index 640655b..0000000
+--- a/src/app/admin/dashboard/page.config.ts
++++ /dev/null
+@@ -1,2 +0,0 @@
+-// Mark the admin dashboard page as dynamic to avoid cookie errors
+-export const dynamic = 'force-dynamic'
+diff --git a/src/app/dashboard/page.config.ts b/src/app/dashboard/page.config.ts
+deleted file mode 100644
+index cec1657..0000000
+--- a/src/app/dashboard/page.config.ts
++++ /dev/null
+@@ -1,2 +0,0 @@
+-// Mark the dashboard page as dynamic to avoid cookie errors
+-export const dynamic = 'force-dynamic'
+diff --git a/src/app/page.config.ts b/src/app/page.config.ts
+deleted file mode 100644
+index 2cdb939..0000000
+--- a/src/app/page.config.ts
++++ /dev/null
+@@ -1,2 +0,0 @@
+-// Mark the home page as dynamic to avoid cookie errors
+-export const dynamic = 'force-dynamic'
+diff --git a/src/app/page.tsx b/src/app/page.tsx
+index ce3da2e..7f5b336 100644
+--- a/src/app/page.tsx
++++ b/src/app/page.tsx
+@@ -3,7 +3,7 @@
+ import Link from 'next/link'
+ import Image from 'next/image'
+ import { Button } from '@/components/ui/button'
+-import { FaMusic, FaUpload, FaHeadphones } from 'react-icons/fa'
++import { Music, Upload, Headphones } from 'lucide-react'
+ import { useEffect, useState } from 'react'
+ import { logoutAction } from '@/app/actions/auth-actions'
+ import LoadingOverlay from '@/components/ui/loading-overlay'
+@@ -58,7 +58,7 @@ export default function Home() {
+ 
+         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 w-full max-w-3xl">
+           <div className="flex flex-col items-center p-6 rounded-xl bg-card shadow-sm border border-border/40 hover:shadow-md transition-shadow">
+-            <FaUpload className="w-8 h-8 text-primary mb-4" />
++            <Upload className="w-8 h-8 text-primary mb-4" />
+             <h3 className="text-lg font-medium mb-2">Easy Uploads</h3>
+             <p className="text-sm text-muted-foreground text-center">
+               Upload and store your music files securely
+@@ -66,7 +66,7 @@ export default function Home() {
+           </div>
+ 
+           <div className="flex flex-col items-center p-6 rounded-xl bg-card shadow-sm border border-border/40 hover:shadow-md transition-shadow">
+-            <FaMusic className="w-8 h-8 text-primary mb-4" />
++            <Music className="w-8 h-8 text-primary mb-4" />
+             <h3 className="text-lg font-medium mb-2">Organize</h3>
+             <p className="text-sm text-muted-foreground text-center">
+               Categorize and manage your music collection
+@@ -74,7 +74,7 @@ export default function Home() {
+           </div>
+ 
+           <div className="flex flex-col items-center p-6 rounded-xl bg-card shadow-sm border border-border/40 hover:shadow-md transition-shadow">
+-            <FaHeadphones className="w-8 h-8 text-primary mb-4" />
++            <Headphones className="w-8 h-8 text-primary mb-4" />
+             <h3 className="text-lg font-medium mb-2">Preview</h3>
+             <p className="text-sm text-muted-foreground text-center">
+               Listen to your tracks before competitions
+diff --git a/src/components/layout/navbar.tsx b/src/components/layout/navbar.tsx
+index 5101e07..dfd5189 100644
+--- a/src/components/layout/navbar.tsx
++++ b/src/components/layout/navbar.tsx
+@@ -2,7 +2,7 @@
+ 
+ import Link from 'next/link'
+ import Image from 'next/image'
+-import { FaUser, FaSignOutAlt, FaMusic } from 'react-icons/fa'
++import { User, LogOut, Music } from 'lucide-react'
+ import { useState } from 'react'
+ import { useRouter } from 'next/navigation'
+ import { logoutAction } from '@/app/actions/auth-actions'
+@@ -143,7 +143,7 @@ export default function Navbar({ user }: NavbarProps) {
+                 href={userRole === 'admin' ? '/admin/dashboard' : '/dashboard'}
+                 className="hidden md:flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
+               >
+-                <FaMusic className="w-4 h-4" />
++                <Music className="w-4 h-4" />
+                 <span>My Music</span>
+               </Link>
+             )}
+@@ -157,7 +157,7 @@ export default function Navbar({ user }: NavbarProps) {
+                 {isLoggingOut ? (
+                   <div className="w-5 h-5 border-2 border-t-current border-r-transparent border-b-current border-l-transparent rounded-full animate-spin"></div>
+                 ) : (
+-                  <FaUser className="w-5 h-5" />
++                  <User className="w-5 h-5" />
+                 )}
+               </button>
+ 
+@@ -185,7 +185,7 @@ export default function Navbar({ user }: NavbarProps) {
+                         disabled={isLoggingOut}
+                         className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                       >
+-                        <FaSignOutAlt className="w-4 h-4" />
++                        <LogOut className="w-4 h-4" />
+                         <span>Logout</span>
+                       </button>
+                     </>
+@@ -196,7 +196,7 @@ export default function Navbar({ user }: NavbarProps) {
+                         onClick={closeUserMenu}
+                         className="flex items-center gap-2 px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 transition-colors"
+                       >
+-                        <FaUser className="w-4 h-4" />
++                        <User className="w-4 h-4" />
+                         <span>Login</span>
+                       </Link>
+                       <Link
+@@ -204,7 +204,7 @@ export default function Navbar({ user }: NavbarProps) {
+                         onClick={closeUserMenu}
+                         className="flex items-center gap-2 px-4 py-2 text-sm text-green-600 hover:bg-green-50 transition-colors"
+                       >
+-                        <FaUser className="w-4 h-4" />
++                        <User className="w-4 h-4" />
+                         <span>Register</span>
+                       </Link>
+                     </>
+diff --git a/src/components/ui/dropdown-menu.tsx b/src/components/ui/dropdown-menu.tsx
+deleted file mode 100644
+index 8cf3fd1..0000000
+--- a/src/components/ui/dropdown-menu.tsx
++++ /dev/null
+@@ -1,257 +0,0 @@
+-"use client"
+-
+-import * as React from "react"
+-import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
+-import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react"
+-
+-import { cn } from "@/lib/utils"
+-
+-function DropdownMenu({
+-  ...props
+-}: React.ComponentProps<typeof DropdownMenuPrimitive.Root>) {
+-  return <DropdownMenuPrimitive.Root data-slot="dropdown-menu" {...props} />
+-}
+-
+-function DropdownMenuPortal({
+-  ...props
+-}: React.ComponentProps<typeof DropdownMenuPrimitive.Portal>) {
+-  return (
+-    <DropdownMenuPrimitive.Portal data-slot="dropdown-menu-portal" {...props} />
+-  )
+-}
+-
+-function DropdownMenuTrigger({
+-  ...props
+-}: React.ComponentProps<typeof DropdownMenuPrimitive.Trigger>) {
+-  return (
+-    <DropdownMenuPrimitive.Trigger
+-      data-slot="dropdown-menu-trigger"
+-      {...props}
+-    />
+-  )
+-}
+-
+-function DropdownMenuContent({
+-  className,
+-  sideOffset = 4,
+-  ...props
+-}: React.ComponentProps<typeof DropdownMenuPrimitive.Content>) {
+-  return (
+-    <DropdownMenuPrimitive.Portal>
+-      <DropdownMenuPrimitive.Content
+-        data-slot="dropdown-menu-content"
+-        sideOffset={sideOffset}
+-        className={cn(
+-          "bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 min-w-[8rem] overflow-hidden rounded-md border p-1 shadow-md",
+-          className
+-        )}
+-        {...props}
+-      />
+-    </DropdownMenuPrimitive.Portal>
+-  )
+-}
+-
+-function DropdownMenuGroup({
+-  ...props
+-}: React.ComponentProps<typeof DropdownMenuPrimitive.Group>) {
+-  return (
+-    <DropdownMenuPrimitive.Group data-slot="dropdown-menu-group" {...props} />
+-  )
+-}
+-
+-function DropdownMenuItem({
+-  className,
+-  inset,
+-  variant = "default",
+-  ...props
+-}: React.ComponentProps<typeof DropdownMenuPrimitive.Item> & {
+-  inset?: boolean
+-  variant?: "default" | "destructive"
+-}) {
+-  return (
+-    <DropdownMenuPrimitive.Item
+-      data-slot="dropdown-menu-item"
+-      data-inset={inset}
+-      data-variant={variant}
+-      className={cn(
+-        "focus:bg-accent focus:text-accent-foreground data-[variant=destructive]:text-destructive-foreground data-[variant=destructive]:focus:bg-destructive/10 dark:data-[variant=destructive]:focus:bg-destructive/40 data-[variant=destructive]:focus:text-destructive-foreground data-[variant=destructive]:*:[svg]:!text-destructive-foreground [&_svg:not([class*='text-'])]:text-muted-foreground relative flex cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 data-[inset]:pl-8 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+-        className
+-      )}
+-      {...props}
+-    />
+-  )
+-}
+-
+-function DropdownMenuCheckboxItem({
+-  className,
+-  children,
+-  checked,
+-  ...props
+-}: React.ComponentProps<typeof DropdownMenuPrimitive.CheckboxItem>) {
+-  return (
+-    <DropdownMenuPrimitive.CheckboxItem
+-      data-slot="dropdown-menu-checkbox-item"
+-      className={cn(
+-        "focus:bg-accent focus:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+-        className
+-      )}
+-      checked={checked}
+-      {...props}
+-    >
+-      <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+-        <DropdownMenuPrimitive.ItemIndicator>
+-          <CheckIcon className="size-4" />
+-        </DropdownMenuPrimitive.ItemIndicator>
+-      </span>
+-      {children}
+-    </DropdownMenuPrimitive.CheckboxItem>
+-  )
+-}
+-
+-function DropdownMenuRadioGroup({
+-  ...props
+-}: React.ComponentProps<typeof DropdownMenuPrimitive.RadioGroup>) {
+-  return (
+-    <DropdownMenuPrimitive.RadioGroup
+-      data-slot="dropdown-menu-radio-group"
+-      {...props}
+-    />
+-  )
+-}
+-
+-function DropdownMenuRadioItem({
+-  className,
+-  children,
+-  ...props
+-}: React.ComponentProps<typeof DropdownMenuPrimitive.RadioItem>) {
+-  return (
+-    <DropdownMenuPrimitive.RadioItem
+-      data-slot="dropdown-menu-radio-item"
+-      className={cn(
+-        "focus:bg-accent focus:text-accent-foreground relative flex cursor-default items-center gap-2 rounded-sm py-1.5 pr-2 pl-8 text-sm outline-hidden select-none data-[disabled]:pointer-events-none data-[disabled]:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+-        className
+-      )}
+-      {...props}
+-    >
+-      <span className="pointer-events-none absolute left-2 flex size-3.5 items-center justify-center">
+-        <DropdownMenuPrimitive.ItemIndicator>
+-          <CircleIcon className="size-2 fill-current" />
+-        </DropdownMenuPrimitive.ItemIndicator>
+-      </span>
+-      {children}
+-    </DropdownMenuPrimitive.RadioItem>
+-  )
+-}
+-
+-function DropdownMenuLabel({
+-  className,
+-  inset,
+-  ...props
+-}: React.ComponentProps<typeof DropdownMenuPrimitive.Label> & {
+-  inset?: boolean
+-}) {
+-  return (
+-    <DropdownMenuPrimitive.Label
+-      data-slot="dropdown-menu-label"
+-      data-inset={inset}
+-      className={cn(
+-        "px-2 py-1.5 text-sm font-medium data-[inset]:pl-8",
+-        className
+-      )}
+-      {...props}
+-    />
+-  )
+-}
+-
+-function DropdownMenuSeparator({
+-  className,
+-  ...props
+-}: React.ComponentProps<typeof DropdownMenuPrimitive.Separator>) {
+-  return (
+-    <DropdownMenuPrimitive.Separator
+-      data-slot="dropdown-menu-separator"
+-      className={cn("bg-border -mx-1 my-1 h-px", className)}
+-      {...props}
+-    />
+-  )
+-}
+-
+-function DropdownMenuShortcut({
+-  className,
+-  ...props
+-}: React.ComponentProps<"span">) {
+-  return (
+-    <span
+-      data-slot="dropdown-menu-shortcut"
+-      className={cn(
+-        "text-muted-foreground ml-auto text-xs tracking-widest",
+-        className
+-      )}
+-      {...props}
+-    />
+-  )
+-}
+-
+-function DropdownMenuSub({
+-  ...props
+-}: React.ComponentProps<typeof DropdownMenuPrimitive.Sub>) {
+-  return <DropdownMenuPrimitive.Sub data-slot="dropdown-menu-sub" {...props} />
+-}
+-
+-function DropdownMenuSubTrigger({
+-  className,
+-  inset,
+-  children,
+-  ...props
+-}: React.ComponentProps<typeof DropdownMenuPrimitive.SubTrigger> & {
+-  inset?: boolean
+-}) {
+-  return (
+-    <DropdownMenuPrimitive.SubTrigger
+-      data-slot="dropdown-menu-sub-trigger"
+-      data-inset={inset}
+-      className={cn(
+-        "focus:bg-accent focus:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground flex cursor-default items-center rounded-sm px-2 py-1.5 text-sm outline-hidden select-none data-[inset]:pl-8",
+-        className
+-      )}
+-      {...props}
+-    >
+-      {children}
+-      <ChevronRightIcon className="ml-auto size-4" />
+-    </DropdownMenuPrimitive.SubTrigger>
+-  )
+-}
+-
+-function DropdownMenuSubContent({
+-  className,
+-  ...props
+-}: React.ComponentProps<typeof DropdownMenuPrimitive.SubContent>) {
+-  return (
+-    <DropdownMenuPrimitive.SubContent
+-      data-slot="dropdown-menu-sub-content"
+-      className={cn(
+-        "bg-popover text-popover-foreground data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 min-w-[8rem] overflow-hidden rounded-md border p-1 shadow-lg",
+-        className
+-      )}
+-      {...props}
+-    />
+-  )
+-}
+-
+-export {
+-  DropdownMenu,
+-  DropdownMenuPortal,
+-  DropdownMenuTrigger,
+-  DropdownMenuContent,
+-  DropdownMenuGroup,
+-  DropdownMenuLabel,
+-  DropdownMenuItem,
+-  DropdownMenuCheckboxItem,
+-  DropdownMenuRadioGroup,
+-  DropdownMenuRadioItem,
+-  DropdownMenuSeparator,
+-  DropdownMenuShortcut,
+-  DropdownMenuSub,
+-  DropdownMenuSubTrigger,
+-  DropdownMenuSubContent,
+-}
+diff --git a/src/hooks/use-audio-player.ts b/src/hooks/use-audio-player.ts
+deleted file mode 100644
+index 51aa66a..0000000
+--- a/src/hooks/use-audio-player.ts
++++ /dev/null
+@@ -1,304 +0,0 @@
+-'use client'
+-
+-import { useState, useEffect, useRef, useCallback } from 'react'
+-import { getMusicFileViewUrl } from '@/app/actions/music-file-actions'
+-
+-export type AudioPlayerState =
+-  | 'idle'
+-  | 'loading'
+-  | 'playing'
+-  | 'paused'
+-  | 'error'
+-
+-interface UseAudioPlayerProps {
+-  fileId: string
+-  onPlayStateChange?: (isPlaying: boolean) => void
+-}
+-
+-// Extend HTMLAudioElement to store event handlers for cleanup
+-interface ExtendedAudioElement extends HTMLAudioElement {
+-  canPlayHandler?: EventListener
+-  playingHandler?: EventListener
+-  pauseHandler?: EventListener
+-  endedHandler?: EventListener
+-  errorHandler?: EventListener
+-  timeUpdateHandler?: EventListener
+-}
+-
+-export function useAudioPlayer({
+-  fileId,
+-  onPlayStateChange,
+-}: UseAudioPlayerProps) {
+-  const [playerState, setPlayerState] = useState<AudioPlayerState>('idle')
+-  const [error, setError] = useState<string | null>(null)
+-  const audioRef = useRef<ExtendedAudioElement | null>(null)
+-  const urlRef = useRef<string | null>(null)
+-  const isInitializedRef = useRef(false)
+-  const shouldPlayOnInitRef = useRef(false)
+-  const retryCountRef = useRef(0)
+-  const maxRetries = 3
+-
+-  // Improved cleanup function to remove all event listeners
+-  const cleanup = useCallback(() => {
+-    if (audioRef.current) {
+-      const audio = audioRef.current
+-
+-      // Remove all event listeners
+-      if (audio.canPlayHandler) {
+-        audio.removeEventListener('canplay', audio.canPlayHandler)
+-      }
+-      if (audio.playingHandler) {
+-        audio.removeEventListener('playing', audio.playingHandler)
+-      }
+-      if (audio.pauseHandler) {
+-        audio.removeEventListener('pause', audio.pauseHandler)
+-      }
+-      if (audio.endedHandler) {
+-        audio.removeEventListener('ended', audio.endedHandler)
+-      }
+-      if (audio.errorHandler) {
+-        audio.removeEventListener('error', audio.errorHandler)
+-      }
+-      if (audio.timeUpdateHandler) {
+-        audio.removeEventListener('timeupdate', audio.timeUpdateHandler)
+-      }
+-
+-      // Pause and reset
+-      audio.pause()
+-      audio.currentTime = 0
+-      audio.src = ''
+-      audioRef.current = null
+-    }
+-
+-    urlRef.current = null
+-    isInitializedRef.current = false
+-    shouldPlayOnInitRef.current = false
+-    retryCountRef.current = 0
+-    setPlayerState('idle')
+-    if (onPlayStateChange) onPlayStateChange(false)
+-  }, [onPlayStateChange])
+-
+-  // Initialize or reset audio element
+-  const initAudio = useCallback(async () => {
+-    try {
+-      // Clean up any existing audio
+-      if (audioRef.current) {
+-        cleanup()
+-      }
+-
+-      setPlayerState('loading')
+-      setError(null)
+-
+-      // Get the streaming URL
+-      const { url } = await getMusicFileViewUrl(fileId)
+-      urlRef.current = url
+-
+-      // Create new audio element
+-      const audio = new Audio() as ExtendedAudioElement
+-
+-      // Set required attributes for better streaming performance
+-      audio.crossOrigin = 'anonymous' // Enable CORS for cross-origin resources
+-      audio.preload = 'auto' // Preload audio data
+-
+-      // Define event handlers
+-      const canPlayHandler = () => {
+-        console.log('Audio can play now')
+-        isInitializedRef.current = true
+-        retryCountRef.current = 0 // Reset retry counter on success
+-
+-        // If we should play on init, do it now
+-        if (shouldPlayOnInitRef.current) {
+-          console.log('Auto-playing after initialization')
+-          audio
+-            .play()
+-            .then(() => {
+-              console.log('Auto-play successful')
+-              setPlayerState('playing')
+-              if (onPlayStateChange) onPlayStateChange(true)
+-            })
+-            .catch((e) => {
+-              console.error('Auto-play failed:', e)
+-              setPlayerState('idle')
+-            })
+-        } else {
+-          setPlayerState('idle')
+-        }
+-      }
+-
+-      const playingHandler = () => {
+-        console.log('Audio playing event')
+-        setPlayerState('playing')
+-        if (onPlayStateChange) onPlayStateChange(true)
+-      }
+-
+-      const pauseHandler = () => {
+-        console.log('Audio paused event')
+-        // Always set to idle state when paused
+-        setPlayerState('idle')
+-        if (onPlayStateChange) onPlayStateChange(false)
+-      }
+-
+-      const endedHandler = () => {
+-        console.log('Audio ended event')
+-        setPlayerState('idle')
+-        if (onPlayStateChange) onPlayStateChange(false)
+-      }
+-
+-      // Regular timeupdate handler to detect and handle stalled playback
+-      const timeUpdateHandler = () => {
+-        // Audio is playing if we get timeupdate events
+-        // This helps recover from some stalled states
+-        if (playerState === 'loading' && audio.currentTime > 0) {
+-          setPlayerState('playing')
+-          if (onPlayStateChange) onPlayStateChange(true)
+-        }
+-      }
+-
+-      const errorHandler = async (e: Event) => {
+-        // Only handle error if component is still mounted
+-        if (audioRef.current === audio) {
+-          console.error('Audio playback error:', e)
+-
+-          // Try to recover with retry logic
+-          if (retryCountRef.current < maxRetries) {
+-            retryCountRef.current++
+-            console.log(
+-              `Retrying audio initialization (${retryCountRef.current}/${maxRetries})`
+-            )
+-
+-            // Wait a moment before retrying
+-            await new Promise((resolve) => setTimeout(resolve, 1000))
+-
+-            // Get a fresh URL with a new cache buster
+-            try {
+-              const { url: freshUrl } = await getMusicFileViewUrl(fileId)
+-
+-              // Set the new URL and try again
+-              audio.src = freshUrl
+-              audio.load()
+-              return
+-            } catch (refreshError) {
+-              console.error('Error refreshing streaming URL:', refreshError)
+-            }
+-          }
+-
+-          // If we reach here, all retries failed
+-          setPlayerState('error')
+-          setError('Failed to play audio file')
+-          if (onPlayStateChange) onPlayStateChange(false)
+-        }
+-      }
+-
+-      // Store handlers for cleanup
+-      audio.canPlayHandler = canPlayHandler
+-      audio.playingHandler = playingHandler
+-      audio.pauseHandler = pauseHandler
+-      audio.endedHandler = endedHandler
+-      audio.errorHandler = errorHandler
+-      audio.timeUpdateHandler = timeUpdateHandler
+-
+-      // Add event listeners
+-      audio.addEventListener('canplay', canPlayHandler)
+-      audio.addEventListener('playing', playingHandler)
+-      audio.addEventListener('pause', pauseHandler)
+-      audio.addEventListener('ended', endedHandler)
+-      audio.addEventListener('error', errorHandler)
+-      audio.addEventListener('timeupdate', timeUpdateHandler)
+-
+-      // Set the source and store the reference
+-      audio.src = url
+-      audioRef.current = audio
+-
+-      // Start loading the audio
+-      audio.load()
+-    } catch (err) {
+-      console.error('Error initializing audio:', err)
+-      setPlayerState('error')
+-      setError(err instanceof Error ? err.message : 'Failed to load audio file')
+-      if (onPlayStateChange) onPlayStateChange(false)
+-    }
+-  }, [fileId, cleanup, onPlayStateChange, playerState])
+-
+-  // Play function - only handles starting playback
+-  const togglePlayPause = useCallback(async () => {
+-    try {
+-      console.log('togglePlayPause called, current state:', playerState)
+-      // If not initialized, set flag to play on init and initialize
+-      if (!isInitializedRef.current || !audioRef.current || !urlRef.current) {
+-        console.log('First click - initializing audio and setting play flag')
+-        shouldPlayOnInitRef.current = true
+-        await initAudio()
+-        return
+-      }
+-      const audio = audioRef.current
+-      // Only handle play functionality here
+-      if (playerState === 'idle' || playerState === 'paused') {
+-        console.log('Playing audio - current time:', audio.currentTime)
+-        try {
+-          // Reset playback position if at the end
+-          if (audio.ended || audio.currentTime >= audio.duration - 0.1) {
+-            audio.currentTime = 0
+-          }
+-          const playPromise = audio.play()
+-          if (playPromise !== undefined) {
+-            playPromise.catch((err) => {
+-              console.error('Error playing audio:', err)
+-              setPlayerState('error')
+-              setError('Failed to play audio file')
+-            })
+-          }
+-        } catch (err) {
+-          console.error('Error playing audio:', err)
+-          setPlayerState('error')
+-          setError('Failed to play audio file')
+-        }
+-      } else if (playerState === 'playing') {
+-        // Add support for pausing
+-        console.log('Pausing audio - current time:', audio.currentTime)
+-        audio.pause()
+-        setPlayerState('idle')
+-        if (onPlayStateChange) onPlayStateChange(false)
+-      } else if (playerState === 'error') {
+-        // Try to reinitialize on error
+-        shouldPlayOnInitRef.current = true
+-        await initAudio()
+-      }
+-    } catch (err) {
+-      console.error('Error toggling play/stop:', err)
+-      setPlayerState('error')
+-      setError(err instanceof Error ? err.message : 'Failed to play audio file')
+-    }
+-  }, [playerState, initAudio, onPlayStateChange])
+-
+-  // Stop function
+-  const stop = useCallback(async () => {
+-    console.log('Stop function called')
+-    if (audioRef.current) {
+-      const audio = audioRef.current
+-      audio.pause()
+-      audio.currentTime = 0
+-
+-      // Ensure state is updated
+-      setPlayerState('idle')
+-      if (onPlayStateChange) onPlayStateChange(false)
+-
+-      // Add a small delay to ensure state is updated
+-      await new Promise((resolve) => setTimeout(resolve, 50))
+-    }
+-  }, [onPlayStateChange])
+-
+-  // Clean up on unmount
+-  useEffect(() => {
+-    return () => {
+-      cleanup()
+-    }
+-  }, [cleanup])
+-
+-  return {
+-    playerState,
+-    error,
+-    togglePlayPause,
+-    stop,
+-    isPlaying: playerState === 'playing',
+-  }
+-}
+diff --git a/src/lib/appwrite/helpers.ts b/src/lib/appwrite/helpers.ts
+deleted file mode 100644
+index 3e8e9f0..0000000
+--- a/src/lib/appwrite/helpers.ts
++++ /dev/null
+@@ -1,295 +0,0 @@
+-import { databases, storage, users, ID, Query } from './server'
+-import { Models } from 'node-appwrite'
+-
+-/**
+- * Helper functions for working with music files
+- */
+-
+-/**
+- * Uploads a music file to Appwrite storage and creates a document in the database
+- */
+-export async function uploadMusicFile(
+-  file: File,
+-  competitionId: string,
+-  gradeId: string,
+-  userId: string
+-): Promise<Models.Document> {
+-  try {
+-    // Validate inputs
+-    if (!file || !competitionId || !gradeId || !userId) {
+-      throw new Error('Missing required fields')
+-    }
+-
+-    // Get competition and grade details for the file metadata
+-    const dbId = process.env.APPWRITE_DATABASE_ID!
+-    const competition = await databases.getDocument(
+-      dbId,
+-      process.env.APPWRITE_COMPETITIONS_COLLECTION_ID!,
+-      competitionId
+-    )
+-
+-    const grade = await databases.getDocument(
+-      dbId,
+-      process.env.APPWRITE_GRADES_COLLECTION_ID!,
+-      gradeId
+-    )
+-
+-    const user = await users.get(userId)
+-
+-    // Format file name according to convention
+-    const fileName = await formatFileName(
+-      competitionId,
+-      gradeId,
+-      userId,
+-      file.name
+-    )
+-
+-    // Upload file to storage
+-    const bucketId = process.env.APPWRITE_BUCKET_ID!
+-    const fileId = ID.unique()
+-
+-    const uploadedFile = await storage.createFile(bucketId, fileId, file)
+-
+-    // Create document in database
+-    const collectionId = process.env.APPWRITE_MUSIC_FILES_COLLECTION_ID!
+-
+-    const fileDoc = await databases.createDocument(
+-      dbId,
+-      collectionId,
+-      ID.unique(),
+-      {
+-        originalName: file.name,
+-        fileName,
+-        storagePath: uploadedFile.$id,
+-        // Don't store downloadURL in the database as it may expire
+-        competitionId,
+-        competitionName: competition.name,
+-        competitionYear: competition.year,
+-        gradeId,
+-        gradeType: grade.name,
+-        gradeCategory: grade.category,
+-        gradeSegment: grade.segment,
+-        userId,
+-        userName: user.name,
+-        uploadedAt: new Date().toISOString(),
+-        size: file.size,
+-        status: 'active',
+-        fileId: uploadedFile.$id,
+-      }
+-    )
+-
+-    return fileDoc
+-  } catch (error) {
+-    console.error('Error uploading music file:', error)
+-    throw error
+-  }
+-}
+-
+-/**
+- * Formats a music file name according to the standardized convention
+- * [YEAR]-[COMPETITION]-[CATEGORY]-[SEGMENT]-[FIRSTNAME+(LASTNAME INITIAL)]
+- */
+-export async function formatFileName(
+-  competitionId: string,
+-  gradeId: string,
+-  userId: string,
+-  originalName: string
+-): Promise<string> {
+-  try {
+-    const dbId = process.env.APPWRITE_DATABASE_ID!
+-
+-    // Get competition details
+-    const competition = await databases.getDocument(
+-      dbId,
+-      process.env.APPWRITE_COMPETITIONS_COLLECTION_ID!,
+-      competitionId
+-    )
+-
+-    // Get grade details
+-    const grade = await databases.getDocument(
+-      dbId,
+-      process.env.APPWRITE_GRADES_COLLECTION_ID!,
+-      gradeId
+-    )
+-
+-    // Get user details
+-    const user = await users.get(userId)
+-
+-    // Extract required information
+-    const year = competition.year
+-    const competitionName = competition.name.replace(/\s+/g, '-')
+-    const category = grade.category
+-    const segment = grade.segment
+-
+-    // Format user name (first name + last initial)
+-    const nameParts = user.name.split(' ')
+-    const firstName = nameParts[0]
+-    const lastInitial =
+-      nameParts.length > 1 ? nameParts[nameParts.length - 1][0] : ''
+-    const formattedName = `${firstName}${lastInitial ? `+${lastInitial}` : ''}`
+-
+-    // Get file extension
+-    const extension = originalName.split('.').pop()
+-
+-    return `${year}-${competitionName}-${category}-${segment}-${formattedName}.${extension}`
+-  } catch (error) {
+-    console.error('Error formatting file name:', error)
+-    throw error
+-  }
+-}
+-
+-/**
+- * Generates the download URL for a file
+- */
+-export function getFileDownloadUrl(fileId: string): string {
+-  // Construct the URL manually based on the Appwrite API documentation
+-  const endpoint = process.env.APPWRITE_ENDPOINT!
+-  const bucketId = process.env.APPWRITE_BUCKET_ID!
+-  const projectId = process.env.APPWRITE_PROJECT_ID!
+-
+-  // Remove any trailing slash from the endpoint
+-  const baseUrl = endpoint.endsWith('/') ? endpoint.slice(0, -1) : endpoint
+-
+-  return `${baseUrl}/storage/buckets/${bucketId}/files/${fileId}/download?project=${projectId}`
+-}
+-
+-/**
+- * Validates if a file type is acceptable for music uploads
+- */
+-export function isValidMusicFileType(mimeType: string): boolean {
+-  const validTypes = [
+-    'audio/mpeg', // MP3
+-    'audio/wav', // WAV
+-    'audio/x-wav', // WAV alternate MIME
+-    'audio/x-m4a', // M4A
+-    'audio/mp4', // M4A alternate MIME
+-    'audio/aac', // AAC
+-    'audio/x-aac', // AAC alternate MIME
+-  ]
+-
+-  return validTypes.includes(mimeType)
+-}
+-
+-/**
+- * Helper functions for working with competitions
+- */
+-
+-/**
+- * Creates a new competition
+- */
+-export async function createCompetition(
+-  name: string,
+-  year: number,
+-  description?: string,
+-  startDate?: Date,
+-  endDate?: Date
+-): Promise<Models.Document> {
+-  try {
+-    const dbId = process.env.APPWRITE_DATABASE_ID!
+-    const collectionId = process.env.APPWRITE_COMPETITIONS_COLLECTION_ID!
+-
+-    const competition = await databases.createDocument(
+-      dbId,
+-      collectionId,
+-      ID.unique(),
+-      {
+-        name,
+-        year,
+-        active: true,
+-        description: description || '',
+-        startDate: startDate ? startDate.toISOString() : null,
+-        endDate: endDate ? endDate.toISOString() : null,
+-      }
+-    )
+-
+-    return competition
+-  } catch (error) {
+-    console.error('Error creating competition:', error)
+-    throw error
+-  }
+-}
+-
+-/**
+- * Adds grades to a competition from the template
+- */
+-export async function addGradesToCompetition(
+-  competitionId: string
+-): Promise<Models.DocumentList<Models.Document>> {
+-  try {
+-    const dbId = process.env.APPWRITE_DATABASE_ID!
+-    const gradesCollectionId = process.env.APPWRITE_GRADES_COLLECTION_ID!
+-
+-    // Get template grades
+-    const templateGrades = await databases.listDocuments(
+-      dbId,
+-      gradesCollectionId,
+-      [Query.equal('isTemplate', true)]
+-    )
+-
+-    // Create grades for the competition
+-    const createdGrades = []
+-
+-    for (const template of templateGrades.documents) {
+-      const grade = await databases.createDocument(
+-        dbId,
+-        gradesCollectionId,
+-        ID.unique(),
+-        {
+-          name: template.name,
+-          category: template.category,
+-          segment: template.segment,
+-          competitionId,
+-          isTemplate: false,
+-          description:
+-            template.description ||
+-            `${template.name} ${template.category} ${template.segment}`,
+-        }
+-      )
+-
+-      createdGrades.push(grade)
+-    }
+-
+-    return {
+-      total: createdGrades.length,
+-      documents: createdGrades,
+-    } as Models.DocumentList<Models.Document>
+-  } catch (error) {
+-    console.error(`Error adding grades to competition ${competitionId}:`, error)
+-    throw error
+-  }
+-}
+-
+-/**
+- * Helper functions for working with users
+- */
+-
+-/**
+- * Updates a user's role
+- */
+-export async function updateUserRole(
+-  userId: string,
+-  role: 'admin' | 'competitor'
+-): Promise<void> {
+-  try {
+-    await users.updateLabels(userId, [role])
+-  } catch (error) {
+-    console.error(`Error updating role for user ${userId}:`, error)
+-    throw error
+-  }
+-}
+-
+-/**
+- * Toggles a user's status between active and blocked
+- */
+-export async function toggleUserStatus(
+-  userId: string,
+-  active: boolean
+-): Promise<void> {
+-  try {
+-    // Pass the boolean value directly to updateStatus
+-    await users.updateStatus(userId, active)
+-  } catch (error) {
+-    console.error(`Error toggling status for user ${userId}:`, error)
+-    throw error
+-  }
+-}
+diff --git a/src/lib/appwrite/server.ts b/src/lib/appwrite/server.ts
+index c88135d..c94440a 100644
+--- a/src/lib/appwrite/server.ts
++++ b/src/lib/appwrite/server.ts
+@@ -31,181 +31,3 @@ export const databases = new Databases(client)
+ export const storage = new Storage(client)
+ export const users = new Users(client)
+ export { ID, Query }
+-
+-// Helper functions for common operations
+-export async function getCompetitions(active?: boolean) {
+-  try {
+-    const dbId = process.env.APPWRITE_DATABASE_ID
+-    const collectionId = process.env.APPWRITE_COMPETITIONS_COLLECTION_ID
+-
+-    if (!dbId || !collectionId) {
+-      throw new Error('Missing database or collection configuration')
+-    }
+-
+-    const queries = []
+-    if (typeof active === 'boolean') {
+-      queries.push(Query.equal('active', active))
+-    }
+-
+-    return await databases.listDocuments(dbId, collectionId, queries)
+-  } catch (error) {
+-    console.error('Error fetching competitions:', error)
+-    throw error
+-  }
+-}
+-
+-export async function getGradesForCompetition(competitionId: string) {
+-  try {
+-    const dbId = process.env.APPWRITE_DATABASE_ID
+-    const collectionId = process.env.APPWRITE_GRADES_COLLECTION_ID
+-
+-    if (!dbId || !collectionId) {
+-      throw new Error('Missing database or collection configuration')
+-    }
+-
+-    return await databases.listDocuments(dbId, collectionId, [
+-      Query.equal('competitionId', competitionId),
+-    ])
+-  } catch (error) {
+-    console.error(
+-      `Error fetching grades for competition ${competitionId}:`,
+-      error
+-    )
+-    throw error
+-  }
+-}
+-
+-export async function getMusicFilesForUser(userId: string) {
+-  try {
+-    const dbId = process.env.APPWRITE_DATABASE_ID
+-    const collectionId = process.env.APPWRITE_MUSIC_FILES_COLLECTION_ID
+-
+-    if (!dbId || !collectionId) {
+-      throw new Error('Missing database or collection configuration')
+-    }
+-
+-    return await databases.listDocuments(dbId, collectionId, [
+-      Query.equal('userId', userId),
+-    ])
+-  } catch (error) {
+-    console.error(`Error fetching music files for user ${userId}:`, error)
+-    throw error
+-  }
+-}
+-
+-/**
+- * Formats a music file name according to the standardized convention
+- * [YEAR]-[COMPETITION]-[CATEGORY]-[SEGMENT]-[FIRSTNAME+(LASTNAME INITIAL)]
+- */
+-export async function formatFileName(
+-  competitionId: string,
+-  gradeId: string,
+-  userId: string,
+-  originalName: string
+-): Promise<string> {
+-  try {
+-    const dbId = process.env.APPWRITE_DATABASE_ID
+-
+-    if (!dbId) {
+-      throw new Error('Missing database configuration')
+-    }
+-
+-    // Get competition details
+-    const competition = await databases.getDocument(
+-      dbId,
+-      process.env.APPWRITE_COMPETITIONS_COLLECTION_ID!,
+-      competitionId
+-    )
+-
+-    // Get grade details
+-    const grade = await databases.getDocument(
+-      dbId,
+-      process.env.APPWRITE_GRADES_COLLECTION_ID!,
+-      gradeId
+-    )
+-
+-    // Get user details
+-    const user = await users.get(userId)
+-
+-    // Extract required information
+-    const year = competition.year
+-    const competitionName = competition.name.replace(/\s+/g, '-')
+-    const category = grade.category
+-    const segment = grade.segment
+-
+-    // Format user name (first name + last initial)
+-    const nameParts = user.name.split(' ')
+-    const firstName = nameParts[0]
+-    const lastInitial =
+-      nameParts.length > 1 ? nameParts[nameParts.length - 1][0] : ''
+-    const formattedName = `${firstName}${lastInitial ? `+${lastInitial}` : ''}`
+-
+-    // Get file extension
+-    const extension = originalName.split('.').pop()
+-
+-    return `${year}-${competitionName}-${category}-${segment}-${formattedName}.${extension}`
+-  } catch (error) {
+-    console.error('Error formatting file name:', error)
+-    throw error
+-  }
+-}
+-
+-/**
+- * Generates the download URL for a file
+- * Note: This function should not be used directly for downloads.
+- * Instead, use the getMusicFileDownloadUrl server action.
+- */
+-export function getFileDownloadUrl(fileId: string): string {
+-  // Construct the URL manually based on the Appwrite API documentation
+-  const endpoint = process.env.APPWRITE_ENDPOINT!
+-  const bucketId = process.env.APPWRITE_BUCKET_ID!
+-  const projectId = process.env.APPWRITE_PROJECT_ID!
+-
+-  // Remove any trailing slash from the endpoint
+-  const baseUrl = endpoint.endsWith('/') ? endpoint.slice(0, -1) : endpoint
+-
+-  return `${baseUrl}/storage/buckets/${bucketId}/files/${fileId}/download?project=${projectId}`
+-}
+-
+-/**
+- * Validates if a file type is acceptable for music uploads
+- */
+-export function isValidMusicFileType(mimeType: string): boolean {
+-  const validTypes = [
+-    'audio/mpeg', // MP3
+-    'audio/wav', // WAV
+-    'audio/x-wav', // WAV alternate MIME
+-    'audio/x-m4a', // M4A
+-    'audio/mp4', // M4A alternate MIME
+-    'audio/aac', // AAC
+-    'audio/x-aac', // AAC alternate MIME
+-  ]
+-
+-  return validTypes.includes(mimeType)
+-}
+-
+-/**
+- * Checks if the current user has admin role
+- */
+-export async function isUserAdmin(userId: string): Promise<boolean> {
+-  try {
+-    const user = await users.get(userId)
+-    return user.labels.includes('admin')
+-  } catch (error) {
+-    console.error(`Error checking admin status for user ${userId}:`, error)
+-    return false
+-  }
+-}
+-
+-/**
+- * Middleware function to verify admin access
+- */
+-export async function verifyAdminAccess(userId: string) {
+-  const isAdmin = await isUserAdmin(userId)
+-
+-  if (!isAdmin) {
+-    throw new Error('Unauthorized: Admin access required')
+-  }
+-
+-  return isAdmin
+-}
+diff --git a/src/types/index.ts b/src/types/index.ts
+deleted file mode 100644
+index 54983de..0000000
+--- a/src/types/index.ts
++++ /dev/null
+@@ -1,39 +0,0 @@
+-export interface User {
+-  id: string
+-  firstName: string
+-  lastName: string
+-  email: string
+-  role: 'admin' | 'competitor'
+-}
+-
+-export interface Competition {
+-  id: string
+-  name: string
+-  startDate: string
+-  endDate: string
+-  location: string
+-  description?: string
+-  status: 'active' | 'inactive' | 'completed'
+-}
+-
+-export interface Grade {
+-  id: string
+-  competitionId: string
+-  name: string
+-  category: string
+-  description?: string
+-}
+-
+-export interface MusicFile {
+-  id: string
+-  originalName: string
+-  fileName: string
+-  storagePath: string
+-  fileId: string
+-  competitionId: string
+-  gradeId: string
+-  userId: string
+-  uploadedAt: string
+-  size: number
+-  status: 'active' | 'inactive' | 'deleted'
+-}
+=== UNTRACKED FILE: src/lib/appwrite/default-grades.ts ===
+export const defaultGrades = [
+  // Singles
+  { name: 'Singles', category: 'Kiwi Skate', segment: 'Free Skate' },
+  { name: 'Singles', category: 'Pre Elementary Under 12', segment: 'Free Skate' },
+  { name: 'Singles', category: 'Pre Elementary Girls 12 & Over', segment: 'Free Skate' },
+  { name: 'Singles', category: 'Pre Elementary Boys 12 & Over', segment: 'Free Skate' },
+  { name: 'Singles', category: 'Elementary Under 12', segment: 'Free Skate' },
+  { name: 'Singles', category: 'Elementary Girls 12 & Over', segment: 'Free Skate' },
+  { name: 'Singles', category: 'Elementary Boys 12 & Over', segment: 'Free Skate' },
+  { name: 'Singles', category: 'Juvenile Under 12', segment: 'Free Skate' },
+  { name: 'Singles', category: 'Juvenile Girls 12 & Over', segment: 'Free Skate' },
+  { name: 'Singles', category: 'Juvenile Boys 12 & Over', segment: 'Free Skate' },
+  { name: 'Singles', category: 'Basic Novice Girls', segment: 'Short Program' },
+  { name: 'Singles', category: 'Basic Novice Girls', segment: 'Free Skate' },
+  { name: 'Singles', category: 'Basic Novice Boys', segment: 'Short Program' },
+  { name: 'Singles', category: 'Basic Novice Boys', segment: 'Free Skate' },
+  { name: 'Singles', category: 'Intermediate Novice Girls', segment: 'Short Program' },
+  { name: 'Singles', category: 'Intermediate Novice Girls', segment: 'Free Skate' },
+  { name: 'Singles', category: 'Intermediate Novice Boys', segment: 'Short Program' },
+  { name: 'Singles', category: 'Intermediate Novice Boys', segment: 'Free Skate' },
+  { name: 'Singles', category: 'Advanced Novice Girls', segment: 'Short Program' },
+  { name: 'Singles', category: 'Advanced Novice Girls', segment: 'Free Skate' },
+  { name: 'Singles', category: 'Advanced Novice Boys', segment: 'Short Program' },
+  { name: 'Singles', category: 'Advanced Novice Boys', segment: 'Free Skate' },
+  { name: 'Singles', category: 'Junior Girls', segment: 'Short Program' },
+  { name: 'Singles', category: 'Junior Girls', segment: 'Free Skate' },
+  { name: 'Singles', category: 'Junior Boys', segment: 'Short Program' },
+  { name: 'Singles', category: 'Junior Boys', segment: 'Free Skate' },
+  { name: 'Singles', category: 'Senior Women', segment: 'Short Program' },
+  { name: 'Singles', category: 'Senior Women', segment: 'Free Skate' },
+  { name: 'Singles', category: 'Senior Men', segment: 'Short Program' },
+  { name: 'Singles', category: 'Senior Men', segment: 'Free Skate' },
+  
+  // Adult Singles
+  { name: 'Adult Singles', category: 'Bronze Women', segment: 'Free Skate' },
+  { name: 'Adult Singles', category: 'Bronze Men', segment: 'Free Skate' },
+  { name: 'Adult Singles', category: 'Silver Women', segment: 'Free Skate' },
+  { name: 'Adult Singles', category: 'Silver Men', segment: 'Free Skate' },
+  { name: 'Adult Singles', category: 'Gold Women', segment: 'Free Skate' },
+  { name: 'Adult Singles', category: 'Gold Men', segment: 'Free Skate' },
+  { name: 'Adult Singles', category: 'Elite Women', segment: 'Free Skate' },
+  { name: 'Adult Singles', category: 'Elite Men', segment: 'Free Skate' },
+  
+  // Masters Singles
+  { name: 'Masters Singles', category: 'Women', segment: 'Free Skate' },
+  { name: 'Masters Singles', category: 'Men', segment: 'Free Skate' },
+
+  // Ice Dance
+  { name: 'Ice Dance', category: 'Juvenile', segment: 'Pattern Dance' },
+  { name: 'Ice Dance', category: 'Intermediate', segment: 'Pattern Dance' },
+  { name: 'Ice Dance', category: 'Basic Novice', segment: 'Pattern Dance' },
+  { name: 'Ice Dance', category: 'Intermediate Novice', segment: 'Pattern Dance' },
+  { name: 'Ice Dance', category: 'Advanced Novice', segment: 'Pattern Dance' },
+  { name: 'Ice Dance', category: 'Advanced Novice', segment: 'Free Dance' },
+  { name: 'Ice Dance', category: 'Junior', segment: 'Rhythm Dance' },
+  { name: 'Ice Dance', category: 'Junior', segment: 'Free Dance' },
+  { name: 'Ice Dance', category: 'Senior', segment: 'Rhythm Dance' },
+  { name: 'Ice Dance', category: 'Senior', segment: 'Free Dance' },
+  { name: 'Adult Ice Dance', category: 'Adult', segment: 'Pattern Dance' },
+  { name: 'Adult Ice Dance', category: 'Adult', segment: 'Free Dance' },
+
+  // Pairs
+  { name: 'Pairs', category: 'Juvenile', segment: 'Free Skate' },
+  { name: 'Pairs', category: 'Intermediate', segment: 'Free Skate' },
+  { name: 'Pairs', category: 'Novice', segment: 'Free Skate' },
+  { name: 'Pairs', category: 'Junior', segment: 'Short Program' },
+  { name: 'Pairs', category: 'Junior', segment: 'Free Skate' },
+  { name: 'Pairs', category: 'Senior', segment: 'Short Program' },
+  { name: 'Pairs', category: 'Senior', segment: 'Free Skate' },
+  { name: 'Adult Pairs', category: 'Adult', segment: 'Free Skate' },
+  
+  // Synchronized Skating
+  { name: 'Synchronized Skating', category: 'Basic Novice', segment: 'Free Skate' },
+  { name: 'Synchronized Skating', category: 'Mixed Age', segment: 'Free Skate' },
+  { name: 'Synchronized Skating', category: 'Advanced Novice', segment: 'Free Skate' },
+  { name: 'Synchronized Skating', category: 'Junior', segment: 'Short Program' },
+  { name: 'Synchronized Skating', category: 'Junior', segment: 'Free Skate' },
+  { name: 'Synchronized Skating', category: 'Senior', segment: 'Short Program' },
+  { name: 'Synchronized Skating', category: 'Senior', segment: 'Free Skate' },
+  { name: 'Synchronized Skating', category: 'Adult', segment: 'Free Skate' },
+  
+  // Showcase & Artistic Events
+  { name: 'Individual Showcase', category: 'Beginner Mixed', segment: 'Performance' },
+  { name: 'Individual Showcase', category: 'Beginner Women', segment: 'Performance' },
+  { name: 'Individual Showcase', category: 'Beginner Men', segment: 'Performance' },
+  { name: 'Individual Showcase', category: 'Intermediate Mixed', segment: 'Performance' },
+  { name: 'Individual Showcase', category: 'Intermediate Women', segment: 'Performance' },
+  { name: 'Individual Showcase', category: 'Intermediate Men', segment: 'Performance' },
+  { name: 'Individual Showcase', category: 'Advanced Mixed', segment: 'Performance' },
+  { name: 'Individual Showcase', category: 'Advanced Women', segment: 'Performance' },
+  { name: 'Individual Showcase', category: 'Advanced Men', segment: 'Performance' },
+  { name: 'Duet Showcase', category: 'Duet', segment: 'Performance' },
+  { name: 'Group Showcase', category: 'Group', segment: 'Performance' },
+  { name: 'Theatre on Ice', category: 'Theatre on Ice', segment: 'Performance' },
+]
