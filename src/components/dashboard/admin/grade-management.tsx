@@ -210,11 +210,11 @@ export default function GradeManagement({
   // If the competition is being deleted, show a loading state
   if (isCompetitionDeleting) {
     return (
-      <Card className="border-indigo-100">
+      <Card className="border-indigo-100 dark:border-indigo-500/20 dark:bg-indigo-950/10">
         <CardContent className="p-6">
           <div className="flex flex-col items-center justify-center space-y-4">
-            <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
-            <p className="text-indigo-600 font-medium">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent dark:border-indigo-300" />
+            <p className="font-medium text-indigo-600 dark:text-indigo-200">
               Deleting competition and associated grades...
             </p>
           </div>
@@ -225,13 +225,13 @@ export default function GradeManagement({
 
   return (
     <>
-      <Card className="border-indigo-100">
+      <Card className="border-indigo-100 dark:border-indigo-500/20 dark:bg-indigo-950/10">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <div>
-            <CardTitle className="text-xl font-semibold text-indigo-700">
+            <CardTitle className="text-xl font-semibold text-indigo-700 dark:text-indigo-200">
               {competition.name} - Grades
             </CardTitle>
-            <p className="text-sm text-indigo-500 mt-1">
+            <p className="mt-1 text-sm text-indigo-500 dark:text-indigo-200/80">
               {competition.active
                 ? 'Active Competition'
                 : 'Inactive Competition'}{' '}
@@ -240,7 +240,7 @@ export default function GradeManagement({
           </div>
           <Button
             onClick={() => handleStartEditing(null)}
-            className="bg-indigo-500 hover:bg-indigo-600"
+            className="bg-indigo-500 hover:bg-indigo-600 dark:bg-indigo-500 dark:hover:bg-indigo-400"
             disabled={editingGradeId !== null || isCompetitionDeleting}
           >
             <Plus className="h-4 w-4 mr-2" /> Add Grade
@@ -250,7 +250,7 @@ export default function GradeManagement({
           <div className="mb-4">
             <Label
               htmlFor="name-filter"
-              className="text-xs text-indigo-800 font-semibold mb-1 block"
+              className="mb-1 block text-xs font-semibold text-indigo-800 dark:text-indigo-200"
             >
               Filter by Name
             </Label>
@@ -261,19 +261,22 @@ export default function GradeManagement({
             >
               <SelectTrigger
                 id="name-filter"
-                className="bg-white border-indigo-100 text-indigo-800 font-medium"
+                className="border-indigo-100 bg-background/80 font-medium text-indigo-800 dark:border-indigo-500/30 dark:bg-background dark:text-indigo-100"
               >
                 <SelectValue placeholder="Select grade name" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all" className="text-indigo-800 font-medium">
+              <SelectContent className="border-indigo-100 dark:border-indigo-500/30">
+                <SelectItem
+                  value="all"
+                  className="font-medium text-indigo-800 dark:text-indigo-100"
+                >
                   All Grade Names
                 </SelectItem>
                 {uniqueGradeNames.map((name) => (
                   <SelectItem
                     key={name}
                     value={name}
-                    className="text-indigo-800"
+                    className="text-indigo-800 dark:text-indigo-100"
                   >
                     {name}
                   </SelectItem>
@@ -287,32 +290,32 @@ export default function GradeManagement({
           ) : (
             <Table>
               <TableHeader>
-                <TableRow className="border-indigo-200">
-                  <TableHead className="text-indigo-700">
+                <TableRow className="border-indigo-200 dark:border-indigo-500/20">
+                  <TableHead className="text-indigo-700 dark:text-indigo-200">
                     <div className="flex items-center">
                       Name
-                      <span className="ml-2 text-xs text-indigo-500">
+                      <span className="ml-2 text-xs text-indigo-500 dark:text-indigo-200/70">
                         (Z-A)
                       </span>
                     </div>
                   </TableHead>
-                  <TableHead className="text-indigo-700">
+                  <TableHead className="text-indigo-700 dark:text-indigo-200">
                     <div className="flex items-center">
                       Category
-                      <span className="ml-2 text-xs text-indigo-500">
+                      <span className="ml-2 text-xs text-indigo-500 dark:text-indigo-200/70">
                         (A-Z)
                       </span>
                     </div>
                   </TableHead>
-                  <TableHead className="text-indigo-700">
+                  <TableHead className="text-indigo-700 dark:text-indigo-200">
                     <div className="flex items-center">
                       Segment
-                      <span className="ml-2 text-xs text-indigo-500">
+                      <span className="ml-2 text-xs text-indigo-500 dark:text-indigo-200/70">
                         (A-Z)
                       </span>
                     </div>
                   </TableHead>
-                  <TableHead className="text-right text-indigo-700">
+                  <TableHead className="text-right text-indigo-700 dark:text-indigo-200">
                     Actions
                   </TableHead>
                 </TableRow>
@@ -320,7 +323,7 @@ export default function GradeManagement({
               <TableBody>
                 {/* New grade row */}
                 {editingGradeId === 'new' && editForm && (
-                  <TableRow className="bg-indigo-50 border-indigo-300">
+                  <TableRow className="border-indigo-300 bg-indigo-50 dark:border-indigo-500/30 dark:bg-indigo-950/30">
                     <TableCell>
                       <Input
                         placeholder="Grade name"
@@ -328,7 +331,7 @@ export default function GradeManagement({
                         onChange={(e) =>
                           setEditForm({ ...editForm, name: e.target.value })
                         }
-                        className="border-indigo-300 focus:border-indigo-500"
+                        className="border-indigo-300 focus:border-indigo-500 dark:border-indigo-500/40 dark:focus-visible:ring-indigo-400"
                       />
                     </TableCell>
                     <TableCell>
@@ -338,7 +341,7 @@ export default function GradeManagement({
                         onChange={(e) =>
                           setEditForm({ ...editForm, category: e.target.value })
                         }
-                        className="border-indigo-300 focus:border-indigo-500"
+                        className="border-indigo-300 focus:border-indigo-500 dark:border-indigo-500/40 dark:focus-visible:ring-indigo-400"
                       />
                     </TableCell>
                     <TableCell>
@@ -348,7 +351,7 @@ export default function GradeManagement({
                         onChange={(e) =>
                           setEditForm({ ...editForm, segment: e.target.value })
                         }
-                        className="border-indigo-300 focus:border-indigo-500"
+                        className="border-indigo-300 focus:border-indigo-500 dark:border-indigo-500/40 dark:focus-visible:ring-indigo-400"
                       />
                     </TableCell>
                     <TableCell className="text-right">
@@ -357,7 +360,7 @@ export default function GradeManagement({
                           variant="ghost"
                           size="icon"
                           onClick={handleSaveGrade}
-                          className="text-green-500 hover:text-green-700 hover:bg-green-50"
+                          className="text-green-500 hover:bg-green-50 hover:text-green-700 dark:text-green-300 dark:hover:bg-green-500/10 dark:hover:text-green-200"
                         >
                           <Check className="h-4 w-4" />
                         </Button>
@@ -365,7 +368,7 @@ export default function GradeManagement({
                           variant="ghost"
                           size="icon"
                           onClick={handleCancelEdit}
-                          className="text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                          className="text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-slate-100"
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -378,7 +381,7 @@ export default function GradeManagement({
                   <TableRow>
                     <TableCell
                       colSpan={4}
-                      className="text-center py-6 text-indigo-400"
+                      className="py-6 text-center text-indigo-400 dark:text-indigo-200/70"
                     >
                       {selectedNameFilter === 'all'
                         ? 'No grades found for this competition'
@@ -391,7 +394,7 @@ export default function GradeManagement({
                       // Editing existing grade row
                       <TableRow
                         key={grade.$id}
-                        className="bg-indigo-50 border-indigo-300"
+                        className="border-indigo-300 bg-indigo-50 dark:border-indigo-500/30 dark:bg-indigo-950/30"
                       >
                         <TableCell>
                           <Input
@@ -400,7 +403,7 @@ export default function GradeManagement({
                             onChange={(e) =>
                               setEditForm({ ...editForm, name: e.target.value })
                             }
-                            className="border-indigo-300 focus:border-indigo-500"
+                            className="border-indigo-300 focus:border-indigo-500 dark:border-indigo-500/40 dark:focus-visible:ring-indigo-400"
                           />
                         </TableCell>
                         <TableCell>
@@ -413,7 +416,7 @@ export default function GradeManagement({
                                 category: e.target.value,
                               })
                             }
-                            className="border-indigo-300 focus:border-indigo-500"
+                            className="border-indigo-300 focus:border-indigo-500 dark:border-indigo-500/40 dark:focus-visible:ring-indigo-400"
                           />
                         </TableCell>
                         <TableCell>
@@ -426,7 +429,7 @@ export default function GradeManagement({
                                 segment: e.target.value,
                               })
                             }
-                            className="border-indigo-300 focus:border-indigo-500"
+                            className="border-indigo-300 focus:border-indigo-500 dark:border-indigo-500/40 dark:focus-visible:ring-indigo-400"
                           />
                         </TableCell>
                         <TableCell className="text-right">
@@ -435,7 +438,7 @@ export default function GradeManagement({
                               variant="ghost"
                               size="icon"
                               onClick={handleSaveGrade}
-                              className="text-green-500 hover:text-green-700 hover:bg-green-50"
+                              className="text-green-500 hover:bg-green-50 hover:text-green-700 dark:text-green-300 dark:hover:bg-green-500/10 dark:hover:text-green-200"
                             >
                               <Check className="h-4 w-4" />
                             </Button>
@@ -443,7 +446,7 @@ export default function GradeManagement({
                               variant="ghost"
                               size="icon"
                               onClick={handleCancelEdit}
-                              className="text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                              className="text-gray-500 hover:bg-gray-50 hover:text-gray-700 dark:text-slate-300 dark:hover:bg-white/10 dark:hover:text-slate-100"
                             >
                               <X className="h-4 w-4" />
                             </Button>
@@ -452,14 +455,17 @@ export default function GradeManagement({
                       </TableRow>
                     ) : (
                       // Normal display row
-                      <TableRow key={grade.$id} className="border-indigo-100">
-                        <TableCell className="font-medium text-indigo-700">
+                      <TableRow
+                        key={grade.$id}
+                        className="border-indigo-100 dark:border-indigo-500/20"
+                      >
+                        <TableCell className="font-medium text-indigo-700 dark:text-indigo-100">
                           {grade.name}
                         </TableCell>
-                        <TableCell className="text-indigo-600">
+                        <TableCell className="text-indigo-600 dark:text-indigo-200/80">
                           {grade.category}
                         </TableCell>
-                        <TableCell className="text-indigo-600">
+                        <TableCell className="text-indigo-600 dark:text-indigo-200/80">
                           {grade.segment}
                         </TableCell>
                         <TableCell className="text-right">
@@ -468,7 +474,7 @@ export default function GradeManagement({
                               variant="ghost"
                               size="icon"
                               onClick={() => handleStartEditing(grade)}
-                              className="text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50"
+                              className="text-indigo-500 hover:bg-indigo-50 hover:text-indigo-700 dark:text-indigo-300 dark:hover:bg-indigo-500/10 dark:hover:text-indigo-100"
                               disabled={
                                 editingGradeId !== null || isCompetitionDeleting
                               }

@@ -97,10 +97,10 @@ export default function CompetitionCard({
   // If the competition is being deleted, show a spinner instead of the card
   if (showDeleteSpinner) {
     return (
-      <div className="flex items-center justify-center h-full min-h-[100px] bg-indigo-50 rounded-lg border border-indigo-100 animate-pulse">
+      <div className="flex h-full min-h-[100px] items-center justify-center rounded-lg border border-indigo-100 bg-indigo-50 animate-pulse dark:border-indigo-500/20 dark:bg-indigo-950/30">
         <div className="flex flex-col items-center space-y-3">
-          <Loader2 className="h-8 w-8 text-indigo-500 animate-spin" />
-          <span className="text-sm text-indigo-500 font-medium">
+          <Loader2 className="h-8 w-8 animate-spin text-indigo-500 dark:text-indigo-300" />
+          <span className="text-sm font-medium text-indigo-500 dark:text-indigo-200">
             Deleting...
           </span>
         </div>
@@ -111,15 +111,21 @@ export default function CompetitionCard({
   return (
     <Card
       className={`
-        cursor-pointer 
-        transition-all 
-        hover:shadow-md 
-        ${isSelected ? 'border-indigo-400 bg-indigo-50' : 'hover:bg-slate-50'}
+        cursor-pointer
+        border-indigo-100/80
+        transition-all
+        hover:shadow-md
+        dark:border-white/10
+        ${
+          isSelected
+            ? 'border-indigo-300 bg-gradient-to-r from-indigo-50 to-violet-50 shadow-sm dark:border-indigo-400/50 dark:from-indigo-950/45 dark:to-violet-950/30'
+            : 'hover:bg-slate-50 dark:hover:bg-white/5'
+        }
       `}
       onClick={onSelect}
     >
       <CardContent className="p-3 space-y-2">
-        <h3 className="font-medium text-indigo-700 text-lg">
+        <h3 className="text-lg font-medium text-indigo-700 dark:text-indigo-100">
           {competition.name}
         </h3>
         <div className="flex justify-between items-center">
@@ -128,8 +134,8 @@ export default function CompetitionCard({
               variant={competition.active ? 'default' : 'outline'}
               className={
                 competition.active
-                  ? 'bg-green-500 hover:bg-green-600 text-white'
-                  : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 border-yellow-300'
+                  ? 'bg-green-500 text-white hover:bg-green-600 dark:bg-green-500 dark:hover:bg-green-400'
+                  : 'border-yellow-300 bg-yellow-100 text-yellow-800 hover:bg-yellow-200 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-200 dark:hover:bg-amber-500/20'
               }
             >
               {competition.active ? 'Active' : 'Inactive'}
@@ -151,7 +157,7 @@ export default function CompetitionCard({
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                className="text-red-500 hover:bg-red-50 hover:text-red-700 dark:text-red-300 dark:hover:bg-red-500/10 dark:hover:text-red-200"
                 onClick={(e: React.MouseEvent) => e.stopPropagation()}
               >
                 <Trash className="h-4 w-4" />
