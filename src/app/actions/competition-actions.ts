@@ -28,7 +28,7 @@ async function getAllDocuments(
 ) {
   const limit = 100 // Maximum allowed by Appwrite
   let offset = 0
-  let allDocuments: Models.Document[] = []
+  let allDocuments: Models.DefaultDocument[] = []
   let hasMoreDocuments = true
 
   // Add limit to queries if not already specified

@@ -8,7 +8,7 @@ import {
   Databases,
   Storage,
   Teams,
-  type IndexType,
+  type DatabasesIndexType,
 } from 'node-appwrite'
 
 // Custom error type for better type safety
@@ -125,14 +125,14 @@ async function setupCollections(databases: Databases) {
         databaseId,
         'competitions',
         'idx_active',
-        activeIndex as unknown as IndexType,
+        activeIndex as unknown as DatabasesIndexType,
         ['key']
       )
       await databases.createIndex(
         databaseId,
         'competitions',
         'idx_year',
-        yearIndex as unknown as IndexType,
+        yearIndex as unknown as DatabasesIndexType,
         ['key']
       )
     } else {
@@ -206,14 +206,14 @@ async function setupCollections(databases: Databases) {
         databaseId,
         'grades',
         'idx_competition',
-        competitionIndex as unknown as IndexType,
+        competitionIndex as unknown as DatabasesIndexType,
         ['key']
       )
       await databases.createIndex(
         databaseId,
         'grades',
         'idx_competition_template',
-        templateIndex as unknown as IndexType,
+        templateIndex as unknown as DatabasesIndexType,
         ['key']
       )
     } else {
@@ -364,35 +364,35 @@ async function setupCollections(databases: Databases) {
         databaseId,
         'musicfiles',
         'idx_user',
-        userIndex as unknown as IndexType,
+        userIndex as unknown as DatabasesIndexType,
         ['key']
       )
       await databases.createIndex(
         databaseId,
         'musicfiles',
         'idx_competition',
-        competitionIndex as unknown as IndexType,
+        competitionIndex as unknown as DatabasesIndexType,
         ['key']
       )
       await databases.createIndex(
         databaseId,
         'musicfiles',
         'idx_grade',
-        gradeIndex as unknown as IndexType,
+        gradeIndex as unknown as DatabasesIndexType,
         ['key']
       )
       await databases.createIndex(
         databaseId,
         'musicfiles',
         'idx_competition_grade',
-        compGradeIndex as unknown as IndexType,
+        compGradeIndex as unknown as DatabasesIndexType,
         ['key']
       )
       await databases.createIndex(
         databaseId,
         'musicfiles',
         'idx_file',
-        fileIndex as unknown as IndexType,
+        fileIndex as unknown as DatabasesIndexType,
         ['unique']
       )
     } else {

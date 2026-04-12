@@ -40,9 +40,9 @@ import { Upload } from 'lucide-react'
 
 // Form validation schema
 const formSchema = z.object({
-  competitionId: z.string({ required_error: 'Please select a competition' }),
-  category: z.string({ required_error: 'Please select a category' }),
-  gradeId: z.string({ required_error: 'Please select a grade' }),
+  competitionId: z.string({ error: 'Please select a competition' }),
+  category: z.string({ error: 'Please select a category' }),
+  gradeId: z.string({ error: 'Please select a grade' }),
   file: z
     .any()
     .refine((value) => value instanceof File, {
@@ -70,14 +70,14 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>
 
-interface Competition extends Models.Document {
+interface Competition extends Models.DefaultDocument {
   $id: string
   name: string
   year: number
   active: boolean
 }
 
-interface Grade extends Models.Document {
+interface Grade extends Models.DefaultDocument {
   $id: string
   name: string
   category: string
