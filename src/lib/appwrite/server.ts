@@ -1,33 +1,103 @@
-import { Client, Databases, Storage, Users, ID, Query } from 'node-appwrite'
+import {
+  Client,
+  Databases,
+  Storage,
+  Users,
+  ID as AppwriteID,
+  Query,
+} from 'node-appwrite'
 
-// Initialize the Appwrite client with proper error handling
-function createAppwriteClient() {
-  const endpoint = process.env.APPWRITE_ENDPOINT
-  const projectId = process.env.APPWRITE_PROJECT_ID
-  const apiKey = process.env.APPWRITE_API_KEY
+interface AppwriteServices {
+  client: Client
+  databases: Databases
+  storage: Storage
+  users: Users
+}
 
-  if (!endpoint || !projectId || !apiKey) {
-    console.error('Missing required Appwrite environment variables')
-    throw new Error(
-      'Appwrite configuration incomplete. Check your environment variables.'
-    )
+let cachedServices: AppwriteServices | null = null
+
+function requireEnv(name: 'APPWRITE_ENDPOINT' | 'APPWRITE_PROJECT_ID' | 'APPWRITE_API_KEY') {
+  const value = process.env[name]
+
+  if (!value) {
+    throw new Error(`Missing required Appwrite environment variable: ${name}`)
   }
+
+  return value
+}
+
+export function getAppwriteEndpointConfig() {
+  return {
+    endpoint: requireEnv('APPWRITE_ENDPOINT'),
+    projectId: requireEnv('APPWRITE_PROJECT_ID'),
+  }
+}
+
+export function createProjectClient() {
+  const { endpoint, projectId } = getAppwriteEndpointConfig()
+  return new Client().setEndpoint(endpoint).setProject(projectId)
+}
+
+function createAdminClient() {
+  const { endpoint, projectId } = getAppwriteEndpointConfig()
+  const apiKey = requireEnv('APPWRITE_API_KEY')
 
   return new Client().setEndpoint(endpoint).setProject(projectId).setKey(apiKey)
 }
 
-// Create and export service instances with error handling
-let _client: Client
-try {
-  _client = createAppwriteClient()
-} catch (error) {
-  console.error('Failed to initialize Appwrite client:', error)
-  // Set a placeholder client that will throw appropriate errors when used
-  _client = new Client()
+function getServices() {
+  if (cachedServices) {
+    return cachedServices
+  }
+
+  const client = createAdminClient()
+
+  cachedServices = {
+    client,
+    databases: new Databases(client),
+    storage: new Storage(client),
+    users: new Users(client),
+  }
+
+  return cachedServices
 }
 
-export const client = _client
-export const databases = new Databases(client)
-export const storage = new Storage(client)
-export const users = new Users(client)
-export { ID, Query }
+function createLazyService<T extends object>(resolver: () => T): T {
+  return new Proxy({} as T, {
+    get(_target, prop, receiver) {
+      const target = resolver()
+      const value = Reflect.get(target, prop, receiver)
+      return typeof value === 'function' ? value.bind(target) : value
+    },
+    set(_target, prop, value, receiver) {
+      return Reflect.set(resolver(), prop, value, receiver)
+    },
+    has(_target, prop) {
+      return Reflect.has(resolver(), prop)
+    },
+    ownKeys() {
+      return Reflect.ownKeys(resolver())
+    },
+    getOwnPropertyDescriptor(_target, prop) {
+      const descriptor = Reflect.getOwnPropertyDescriptor(resolver(), prop)
+      if (!descriptor) {
+        return undefined
+      }
+
+      return {
+        ...descriptor,
+        configurable: true,
+      }
+    },
+    getPrototypeOf() {
+      return Reflect.getPrototypeOf(resolver())
+    },
+  })
+}
+
+export const client = createLazyService(() => getServices().client)
+export const databases = createLazyService(() => getServices().databases)
+export const storage = createLazyService(() => getServices().storage)
+export const users = createLazyService(() => getServices().users)
+export const ID = AppwriteID
+export { Query }

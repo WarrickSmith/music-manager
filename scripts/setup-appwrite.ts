@@ -1,7 +1,4 @@
 #!/usr/bin/env node
-import * as dotenv from 'dotenv'
-dotenv.config({ path: ['.env.local', '.env'] })
-
 import {
   Client,
   Databases,
@@ -738,41 +735,41 @@ export async function setupAppwrite(
 }
 
 // If run as a script, execute setup
-if (require.main === module) {
-  // Parse command line arguments
-  const args = process.argv.slice(2)
-  const options: SetupOptions = {}
+if (typeof require !== 'undefined' && require.main === module) {
+  void (async () => {
+    const dotenv = await import('dotenv')
+    dotenv.config({ path: ['.env.local', '.env'] })
 
-  if (args.includes('--all')) options.all = true
-  if (args.includes('--database')) options.database = true
-  if (args.includes('--collections')) options.collections = true
-  if (args.includes('--storage')) options.storage = true
-  if (args.includes('--indexes')) options.indexes = true
-  if (args.includes('--teams')) options.teams = true
+    // Parse command line arguments
+    const args = process.argv.slice(2)
+    const options: SetupOptions = {}
 
-  // If no specific options provided, run all
-  if (Object.keys(options).length === 0) {
-    options.all = true
-  }
+    if (args.includes('--all')) options.all = true
+    if (args.includes('--database')) options.database = true
+    if (args.includes('--collections')) options.collections = true
+    if (args.includes('--storage')) options.storage = true
+    if (args.includes('--indexes')) options.indexes = true
+    if (args.includes('--teams')) options.teams = true
 
-  // Run setup
-  setupAppwrite(options)
-    .then((result) => {
-      // Log results
-      console.log('\n=== SETUP RESULTS ===\n')
-      result.results.forEach((message) => console.log(`- ${message}`))
+    // If no specific options provided, run all
+    if (Object.keys(options).length === 0) {
+      options.all = true
+    }
 
-      if (result.errors && result.errors.length > 0) {
-        console.error('\n=== SETUP ERRORS ===\n')
-        result.errors.forEach((error) => console.error(`- ${error}`))
-        process.exit(1)
-      } else {
-        console.log('\nSetup completed successfully!')
-        process.exit(0)
-      }
-    })
-    .catch((error) => {
-      console.error('Unhandled error during setup:', error)
+    const result = await setupAppwrite(options)
+
+    console.log('\n=== SETUP RESULTS ===\n')
+    result.results.forEach((message) => console.log(`- ${message}`))
+
+    if (result.errors && result.errors.length > 0) {
+      console.error('\n=== SETUP ERRORS ===\n')
+      result.errors.forEach((error) => console.error(`- ${error}`))
       process.exit(1)
-    })
+    }
+
+    console.log('\nSetup completed successfully!')
+  })().catch((error) => {
+    console.error('Unhandled error during setup:', error)
+    process.exit(1)
+  })
 }

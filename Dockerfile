@@ -30,27 +30,10 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Install tsx globally for runtime script execution
-RUN npm install -g tsx
-
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 COPY --from=builder /app/public ./public
-
-# Copy scripts directory and package.json for runtime initialization
-COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
-COPY --from=builder --chown=nextjs:nodejs /app/package.json ./package.json
-
-# Install only the dependencies needed for setup scripts (dotenv and node-appwrite)
-RUN npm install dotenv node-appwrite
-
-# Set Cache-Control headers for static assets
-RUN mkdir -p /app/public && \
-    echo 'location ~* \.(jpg|jpeg|png|gif|ico|svg|webp)$ { \
-    expires 7d; \
-    add_header Cache-Control "public, max-age=604800, immutable"; \
-}' > /tmp/next-static.conf
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing

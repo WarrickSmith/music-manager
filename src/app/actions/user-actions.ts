@@ -1,19 +1,16 @@
 'use server'
 
-import { Client, Users, Account, Models } from 'node-appwrite'
+import { Account, Models } from 'node-appwrite'
 import { revalidatePath } from 'next/cache'
 import { getCurrentUser } from '@/lib/auth/auth-service'
-import { databases, Query } from '@/lib/appwrite/server'
-import { storage } from '@/lib/appwrite/server'
+import {
+  databases,
+  storage,
+  Query,
+  users,
+  createProjectClient,
+} from '@/lib/appwrite/server'
 import { toPlainObject } from '@/lib/utils'
-
-// Initialize Appwrite
-const client = new Client()
-  .setEndpoint(process.env.APPWRITE_ENDPOINT!)
-  .setProject(process.env.APPWRITE_PROJECT_ID!)
-  .setKey(process.env.APPWRITE_API_KEY!)
-
-const users = new Users(client)
 const databaseId = process.env.APPWRITE_DATABASE_ID!
 const musicFilesCollectionId = process.env.APPWRITE_MUSIC_FILES_COLLECTION_ID!
 const bucketId = process.env.APPWRITE_BUCKET_ID!
@@ -407,9 +404,7 @@ export async function changePassword({
       const user = await users.get(userId)
 
       // Create a temporary client and account instance for verification
-      const tempClient = new Client()
-        .setEndpoint(process.env.APPWRITE_ENDPOINT!)
-        .setProject(process.env.APPWRITE_PROJECT_ID!)
+      const tempClient = createProjectClient()
 
       const account = new Account(tempClient)
 
