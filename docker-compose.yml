@@ -1,32 +1,38 @@
+# Music Manager deployment stack
+#
+# Uses the pre-built image from the private Zot registry.
+#
+# DEPLOYMENT MODES:
+#   Local Docker: docker compose up -d
+#   Portainer:    Import the project .env file into the stack, then deploy
+#
+name: music-manager
+
 services:
   music-manager:
-    build:
-      context: .
-      args:
-        # Client-side variables (MUST be at build time)
-        - NEXT_PUBLIC_APPWRITE_ENDPOINT
-        - NEXT_PUBLIC_APPWRITE_PROJECT_ID
-        # Server-side variables (needed for build-time compilation)
-        - APPWRITE_ENDPOINT
-        - APPWRITE_PROJECT_ID
-        - APPWRITE_API_KEY
-        - APPWRITE_DATABASE_ID
-        - APPWRITE_COMPETITIONS_COLLECTION_ID
-        - APPWRITE_GRADES_COLLECTION_ID
-        - APPWRITE_MUSIC_FILES_COLLECTION_ID
-        - APPWRITE_BUCKET_ID
+    image: registry.wsapz.com/music-manager:latest
+    pull_policy: always
     container_name: music-manager
     restart: unless-stopped
     ports:
       - '3333:3000'
     environment:
-      # Runtime server-side variables
-      - NODE_ENV=${NODE_ENV:-production}
-      - APPWRITE_ENDPOINT
-      - APPWRITE_PROJECT_ID
-      - APPWRITE_API_KEY
-      - APPWRITE_DATABASE_ID
-      - APPWRITE_COMPETITIONS_COLLECTION_ID
-      - APPWRITE_GRADES_COLLECTION_ID
-      - APPWRITE_MUSIC_FILES_COLLECTION_ID
-      - APPWRITE_BUCKET_ID
+      NODE_ENV: ${NODE_ENV:-production}
+      APPWRITE_ENDPOINT: ${APPWRITE_ENDPOINT}
+      APPWRITE_PROJECT_ID: ${APPWRITE_PROJECT_ID}
+      APPWRITE_API_KEY: ${APPWRITE_API_KEY}
+      APPWRITE_DATABASE_ID: ${APPWRITE_DATABASE_ID}
+      APPWRITE_COMPETITIONS_COLLECTION_ID: ${APPWRITE_COMPETITIONS_COLLECTION_ID}
+      APPWRITE_GRADES_COLLECTION_ID: ${APPWRITE_GRADES_COLLECTION_ID}
+      APPWRITE_MUSIC_FILES_COLLECTION_ID: ${APPWRITE_MUSIC_FILES_COLLECTION_ID}
+      APPWRITE_BUCKET_ID: ${APPWRITE_BUCKET_ID}
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'node -e "fetch(''http://localhost:3000'').then((res) => process.exit(res.ok ? 0 : 1)).catch(() => process.exit(1))"',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
