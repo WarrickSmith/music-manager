@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { FaUser, FaSignOutAlt, FaMusic } from 'react-icons/fa'
+import { User, LogOut, Music } from 'lucide-react'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { logoutAction } from '@/app/actions/auth-actions'
@@ -143,7 +143,7 @@ export default function Navbar({ user }: NavbarProps) {
                 href={userRole === 'admin' ? '/admin/dashboard' : '/dashboard'}
                 className="hidden md:flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors"
               >
-                <FaMusic className="w-4 h-4" />
+                <Music className="w-4 h-4" />
                 <span>My Music</span>
               </Link>
             )}
@@ -157,7 +157,7 @@ export default function Navbar({ user }: NavbarProps) {
                 {isLoggingOut ? (
                   <div className="w-5 h-5 border-2 border-t-current border-r-transparent border-b-current border-l-transparent rounded-full animate-spin"></div>
                 ) : (
-                  <FaUser className="w-5 h-5" />
+                  <User className="w-5 h-5" />
                 )}
               </button>
 
@@ -185,7 +185,7 @@ export default function Navbar({ user }: NavbarProps) {
                         disabled={isLoggingOut}
                         className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                       >
-                        <FaSignOutAlt className="w-4 h-4" />
+                        <LogOut className="w-4 h-4" />
                         <span>Logout</span>
                       </button>
                     </>
@@ -196,7 +196,7 @@ export default function Navbar({ user }: NavbarProps) {
                         onClick={closeUserMenu}
                         className="flex items-center gap-2 px-4 py-2 text-sm text-blue-600 hover:bg-blue-50 transition-colors"
                       >
-                        <FaUser className="w-4 h-4" />
+                        <User className="w-4 h-4" />
                         <span>Login</span>
                       </Link>
                       <Link
@@ -204,7 +204,7 @@ export default function Navbar({ user }: NavbarProps) {
                         onClick={closeUserMenu}
                         className="flex items-center gap-2 px-4 py-2 text-sm text-green-600 hover:bg-green-50 transition-colors"
                       >
-                        <FaUser className="w-4 h-4" />
+                        <User className="w-4 h-4" />
                         <span>Register</span>
                       </Link>
                     </>

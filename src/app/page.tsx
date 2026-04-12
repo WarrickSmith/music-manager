@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { FaMusic, FaUpload, FaHeadphones } from 'react-icons/fa'
+import { Music, Upload, Headphones } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { logoutAction } from '@/app/actions/auth-actions'
 import LoadingOverlay from '@/components/ui/loading-overlay'
@@ -58,7 +58,7 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 w-full max-w-3xl">
           <div className="flex flex-col items-center p-6 rounded-xl bg-card shadow-sm border border-border/40 hover:shadow-md transition-shadow">
-            <FaUpload className="w-8 h-8 text-primary mb-4" />
+            <Upload className="w-8 h-8 text-primary mb-4" />
             <h3 className="text-lg font-medium mb-2">Easy Uploads</h3>
             <p className="text-sm text-muted-foreground text-center">
               Upload and store your music files securely
@@ -66,7 +66,7 @@ export default function Home() {
           </div>
 
           <div className="flex flex-col items-center p-6 rounded-xl bg-card shadow-sm border border-border/40 hover:shadow-md transition-shadow">
-            <FaMusic className="w-8 h-8 text-primary mb-4" />
+            <Music className="w-8 h-8 text-primary mb-4" />
             <h3 className="text-lg font-medium mb-2">Organize</h3>
             <p className="text-sm text-muted-foreground text-center">
               Categorize and manage your music collection
@@ -74,7 +74,7 @@ export default function Home() {
           </div>
 
           <div className="flex flex-col items-center p-6 rounded-xl bg-card shadow-sm border border-border/40 hover:shadow-md transition-shadow">
-            <FaHeadphones className="w-8 h-8 text-primary mb-4" />
+            <Headphones className="w-8 h-8 text-primary mb-4" />
             <h3 className="text-lg font-medium mb-2">Preview</h3>
             <p className="text-sm text-muted-foreground text-center">
               Listen to your tracks before competitions

@@ -10,7 +10,7 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
 - shadcn/UI components
 - Appwrite for backend and storage (server-side Node.js SDK)
 - Sonner for toast notifications
-- React Icons
+- Lucide for icons
 
 ## Getting Started
 
@@ -21,12 +21,12 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
 
 ## Project Structure
 
-- `src/app`: Next.js App Router pages and layouts
+- `src/app`: Next.js App Router pages, layouts, and server actions
 - `src/components`: Reusable UI components
 - `src/lib`: Utility functions and Appwrite configuration
 - `src/hooks`: Custom React hooks
-- `src/types`: TypeScript type definitions
-- `Docs`: Project documentation and Appwrite setup files
+- `scripts`: Appwrite setup and admin scripts
+- `docs`: Project documentation and reference materials
 
 ## Authentication and Role-based Access
 

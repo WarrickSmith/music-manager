@@ -72,6 +72,6 @@ The full implementation plan is available in `mm-plan-p5.md`. Refer to this docu
 
 For additional context, you may also refer to:
 
-- `Docs/mm-plan.md`: The overall project development plan
-- `Docs/AppwriteAPI/`: Documentation on Appwrite API usage
+- `docs/mm-plan.md`: The overall project development plan
+- `docs/AppwriteAPI/`: Documentation on Appwrite API usage
 - Existing code in the `src/` directory to understand the current implementation patterns
