@@ -35,7 +35,7 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
   - Appwrite server-side Node.js SDK for Database, Storage, and Authentication
   - Server Actions using the Appwrite node.js SDK for Appwrite integration not API endpoints.
   - `sonner` package for toast notifications
-  - React Icons for icons
+  - Lucide for icons
   - Functional programming approach (React hooks, pure functions, immutable state)
 
 - **Data Model**
@@ -112,7 +112,7 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
      git init
      ```
    - Define a branch strategy (e.g., `main`, `dev`, `feature/*`).
-   - Document the architecture, file structure, and code style guidelines in a top-level `README.md` or in a `/docs` folder, including references to `/Docs/Appwrite Docs` for server-side examples.
+   - Document the architecture, file structure, and code style guidelines in a top-level `README.md` or in a `/docs` folder, including references to `/docs/AppwriteAPI` for server-side examples.
 
 ---
 
@@ -133,7 +133,7 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
    - Secure endpoints and storage accordingly via server-side operations.
 
 4. **Master Grades Template**
-   - There are default grades defined in the Docs directory in the default-grades.ts file.
+   - There are default grades defined at `src/lib/appwrite/default-grades.ts`.
 
 ---
 
@@ -187,7 +187,7 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
 2. **Admin Dashboard Features**
 
    - Manage user roles, see all competitions, create new competitions, delete competitions, and manage Grades (CRUD) via server-side operations.
-   - Creating a new competition will initially create associated grades from a default list of grades. There are default template grade Documents in the grades collection created by the setup-appwrite.ts script at project initiation. It may be better to remove this from the script and just create the default grades for a new competition directly from the Docs/default-grades.ts file as there will need to be a way to maintian the default grades after initial setup..
+   - Creating a new competition will initially create associated grades from a default list of grades. There are default template grade Documents in the grades collection created by the setup-appwrite.ts script at project initiation. It may be better to remove this from the script and just create the default grades for a new competition directly from `src/lib/appwrite/default-grades.ts` as there will need to be a way to maintian the default grades after initial setup..
    - Provide bulk updates or deletions for user accounts and associated data.
    - Provide a data view of MusicFile submissions.
    - Dashboard should display active and inactive competitions separately.
@@ -246,7 +246,7 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
 
    - Assume mm-plan.md Phases 1 to 4 have been fully implemented. Phase 5 will leverage the existing architecture and implemented code where possible, for example toast components, spinners, Appwrite auth implementation and role based routing for Admins and Competitors.
 
-   - Refer to the project Docs at Docs/appwriteAPI and online at https://appwrite.io/docs/references/cloud/server-nodejs/storage for Storage API details.
+   - Refer to the project docs at `docs/AppwriteAPI/` and online at https://appwrite.io/docs/references/cloud/server-nodejs/storage for Storage API details.
 
    - A value for APPWRITE_BUCKET_ID already exists in the .env.local file so no .env.local valuse need to be implemented.
 
@@ -420,5 +420,5 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
 - [Appwrite Server-Side API Reference](https://appwrite.io/docs/references/cloud/server-nodejs)
 - [Appwrite Storage API](https://appwrite.io/docs/references/cloud/server-nodejs/storage)
 - [Sonner Documentation](https://sonner.dev/)
-- [Server-Side Auth Examples](/Docs/Appwrite Docs/appwrite-ss-auth)
-- [Additional Server-Side Examples](/Docs/Appwrite Docs)
+- [Server-Side Auth Examples](/docs/appwrite-ss-auth.md)
+- [Additional Server-Side API Reference](/docs/AppwriteAPI/)

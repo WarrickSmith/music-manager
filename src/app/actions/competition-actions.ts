@@ -3,7 +3,7 @@
 import { databases, ID, Query } from '@/lib/appwrite/server'
 import { Models } from 'node-appwrite'
 import { revalidatePath } from 'next/cache'
-import { defaultGrades } from '../../../Docs/default-grades'
+import { defaultGrades } from '@/lib/appwrite/default-grades'
 import { storage } from '@/lib/appwrite/server'
 import { checkAppwriteInitialization } from '@/lib/appwrite/initialization-service'
 
