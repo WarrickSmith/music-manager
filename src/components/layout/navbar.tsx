@@ -127,14 +127,13 @@ export default function Navbar({ initialTheme, user }: NavbarProps) {
               onClick={handleLogoClick}
               className="group flex cursor-pointer items-center gap-3 text-left transition-transform hover:scale-105"
             >
-              <div className="relative w-9 h-9">
+              <div className="relative flex h-9 w-9 items-center justify-center">
                 <div className="absolute -inset-1 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 opacity-30 blur transition duration-300 group-hover:opacity-100 dark:from-sky-400 dark:to-violet-400"></div>
                 <Image
                   src={logoSrc}
                   alt="Music Manager Logo"
-                  fill
                   priority
-                  className="rounded-md object-contain"
+                  className="relative z-10 h-auto w-9 rounded-md"
                 />
               </div>
               <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-xl font-bold text-transparent dark:from-sky-300 dark:to-violet-300">
@@ -147,14 +146,13 @@ export default function Navbar({ initialTheme, user }: NavbarProps) {
               href="/"
               className="group flex items-center gap-3 transition-transform hover:scale-105"
             >
-              <div className="relative w-9 h-9">
+              <div className="relative flex h-9 w-9 items-center justify-center">
                 <div className="absolute -inset-1 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 opacity-30 blur transition duration-300 group-hover:opacity-100 dark:from-sky-400 dark:to-violet-400"></div>
                 <Image
                   src={logoSrc}
                   alt="Music Manager Logo"
-                  fill
                   priority
-                  className="rounded-md object-contain"
+                  className="relative z-10 h-auto w-9 rounded-md"
                 />
               </div>
               <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-xl font-bold text-transparent dark:from-sky-300 dark:to-violet-300">
