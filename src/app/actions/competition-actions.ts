@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { defaultGrades } from '@/lib/appwrite/default-grades'
 import { storage } from '@/lib/appwrite/server'
 import { checkAppwriteInitialization } from '@/lib/appwrite/initialization-service'
+import { toPlainObject } from '@/lib/utils'
 
 const databaseId = process.env.APPWRITE_DATABASE_ID!
 const competitionsCollectionId =
@@ -71,7 +72,7 @@ export async function getCompetitions() {
       [Query.orderDesc('year'), Query.orderAsc('name'), Query.limit(100)]
     )
 
-    return response.documents
+    return toPlainObject(response.documents)
   } catch (error) {
     console.error('Error fetching competitions:', error)
     throw new Error('Failed to fetch competitions')
@@ -152,7 +153,7 @@ export async function createCompetition({
     }
 
     revalidatePath('/admin/dashboard')
-    return competition
+    return toPlainObject(competition)
   } catch (error) {
     console.error('Error creating competition:', error)
     throw new Error('Failed to create competition')
@@ -180,7 +181,7 @@ export async function updateCompetitionStatus(
     )
 
     revalidatePath('/admin/dashboard')
-    return result
+    return toPlainObject(result)
   } catch (error) {
     console.error('Error updating competition status:', error)
     throw new Error('Failed to update competition status')
@@ -266,7 +267,7 @@ export async function getActiveCompetitions() {
         Query.orderAsc('name'),
       ]
     )
-    return response.documents
+    return toPlainObject(response.documents)
   } catch (error) {
     console.error('Error fetching active competitions:', error)
     throw new Error('Failed to fetch active competitions')
@@ -299,7 +300,7 @@ export async function getGradesForCompetition(
       queries
     )
 
-    return response.documents
+    return toPlainObject(response.documents)
   } catch (error) {
     console.error('Error fetching grades:', error)
     throw new Error('Failed to fetch grades')

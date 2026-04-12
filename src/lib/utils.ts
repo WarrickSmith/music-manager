@@ -5,6 +5,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+/** Strip class prototypes so Appwrite SDK objects can cross the Server→Client boundary */
+export function toPlainObject<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value))
+}
+
 /**
  * Format a date string to a readable format
  */

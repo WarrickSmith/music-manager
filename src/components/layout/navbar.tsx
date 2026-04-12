@@ -107,7 +107,7 @@ export default function Navbar({ user }: NavbarProps) {
                   width={36}
                   height={36}
                   priority
-                  className="rounded-md relative"
+                  className="rounded-md relative w-auto h-auto"
                 />
               </div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -128,7 +128,7 @@ export default function Navbar({ user }: NavbarProps) {
                   width={36}
                   height={36}
                   priority
-                  className="rounded-md relative"
+                  className="rounded-md relative w-auto h-auto"
                 />
               </div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
