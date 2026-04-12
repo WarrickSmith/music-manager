@@ -35,58 +35,59 @@ export default function Home() {
   }
 
   return (
-    <main className="flex flex-col items-center justify-center p-8 bg-gradient-to-b from-background to-background/95">
-      <div className="flex flex-col items-center text-center max-w-3xl mx-auto">
-        <div className="flex items-center gap-4 mb-6 animate-fade-in min-h-[10px]">
+    <main className="flex min-h-[calc(100vh-5rem)] flex-col items-center justify-center px-6 py-12">
+      <div className="app-panel relative mx-auto flex w-full max-w-5xl flex-col items-center overflow-hidden px-8 py-14 text-center sm:px-12">
+        <div className="absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.22),transparent_60%)] dark:bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.22),transparent_58%)]" />
+        <div className="relative flex min-h-[10px] items-center gap-4 mb-6 animate-fade-in">
           <Image
             src={logoSrc}
             alt="Music Manager Logo"
             width={64}
             height={64}
             priority
-            className="rounded-lg shadow-md"
+            className="rounded-2xl shadow-lg shadow-slate-950/10"
           />
-          <h1 className="text-5xl font-bold leading-[1.2] pb-1 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text pb-1 text-5xl font-bold leading-[1.2] text-transparent dark:from-sky-300 dark:to-violet-300">
             Music Manager
           </h1>
         </div>
 
-        <p className="text-xl text-center mb-10 max-w-2xl text-muted-foreground leading-relaxed">
+        <p className="relative mb-10 max-w-2xl text-center text-xl leading-relaxed text-muted-foreground">
           A modern platform for Ice Skaters to upload, organize, and manage
           music files for competitions with ease
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 w-full max-w-3xl">
-          <div className="flex flex-col items-center p-6 rounded-xl bg-card shadow-sm border border-border/40 hover:shadow-md transition-shadow">
-            <Upload className="w-8 h-8 text-primary mb-4" />
-            <h3 className="text-lg font-medium mb-2">Easy Uploads</h3>
+        <div className="relative mb-12 grid w-full max-w-4xl grid-cols-1 gap-8 md:grid-cols-3">
+          <div className="rounded-3xl border border-slate-200/70 bg-white/75 p-6 shadow-lg shadow-slate-950/5 transition-transform transition-shadow hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-white/5 dark:shadow-black/20">
+            <Upload className="mb-4 h-8 w-8 text-sky-600 dark:text-sky-300" />
+            <h3 className="mb-2 text-lg font-medium">Easy Uploads</h3>
             <p className="text-sm text-muted-foreground text-center">
               Upload and store your music files securely
             </p>
           </div>
 
-          <div className="flex flex-col items-center p-6 rounded-xl bg-card shadow-sm border border-border/40 hover:shadow-md transition-shadow">
-            <Music className="w-8 h-8 text-primary mb-4" />
-            <h3 className="text-lg font-medium mb-2">Organize</h3>
+          <div className="rounded-3xl border border-slate-200/70 bg-white/75 p-6 shadow-lg shadow-slate-950/5 transition-transform transition-shadow hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-white/5 dark:shadow-black/20">
+            <Music className="mb-4 h-8 w-8 text-violet-600 dark:text-violet-300" />
+            <h3 className="mb-2 text-lg font-medium">Organize</h3>
             <p className="text-sm text-muted-foreground text-center">
               Categorize and manage your music collection
             </p>
           </div>
 
-          <div className="flex flex-col items-center p-6 rounded-xl bg-card shadow-sm border border-border/40 hover:shadow-md transition-shadow">
-            <Headphones className="w-8 h-8 text-primary mb-4" />
-            <h3 className="text-lg font-medium mb-2">Preview</h3>
+          <div className="rounded-3xl border border-slate-200/70 bg-white/75 p-6 shadow-lg shadow-slate-950/5 transition-transform transition-shadow hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-white/5 dark:shadow-black/20">
+            <Headphones className="mb-4 h-8 w-8 text-emerald-600 dark:text-emerald-300" />
+            <h3 className="mb-2 text-lg font-medium">Preview</h3>
             <p className="text-sm text-muted-foreground text-center">
               Listen to your tracks before competitions
             </p>
           </div>
         </div>
 
-        <div className="flex gap-5">
+        <div className="relative flex flex-col gap-4 sm:flex-row">
           <Button
             asChild
             size="lg"
-            className="rounded-full px-8 shadow-md hover:shadow-lg transition-all bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium"
+            className="rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 px-8 font-medium text-white shadow-lg shadow-blue-900/15 transition-all hover:shadow-xl hover:from-blue-500 hover:to-violet-500 dark:from-sky-500 dark:to-indigo-500 dark:hover:from-sky-400 dark:hover:to-violet-400"
           >
             <Link href="/login" className="flex items-center gap-2">
               <span>Login</span>
@@ -110,7 +111,7 @@ export default function Home() {
             asChild
             variant="outline"
             size="lg"
-            className="rounded-full px-8 border-2 border-purple-400 hover:bg-purple-50 hover:border-purple-500 text-purple-700 font-medium transition-all"
+            className="rounded-full border-2 border-violet-300/80 bg-white/70 px-8 font-medium text-violet-700 transition-all hover:border-violet-500 hover:bg-violet-50 dark:border-violet-400/50 dark:bg-white/5 dark:text-violet-200 dark:hover:border-violet-300 dark:hover:bg-violet-500/10"
           >
             <Link href="/register" className="flex items-center gap-2">
               <span>Register</span>

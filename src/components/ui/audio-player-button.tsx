@@ -201,23 +201,23 @@ export default function AudioPlayerButton({
       'transition-all duration-300',
       {
         // Admin variant (purple theme)
-        'bg-purple-50 hover:bg-purple-100 text-purple-600':
+        'bg-purple-50 hover:bg-purple-100 text-purple-600 dark:bg-violet-500/10 dark:text-violet-300 dark:hover:bg-violet-500/20':
           variant === 'admin' && !isPlaying && !isLoading && !error,
-        'bg-purple-600 hover:bg-purple-700 text-white':
+        'bg-purple-600 hover:bg-purple-700 text-white dark:bg-violet-500 dark:hover:bg-violet-400':
           variant === 'admin' && isPlaying,
-        'bg-purple-50 hover:bg-purple-100 text-purple-600 animate-pulse':
+        'bg-purple-50 hover:bg-purple-100 text-purple-600 animate-pulse dark:bg-violet-500/10 dark:text-violet-300 dark:hover:bg-violet-500/20':
           variant === 'admin' && isLoading,
-        'bg-red-50 hover:bg-red-100 text-red-600':
+        'bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/20':
           variant === 'admin' && !!error,
 
         // Competitor variant (blue theme)
-        'bg-sky-50 hover:bg-sky-100 text-sky-600':
+        'bg-sky-50 hover:bg-sky-100 text-sky-600 dark:bg-sky-500/10 dark:text-sky-300 dark:hover:bg-sky-500/20':
           variant === 'competitor' && !isPlaying && !isLoading && !error,
-        'bg-sky-600 hover:bg-sky-700 text-white':
+        'bg-sky-600 hover:bg-sky-700 text-white dark:bg-sky-500 dark:hover:bg-sky-400':
           variant === 'competitor' && isPlaying,
-        'bg-sky-50 hover:bg-sky-100 text-sky-600 animate-pulse':
+        'bg-sky-50 hover:bg-sky-100 text-sky-600 animate-pulse dark:bg-sky-500/10 dark:text-sky-300 dark:hover:bg-sky-500/20':
           variant === 'competitor' && isLoading,
-        'bg-red-100 hover:bg-red-200 text-red-700':
+        'bg-red-100 hover:bg-red-200 text-red-700 dark:bg-red-500/15 dark:text-red-300 dark:hover:bg-red-500/25':
           variant === 'competitor' && !!error,
       },
       className

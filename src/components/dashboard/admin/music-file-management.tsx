@@ -383,14 +383,14 @@ export default function MusicFileManagement() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold text-purple-700">
+        <h2 className="text-3xl font-bold text-purple-700 dark:text-violet-300">
           Music Files Management
         </h2>
         <div className="flex space-x-2">
           <Button
             variant="outline"
             onClick={() => fetchMusicFiles(true)} // Show success toast on manual refresh
-            className="flex items-center gap-1 border-purple-200 hover:bg-purple-50"
+            className="flex items-center gap-1 border-purple-200 hover:bg-purple-50 dark:border-violet-500/30 dark:hover:bg-violet-500/10"
           >
             <RefreshCw size={16} />
             <span>Refresh</span>
@@ -399,7 +399,7 @@ export default function MusicFileManagement() {
           <Button
             variant="outline"
             onClick={resetFilters}
-            className="flex items-center gap-1 border-purple-200 hover:bg-purple-50"
+            className="flex items-center gap-1 border-purple-200 hover:bg-purple-50 dark:border-violet-500/30 dark:hover:bg-violet-500/10"
           >
             <Filter size={16} />
             <span>Reset Filters</span>
@@ -408,9 +408,9 @@ export default function MusicFileManagement() {
       </div>
 
       {/* Filters */}
-      <Card className="border-purple-100 bg-purple-50/50">
+      <Card className="border-purple-100 bg-purple-50/50 dark:border-violet-500/20 dark:bg-violet-950/20">
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg text-purple-700">
+          <CardTitle className="text-lg text-purple-700 dark:text-violet-300">
             Filter Music Files
           </CardTitle>
           <CardDescription>
@@ -422,14 +422,14 @@ export default function MusicFileManagement() {
           {/* Search bar */}
           <div className="mb-6 relative">
             <Search
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+              className="absolute left-3 top-1/2 -translate-y-1/2 transform text-slate-400 dark:text-slate-500"
               size={18}
             />
             <Input
               placeholder="Search by file name, competitor, or competition..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 border-purple-200 focus-visible:ring-purple-400"
+              className="border-purple-200 bg-background/80 pl-10 focus-visible:ring-purple-400 dark:border-violet-500/30 dark:focus-visible:ring-violet-400"
             />
           </div>
 
@@ -437,9 +437,11 @@ export default function MusicFileManagement() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* Year filter */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Year</label>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                Year
+              </label>
               <Select value={yearFilter} onValueChange={setYearFilter}>
-                <SelectTrigger className="border-purple-200 focus:ring-purple-400">
+                <SelectTrigger className="border-purple-200 bg-background/80 focus:ring-purple-400 dark:border-violet-500/30 dark:focus:ring-violet-400">
                   <SelectValue placeholder="All Years" />
                 </SelectTrigger>
                 <SelectContent>
@@ -455,14 +457,14 @@ export default function MusicFileManagement() {
 
             {/* Competition filter */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-200">
                 Competition
               </label>
               <Select
                 value={competitionFilter}
                 onValueChange={setCompetitionFilter}
               >
-                <SelectTrigger className="border-purple-200 focus:ring-purple-400">
+                <SelectTrigger className="border-purple-200 bg-background/80 focus:ring-purple-400 dark:border-violet-500/30 dark:focus:ring-violet-400">
                   <SelectValue placeholder="All Competitions" />
                 </SelectTrigger>
                 <SelectContent>
@@ -478,9 +480,11 @@ export default function MusicFileManagement() {
 
             {/* Grade filter */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Grade</label>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                Grade
+              </label>
               <Select value={gradeFilter} onValueChange={setGradeFilter}>
-                <SelectTrigger className="border-purple-200 focus:ring-purple-400">
+                <SelectTrigger className="border-purple-200 bg-background/80 focus:ring-purple-400 dark:border-violet-500/30 dark:focus:ring-violet-400">
                   <SelectValue placeholder="All Grades" />
                 </SelectTrigger>
                 <SelectContent>
@@ -496,11 +500,11 @@ export default function MusicFileManagement() {
 
             {/* Category filter */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-200">
                 Category
               </label>
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="border-purple-200 focus:ring-purple-400">
+                <SelectTrigger className="border-purple-200 bg-background/80 focus:ring-purple-400 dark:border-violet-500/30 dark:focus:ring-violet-400">
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
@@ -516,11 +520,11 @@ export default function MusicFileManagement() {
 
             {/* Segment filter */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-200">
                 Segment
               </label>
               <Select value={segmentFilter} onValueChange={setSegmentFilter}>
-                <SelectTrigger className="border-purple-200 focus:ring-purple-400">
+                <SelectTrigger className="border-purple-200 bg-background/80 focus:ring-purple-400 dark:border-violet-500/30 dark:focus:ring-violet-400">
                   <SelectValue placeholder="All Segments" />
                 </SelectTrigger>
                 <SelectContent>
@@ -536,14 +540,14 @@ export default function MusicFileManagement() {
 
             {/* Competitor filter */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-200">
                 Competitor
               </label>
               <Select
                 value={competitorFilter}
                 onValueChange={setCompetitorFilter}
               >
-                <SelectTrigger className="border-purple-200 focus:ring-purple-400">
+                <SelectTrigger className="border-purple-200 bg-background/80 focus:ring-purple-400 dark:border-violet-500/30 dark:focus:ring-violet-400">
                   <SelectValue placeholder="All Competitors" />
                 </SelectTrigger>
                 <SelectContent>
@@ -564,10 +568,10 @@ export default function MusicFileManagement() {
       {isLoading ? (
         <LocalLoadingCard message="Loading music files..." minHeight="400px" />
       ) : (
-        <Card className="border-purple-100">
+        <Card className="border-purple-100 dark:border-violet-500/20">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <div>
-              <CardTitle className="text-lg text-purple-700">
+              <CardTitle className="text-lg text-purple-700 dark:text-violet-300">
                 Music Files
               </CardTitle>
               <CardDescription className="mt-1">
@@ -581,7 +585,7 @@ export default function MusicFileManagement() {
             {/* Bulk download button */}
             <Button
               onClick={handleBulkDownload}
-              className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2"
+              className="flex items-center gap-2 bg-purple-600 text-white hover:bg-purple-700 dark:bg-violet-500 dark:hover:bg-violet-400"
               disabled={selectedFileIds.length === 0 || isDownloading}
             >
               <FileDown size={16} />
@@ -602,7 +606,7 @@ export default function MusicFileManagement() {
             {isDownloading && (
               <div className="mb-4 space-y-2">
                 <Progress value={downloadProgress} className="h-2" />
-                <p className="text-sm text-center text-purple-600">
+                <p className="text-center text-sm text-purple-600 dark:text-violet-300">
                   Downloading file {currentFileIndex} of {totalFilesToDownload}{' '}
                   ({downloadProgress}%)
                 </p>
@@ -611,12 +615,12 @@ export default function MusicFileManagement() {
 
             <div className="rounded-md border">
               <Table>
-                <TableHeader className="bg-purple-50">
+                <TableHeader className="bg-purple-50/80 dark:bg-violet-950/30">
                   <TableRow>
                     <TableHead className="w-12 text-center">
                       <input
                         type="checkbox"
-                        className="h-4 w-4 rounded border-gray-300"
+                        className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 dark:bg-slate-900"
                         checked={
                           selectedFileIds.length > 0 &&
                           selectedFileIds.length === filteredFiles.length
@@ -639,7 +643,7 @@ export default function MusicFileManagement() {
                     <TableRow>
                       <TableCell
                         colSpan={9}
-                        className="text-center py-8 text-gray-500"
+                        className="py-8 text-center text-slate-500 dark:text-slate-400"
                       >
                         {musicFiles.length === 0
                           ? 'No music files found. Upload files via the competitor dashboard.'
@@ -650,12 +654,12 @@ export default function MusicFileManagement() {
                     filteredFiles.map((file) => (
                       <TableRow
                         key={file.$id}
-                        className="hover:bg-purple-50/50"
+                        className="hover:bg-purple-50/50 dark:hover:bg-violet-500/8"
                       >
                         <TableCell className="text-center">
                           <input
                             type="checkbox"
-                            className="h-4 w-4 rounded border-gray-300"
+                            className="h-4 w-4 rounded border-slate-300 dark:border-slate-600 dark:bg-slate-900"
                             checked={selectedFileIds.includes(file.$id)}
                             onChange={() => toggleFileSelection(file.$id)}
                           />
@@ -672,12 +676,12 @@ export default function MusicFileManagement() {
                                 {file.fileName}
                               </span>
                               <span
-                                className="text-xs text-gray-500 truncate max-w-40"
+                                className="max-w-40 truncate text-xs text-slate-500 dark:text-slate-400"
                                 title={file.originalName}
                               >
                                 {file.originalName}
                               </span>
-                              <span className="text-xs text-gray-400">
+                              <span className="text-xs text-slate-400 dark:text-slate-500">
                                 {formatFileSize(file.size || 0)}
                               </span>
                             </div>
@@ -686,7 +690,7 @@ export default function MusicFileManagement() {
                         <TableCell>
                           <div className="flex flex-col">
                             <span>{file.competitionName}</span>
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-slate-500 dark:text-slate-400">
                               {file.competitionYear}
                             </span>
                           </div>
@@ -697,7 +701,7 @@ export default function MusicFileManagement() {
                         <TableCell>
                           <div className="flex flex-col">
                             <span>{file.gradeCategory}</span>
-                            <span className="text-xs text-gray-500">
+                            <span className="text-xs text-slate-500 dark:text-slate-400">
                               {file.gradeSegment}
                             </span>
                           </div>
@@ -723,7 +727,7 @@ export default function MusicFileManagement() {
                               onClick={() =>
                                 handleDownload(file.fileId, file.originalName)
                               }
-                              className="h-8 w-8 text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                              className="h-8 w-8 text-purple-600 hover:bg-purple-50 hover:text-purple-700 dark:text-violet-300 dark:hover:bg-violet-500/10 dark:hover:text-violet-200"
                               title="Download file"
                             >
                               <Download size={16} />
@@ -734,7 +738,7 @@ export default function MusicFileManagement() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                  className="h-8 w-8 text-red-600 hover:bg-red-50 hover:text-red-700 dark:text-red-300 dark:hover:bg-red-500/10 dark:hover:text-red-200"
                                   title="Delete file"
                                 >
                                   <Trash2 size={16} />
@@ -753,7 +757,7 @@ export default function MusicFileManagement() {
                                 <AlertDialogFooter>
                                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                                   <AlertDialogAction
-                                    className="bg-red-600 hover:bg-red-700"
+                                    className="bg-red-600 hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-400"
                                     onClick={() =>
                                       handleDelete(file.fileId, file.$id)
                                     }

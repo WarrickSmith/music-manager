@@ -149,14 +149,14 @@ export default function MyFiles({ userId }: { userId: string }) {
 
   if (files.length === 0) {
     return (
-      <div className="text-center py-10">
-        <h2 className="text-2xl font-semibold mb-4 text-sky-500">
+      <div className="py-10 text-center">
+        <h2 className="mb-4 text-2xl font-semibold text-sky-500 dark:text-sky-300">
           My Music Files
         </h2>
-        <p className="text-sky-400 mb-4">
+        <p className="mb-4 text-sky-500/80 dark:text-sky-200/80">
           You haven&apos;t uploaded any music files yet.
         </p>
-        <p className="text-sky-400">
+        <p className="text-sky-500/80 dark:text-sky-200/80">
           Use the <span className="font-medium">Upload Music</span> tab to add
           your first music file.
         </p>
@@ -166,45 +166,53 @@ export default function MyFiles({ userId }: { userId: string }) {
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold mb-4 text-sky-500">
+      <h2 className="mb-4 text-2xl font-semibold text-sky-500 dark:text-sky-300">
         My Music Files
       </h2>
 
-      <div className="space-y-4 mb-6">
+      <div className="mb-6 space-y-4">
         <div className="flex items-center gap-2">
-          <span className="text-sky-400">Total Files:</span>
+          <span className="text-sky-500/80 dark:text-sky-200/80">
+            Total Files:
+          </span>
           <Badge variant="outline">{files.length}</Badge>
-          <Badge variant="outline" className="ml-2 bg-sky-100 text-sky-600">
+          <Badge
+            variant="outline"
+            className="ml-2 bg-sky-100 text-sky-600 dark:border-sky-500/30 dark:bg-sky-500/10 dark:text-sky-200"
+          >
             Showing: {filteredFiles.length}
           </Badge>
         </div>
 
-        <div className="w-full bg-sky-50 border border-sky-100 rounded-lg p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Filter className="h-5 w-5 text-sky-500" />
-            <span className="text-sky-600 font-semibold">
+        <div className="w-full rounded-2xl border border-sky-100 bg-sky-50/80 p-4 dark:border-sky-500/20 dark:bg-sky-950/20">
+          <div className="mb-3 flex items-center gap-2">
+            <Filter className="h-5 w-5 text-sky-500 dark:text-sky-300" />
+            <span className="font-semibold text-sky-600 dark:text-sky-200">
               Filter Music Files
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             <div className="col-span-1 sm:col-span-1">
-              <label className="text-sm font-medium text-sky-500 mb-1 block">
+              <label className="mb-1 block text-sm font-medium text-sky-500 dark:text-sky-200">
                 Year
               </label>
               <Select value={selectedYear} onValueChange={handleYearChange}>
-                <SelectTrigger className="w-full bg-gradient-to-r from-sky-50 to-sky-100 border-sky-200 text-sky-600 hover:from-sky-100 hover:to-sky-200 transition-all">
+                <SelectTrigger className="w-full border-sky-200 bg-gradient-to-r from-sky-50 to-sky-100 text-sky-600 transition-all hover:from-sky-100 hover:to-sky-200 dark:border-sky-500/30 dark:from-slate-900 dark:to-sky-950/60 dark:text-sky-200 dark:hover:from-slate-900 dark:hover:to-sky-900/70">
                   <SelectValue placeholder="Select Year" />
                 </SelectTrigger>
-                <SelectContent className="bg-white border-sky-200">
-                  <SelectItem value="all" className="text-sky-600 font-medium">
+                <SelectContent className="border-sky-200 dark:border-sky-500/30">
+                  <SelectItem
+                    value="all"
+                    className="font-medium text-sky-600 dark:text-sky-200"
+                  >
                     All Years
                   </SelectItem>
                   {uniqueYears.map((year) => (
                     <SelectItem
                       key={year}
                       value={year.toString()}
-                      className="text-sky-600"
+                      className="text-sky-600 dark:text-sky-200"
                     >
                       {year}
                     </SelectItem>
@@ -214,20 +222,20 @@ export default function MyFiles({ userId }: { userId: string }) {
             </div>
 
             <div className="col-span-1 sm:col-span-1 md:col-span-2">
-              <label className="text-sm font-medium text-indigo-500 mb-1 block">
+              <label className="mb-1 block text-sm font-medium text-indigo-500 dark:text-indigo-200">
                 Competition
               </label>
               <Select
                 value={selectedCompetition}
                 onValueChange={handleCompetitionChange}
               >
-                <SelectTrigger className="w-full bg-gradient-to-r from-indigo-50 to-indigo-100 border-indigo-200 text-indigo-600 hover:from-indigo-100 hover:to-indigo-200 transition-all">
+                <SelectTrigger className="w-full border-indigo-200 bg-gradient-to-r from-indigo-50 to-indigo-100 text-indigo-600 transition-all hover:from-indigo-100 hover:to-indigo-200 dark:border-indigo-500/30 dark:from-slate-900 dark:to-indigo-950/60 dark:text-indigo-200 dark:hover:from-slate-900 dark:hover:to-indigo-900/70">
                   <SelectValue placeholder="Select Competition" />
                 </SelectTrigger>
-                <SelectContent className="bg-white border-indigo-200 max-h-60">
+                <SelectContent className="max-h-60 border-indigo-200 dark:border-indigo-500/30">
                   <SelectItem
                     value="all"
-                    className="text-indigo-600 font-medium"
+                    className="font-medium text-indigo-600 dark:text-indigo-200"
                   >
                     All Competitions
                   </SelectItem>
@@ -235,7 +243,7 @@ export default function MyFiles({ userId }: { userId: string }) {
                     <SelectItem
                       key={comp}
                       value={comp}
-                      className="text-indigo-600"
+                      className="text-indigo-600 dark:text-indigo-200"
                     >
                       {comp}
                     </SelectItem>
@@ -248,18 +256,18 @@ export default function MyFiles({ userId }: { userId: string }) {
       </div>
 
       {filteredFiles.length === 0 ? (
-        <div className="text-center py-6 bg-sky-50 rounded-lg border border-sky-200">
-          <p className="text-sky-500 mb-2">
+        <div className="rounded-2xl border border-sky-200 bg-sky-50/80 py-6 text-center dark:border-sky-500/20 dark:bg-sky-950/20">
+          <p className="mb-2 text-sky-500 dark:text-sky-300">
             No files match the selected filters
           </p>
-          <p className="text-sky-400 text-sm">
+          <p className="text-sm text-sky-500/80 dark:text-sky-200/80">
             Try selecting different filter options
           </p>
         </div>
       ) : (
         sortedCompetitions.map((competition) => (
           <div key={competition} className="mb-8">
-            <h3 className="text-xl font-medium mb-4 text-sky-500">
+            <h3 className="mb-4 text-xl font-medium text-sky-500 dark:text-sky-300">
               {competition}
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
