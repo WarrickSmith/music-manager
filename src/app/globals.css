@@ -123,9 +123,6 @@
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
-  }
 
   /* Fix for scrollbar issues */
   html,
@@ -136,11 +133,35 @@
 
   html {
     height: 100%;
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
   }
 
   body {
     height: 100%;
     margin: 0;
+    @apply bg-background text-foreground;
+    background-image:
+      radial-gradient(circle at top, rgba(59, 130, 246, 0.16), transparent 34%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(241, 245, 249, 0.98));
+    transition:
+      background-color 300ms ease,
+      color 300ms ease,
+      border-color 300ms ease;
+  }
+
+  html.dark body {
+    background-image:
+      radial-gradient(circle at top, rgba(56, 189, 248, 0.18), transparent 32%),
+      radial-gradient(circle at 85% 15%, rgba(139, 92, 246, 0.18), transparent 22%),
+      linear-gradient(180deg, #020617, #0f172a 52%, #111827);
+  }
+
+  ::selection {
+    background: rgba(59, 130, 246, 0.28);
   }
 }
 
@@ -158,5 +179,13 @@
       opacity: 1;
       transform: translateY(0);
     }
+  }
+
+  .app-panel {
+    @apply rounded-3xl border border-slate-200/70 bg-white/80 shadow-xl shadow-slate-950/5 backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/65 dark:shadow-black/25;
+  }
+
+  .app-shell-banner {
+    @apply rounded-[1.75rem] border border-slate-200/70 bg-gradient-to-r from-white/85 via-sky-50/90 to-indigo-50/85 shadow-lg shadow-slate-950/5 backdrop-blur-xl dark:border-white/10 dark:from-slate-900/90 dark:via-slate-900/80 dark:to-indigo-950/55 dark:shadow-black/20;
   }
 }

@@ -122,10 +122,12 @@ export default function FileCard({
   // If the file is being deleted, show a spinner instead of the card
   if (showDeleteSpinner) {
     return (
-      <div className="flex items-center justify-center h-full min-h-[240px] bg-sky-50 rounded-lg border border-sky-100 animate-pulse">
+      <div className="flex h-full min-h-[240px] animate-pulse items-center justify-center rounded-2xl border border-sky-100 bg-sky-50/80 dark:border-sky-500/20 dark:bg-sky-950/20">
         <div className="flex flex-col items-center space-y-3">
-          <Loader2 className="h-10 w-10 text-sky-500 animate-spin" />
-          <span className="text-sm text-sky-500 font-medium">Deleting...</span>
+          <Loader2 className="h-10 w-10 animate-spin text-sky-500 dark:text-sky-300" />
+          <span className="text-sm font-medium text-sky-500 dark:text-sky-300">
+            Deleting...
+          </span>
         </div>
       </div>
     )
@@ -208,7 +210,7 @@ export default function FileCard({
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDelete}
-                className="bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 cursor-pointer"
+                className="cursor-pointer bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 dark:bg-red-500 dark:hover:bg-red-400"
               >
                 Delete
               </AlertDialogAction>

@@ -28,18 +28,18 @@ export default async function AdminDashboardPage() {
   return (
     <>
       <div className="container mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 rounded-lg p-6 mb-8 shadow-sm border border-indigo-100">
+        <div className="app-shell-banner mb-8 p-6">
           <div className="flex items-center justify-between">
-            <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-500">
+            <h1 className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-3xl font-bold text-transparent dark:from-sky-300 dark:to-violet-300">
               Admin Dashboard
             </h1>
-            <div className="bg-white px-4 py-2 rounded-full shadow-sm text-indigo-600 font-medium border border-indigo-100">
+            <div className="rounded-full border border-slate-200/70 bg-white/80 px-4 py-2 font-medium text-indigo-600 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-sky-200">
               Welcome, {user?.name || 'Admin'}
             </div>
           </div>
         </div>
         <Tabs defaultValue={defaultTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-8 p-1 bg-slate-50 rounded-xl shadow-sm border border-slate-200">
+          <TabsList className="mb-8 grid w-full grid-cols-5 rounded-2xl border border-slate-200/70 bg-slate-100/80 p-1 shadow-sm dark:border-white/10 dark:bg-white/5">
             <TabsTrigger
               value="musicfiles"
               className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-400 data-[state=active]:text-white"
@@ -79,40 +79,40 @@ export default async function AdminDashboardPage() {
 
           <TabsContent value="musicfiles" className="mt-6">
             {/* Music File Management Component */}
-            <div className="rounded-lg border border-purple-100 bg-white p-8 shadow-sm">
+            <div className="app-panel p-8">
               <MusicFileManagement />
             </div>
           </TabsContent>
 
           <TabsContent value="competitions" className="mt-6">
             {/* Competition & Grade Management Component */}
-            <div className="rounded-lg border border-indigo-100 bg-white p-6 shadow-sm">
+            <div className="app-panel p-6">
               <CompetitionManagement />
             </div>
           </TabsContent>
 
           <TabsContent value="users" className="mt-6">
             {/* User Management Component */}
-            <div className="rounded-lg border border-blue-100 bg-white p-6 shadow-sm">
+            <div className="app-panel p-6">
               <UserManagement />
             </div>
           </TabsContent>
 
           <TabsContent value="profile" className="mt-6">
             {/* Admin Profile Component */}
-            <div className="rounded-lg border border-violet-100 bg-white p-6 shadow-sm">
+            <div className="app-panel p-6">
               <AdminProfileManagement />
             </div>
           </TabsContent>
 
           <TabsContent value="appwrite" className="mt-6">
             {/* Appwrite Initialization Component */}
-            <div className="rounded-lg border border-green-100 bg-white p-6 shadow-sm">
+            <div className="app-panel p-6">
               <div className="mb-6">
-                <h2 className="text-3xl font-bold text-green-700 mb-2">
+                <h2 className="mb-2 text-3xl font-bold text-green-700 dark:text-emerald-300">
                   Appwrite Backend Setup
                 </h2>
-                <p className="text-gray-600">
+                <p className="text-muted-foreground">
                   Check the status of your Appwrite backend resources and
                   initialize them if needed.
                 </p>

@@ -15,19 +15,19 @@ export default function CompetitorDashboard({
 }) {
   return (
     <div className="w-full">
-      <div className="bg-gradient-to-r from-sky-50 via-blue-50 to-indigo-50 rounded-lg p-6 mb-8 shadow-sm border border-blue-100">
+      <div className="app-shell-banner mb-8 p-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-sky-500 to-blue-500">
+          <h1 className="bg-gradient-to-r from-sky-500 to-blue-500 bg-clip-text text-3xl font-bold text-transparent dark:from-sky-300 dark:to-cyan-200">
             Competitor Dashboard
           </h1>
-          <div className="bg-white px-4 py-2 rounded-full shadow-sm text-blue-600 font-medium border border-blue-100">
+          <div className="rounded-full border border-slate-200/70 bg-white/80 px-4 py-2 font-medium text-blue-600 shadow-sm dark:border-white/10 dark:bg-white/5 dark:text-sky-200">
             Welcome, {userName}
           </div>
         </div>
       </div>
 
       <Tabs defaultValue="my-files" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-8 p-1 bg-slate-50 rounded-xl shadow-sm border border-slate-200">
+        <TabsList className="mb-8 grid w-full grid-cols-3 rounded-2xl border border-slate-200/70 bg-slate-100/80 p-1 shadow-sm dark:border-white/10 dark:bg-white/5">
           <TabsTrigger
             value="my-files"
             className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-sky-500 data-[state=active]:to-sky-400 data-[state=active]:text-white"
@@ -52,7 +52,7 @@ export default function CompetitorDashboard({
         </TabsList>
 
         <TabsContent value="my-files" className="mt-6">
-          <div className="rounded-lg border border-sky-100 bg-white p-6 shadow-sm">
+          <div className="app-panel p-6">
             <Suspense
               fallback={
                 <LocalLoadingCard
@@ -67,7 +67,7 @@ export default function CompetitorDashboard({
         </TabsContent>
 
         <TabsContent value="upload" className="mt-6">
-          <div className="rounded-lg border border-emerald-200 bg-white p-6 shadow-sm">
+          <div className="app-panel p-6">
             <Suspense
               fallback={
                 <LocalLoadingCard
@@ -82,7 +82,7 @@ export default function CompetitorDashboard({
         </TabsContent>
 
         <TabsContent value="profile" className="mt-6">
-          <div className="rounded-lg border border-violet-100 bg-white p-6 shadow-sm">
+          <div className="app-panel p-6">
             <Suspense
               fallback={
                 <LocalLoadingCard

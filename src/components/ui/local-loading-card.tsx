@@ -15,14 +15,14 @@ export default function LocalLoadingCard({
   minHeight = '200px',
 }: LocalLoadingCardProps) {
   return (
-    <Card className="border-indigo-100">
+    <Card className="border-indigo-100 dark:border-indigo-500/20 dark:bg-indigo-950/10">
       <CardContent
         className="p-6 flex items-center justify-center"
         style={{ minHeight }}
       >
         <div className="flex flex-col items-center gap-2">
-          <RefreshCw className="h-10 w-10 animate-spin text-indigo-600" />
-          <p className="text-indigo-600">{message}</p>
+          <RefreshCw className="h-10 w-10 animate-spin text-indigo-600 dark:text-indigo-300" />
+          <p className="text-indigo-600 dark:text-indigo-200">{message}</p>
         </div>
       </CardContent>
     </Card>
