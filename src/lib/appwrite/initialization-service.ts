@@ -1,10 +1,7 @@
 'use server'
 
 import { databases, storage } from '@/lib/appwrite/server'
-import { exec } from 'child_process'
-import { promisify } from 'util'
-
-const execAsync = promisify(exec)
+import { setupAppwrite } from '../../../scripts/setup-appwrite'
 
 const databaseId = process.env.APPWRITE_DATABASE_ID!
 const bucketId = process.env.APPWRITE_BUCKET_ID!
@@ -93,13 +90,22 @@ export async function checkAppwriteInitialization() {
 }
 
 /**
- * Initialize Appwrite resources by running the setup script
+ * Initialize Appwrite resources inside the app runtime so the Docker image
+ * only needs the traced standalone bundle.
  */
 export async function initializeAppwrite() {
   try {
-    console.log('Running Appwrite initialization script...')
-    const result = await execAsync('npm run setup:appwrite')
-    console.log('Initialization result:', result.stdout)
+    console.log('Running Appwrite initialization...')
+    const result = await setupAppwrite({ all: true })
+
+    result.results.forEach((message) =>
+      console.log('Appwrite initialization:', message)
+    )
+
+    if (!result.success) {
+      throw new Error(result.errors?.join('; ') || 'Unknown setup failure')
+    }
+
     return {
       success: true,
       message: 'Appwrite resources initialized successfully',

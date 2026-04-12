@@ -1,6 +1,12 @@
-import { users, client, ID, Query } from '../appwrite/server'
+import {
+  users,
+  client,
+  ID,
+  Query,
+  createProjectClient,
+} from '../appwrite/server'
 import { cookies } from 'next/headers'
-import { Account, Client } from 'node-appwrite'
+import { Account } from 'node-appwrite'
 
 // Session management
 export async function createSession(email: string, password: string) {
@@ -54,10 +60,7 @@ export async function getCurrentUser() {
     try {
       // Create a new client instance for session-based authentication
       // This avoids the conflict with the API key set in the global client
-      const sessionClient = new Client()
-        .setEndpoint(process.env.APPWRITE_ENDPOINT || '')
-        .setProject(process.env.APPWRITE_PROJECT_ID || '')
-        .setSession(sessionValue)
+      const sessionClient = createProjectClient().setSession(sessionValue)
 
       // Create a temporary Account instance for getting the current user
       const account = new Account(sessionClient)
@@ -153,10 +156,7 @@ export async function logout() {
 
     if (sessionValue) {
       // Create a new client instance for session-based authentication
-      const sessionClient = new Client()
-        .setEndpoint(process.env.APPWRITE_ENDPOINT || '')
-        .setProject(process.env.APPWRITE_PROJECT_ID || '')
-        .setSession(sessionValue)
+      const sessionClient = createProjectClient().setSession(sessionValue)
 
       // Create a temporary Account instance for deleting the session
       const account = new Account(sessionClient)
