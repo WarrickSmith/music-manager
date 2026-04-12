@@ -16,8 +16,15 @@ Music Manager is an application designed for Ice Skaters to upload and manage mu
 
 1. Clone the repository
 2. Install dependencies: `npm install`
-3. Set up environment variables in `.env.local`
+3. Set up environment variables in `.env.local` for `npm run dev`, or in `.env` for Docker and Portainer deployments
 4. Run the development server: `npm run dev`
+
+## Deployment
+
+- GitHub Actions publishes `registry.wsapz.com/music-manager:latest` from `.github/workflows/publish-image.yml` on pushes to `main` and manual runs.
+- `docker-compose.yml` is the Portainer stack definition. It pulls the published image from Zot and expects Portainer stack variables to be imported from the project `.env` file before deployment.
+- The GitHub workflow only requires the `REGISTRY_PASSWORD` repository secret for Zot login.
+- Runtime configuration stays in the Portainer stack `.env` import, including `APPWRITE_ENDPOINT`, `APPWRITE_PROJECT_ID`, `APPWRITE_API_KEY`, `APPWRITE_DATABASE_ID`, `APPWRITE_COMPETITIONS_COLLECTION_ID`, `APPWRITE_GRADES_COLLECTION_ID`, `APPWRITE_MUSIC_FILES_COLLECTION_ID`, and `APPWRITE_BUCKET_ID`.
 
 ## Project Structure
 
