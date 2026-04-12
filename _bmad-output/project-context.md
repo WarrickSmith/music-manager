@@ -56,7 +56,7 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - React 19 + Next 16 + Tailwind v4 are a tightly coupled triple; upgrading one usually requires upgrading the others
 
 **Next.js 16 deprecations**
-- `middleware.ts` is deprecated — should be renamed to `proxy.ts` in a future change (still works for now)
+- `middleware.ts` has been renamed to `proxy.ts` (Next.js 16 convention); function export renamed from `middleware` to `proxy`
 - Synchronous `cookies()`, `headers()`, `params`, `searchParams` access fully removed — must `await` all of them
 
 ## Critical Implementation Rules
@@ -104,7 +104,7 @@ _This file contains critical rules and patterns that AI agents must follow when 
 
 **Auth & routing**
 - Session cookie is named `mm-session`; HTTP-only, 7-day expiry, set via `cookies().set()` inside a Server Action ONLY (cannot be set from middleware or RSC)
-- [src/middleware.ts](src/middleware.ts) only forwards the cookie + sets cache headers — it does NOT gate routes. Route protection happens in layout `page.tsx`/`layout.tsx` via `getCurrentUser()` + `redirect()` (see [src/app/dashboard/layout.tsx](src/app/dashboard/layout.tsx))
+- [src/proxy.ts](src/proxy.ts) only forwards the cookie + sets cache headers — it does NOT gate routes. Route protection happens in layout `page.tsx`/`layout.tsx` via `getCurrentUser()` + `redirect()` (see [src/app/dashboard/layout.tsx](src/app/dashboard/layout.tsx))
 - Role is derived from Appwrite user `labels` (`'admin'` vs `'competitor'`) — NOT from a database field. Use `getUserRole()` or inspect `user.labels.includes('admin')` directly
 
 **Appwrite client discipline**
@@ -223,7 +223,7 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - Role is read from `user.labels`, not from user preferences, a collection, or a team. Changing this model breaks middleware, layouts, and server actions simultaneously
 
 **Session cookie rules**
-- Cookie name is `mm-session` (literal; matched in [middleware.ts:16](src/middleware.ts#L16) and auth service). Renaming requires updating BOTH
+- Cookie name is `mm-session` (literal; matched in [proxy.ts:16](src/proxy.ts#L16) and auth service). Renaming requires updating BOTH
 - `cookies().set()` works ONLY inside Server Actions or Route Handlers. In RSC / layouts, you can READ cookies but not WRITE them — respect this or Next 15 will throw at runtime
 - `getCurrentUser()` must NOT delete invalid cookies — only a Server Action can. It returns `null` and lets the caller decide
 
