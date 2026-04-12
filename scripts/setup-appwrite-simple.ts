@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import * as dotenv from 'dotenv'
-// Load environment variables from .env.local
-dotenv.config({ path: '.env.local' })
+dotenv.config({ path: ['.env.local', '.env'] })
 
 import {
   Client,
