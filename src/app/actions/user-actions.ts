@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { getCurrentUser } from '@/lib/auth/auth-service'
 import { databases, Query } from '@/lib/appwrite/server'
 import { storage } from '@/lib/appwrite/server'
+import { toPlainObject } from '@/lib/utils'
 
 // Initialize Appwrite
 const client = new Client()
@@ -31,7 +32,7 @@ async function getAllDocuments(
 ) {
   const limit = 100 // Maximum allowed by Appwrite
   let offset = 0
-  let allDocuments: Models.Document[] = [] // Using Appwrite Models.Document type
+  let allDocuments: Models.DefaultDocument[] = []
   let hasMoreDocuments = true
 
   // Add limit to queries if not already specified
@@ -98,7 +99,7 @@ export async function getAllUsers() {
       })
     )
 
-    return enhancedUsers
+    return toPlainObject(enhancedUsers)
   } catch (error) {
     console.error('Error fetching users:', error)
     throw new Error('Failed to fetch users')
@@ -204,13 +205,12 @@ export async function getCurrentUserProfile() {
       preferences = {}
     }
 
-    return {
+    return toPlainObject({
       ...user,
       firstName: preferences.firstName || '',
       lastName: preferences.lastName || '',
-      // Get phone from the user object instead of preferences
       phone: user.phone || '',
-    }
+    })
   } catch (error) {
     console.error('Error getting current user profile:', error)
     throw new Error('Failed to fetch user profile')
@@ -328,12 +328,12 @@ export async function getUserProfile(userId: string) {
     const user = await users.get(userId)
     const prefs = await users.getPrefs(userId)
 
-    return {
+    return toPlainObject({
       id: user.$id,
       email: user.email,
       name: user.name,
       prefs,
-    }
+    })
   } catch (error) {
     console.error('Error fetching user profile:', error)
     throw new Error('Failed to fetch user profile')

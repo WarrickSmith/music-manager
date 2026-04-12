@@ -69,7 +69,10 @@ export async function getCurrentUser() {
         await account.getSession('current')
 
         // Only if the session check passes, we try to get the full account
-        return await account.get()
+        // Serialize to plain object — node-appwrite v23 returns class instances
+        // that can't cross the Server→Client Component boundary in Next.js 16
+        const user = await account.get()
+        return JSON.parse(JSON.stringify(user))
       } catch (sessionVerifyError) {
         console.log('Invalid or expired session:', sessionVerifyError)
         // Don't try to delete the cookie here - it can only be done in a Server Action

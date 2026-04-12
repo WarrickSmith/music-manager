@@ -1,6 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   // Add cache control headers for static image files
   if (request.nextUrl.pathname.match(/\.(png|jpg|jpeg|gif|svg|ico)$/)) {
     const response = NextResponse.next()

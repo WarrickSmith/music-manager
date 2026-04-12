@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import * as musicMetadata from 'music-metadata'
 import { Models } from 'node-appwrite'
 import { checkAppwriteInitialization } from '@/lib/appwrite/initialization-service'
+import { toPlainObject } from '@/lib/utils'
 
 const databaseId = process.env.APPWRITE_DATABASE_ID!
 const bucketId = process.env.APPWRITE_BUCKET_ID!
@@ -26,7 +27,7 @@ export async function getUserMusicFiles(userId: string) {
       musicFilesCollectionId,
       [Query.equal('userId', userId), Query.orderDesc('uploadedAt')]
     )
-    return response.documents
+    return toPlainObject(response.documents)
   } catch (error) {
     console.error('Error fetching user music files:', error)
     throw new Error('Failed to fetch your music files')
@@ -47,7 +48,7 @@ export async function getAllMusicFiles() {
     // Fetch all music files with pagination handling
     const limit = 100 // Maximum allowed by Appwrite
     let offset = 0
-    let allDocuments: Models.Document[] = []
+    let allDocuments: Models.DefaultDocument[] = []
     let hasMoreDocuments = true
 
     // Add limit to queries
@@ -73,7 +74,7 @@ export async function getAllMusicFiles() {
       }
     }
 
-    return allDocuments
+    return toPlainObject(allDocuments)
   } catch (error) {
     console.error('Error fetching all music files:', error)
     throw new Error('Failed to fetch music files')
@@ -251,7 +252,7 @@ export async function uploadMusicFile(formData: FormData) {
     console.log('Music file document created with duration:', duration)
 
     revalidatePath('/dashboard')
-    return { success: true, musicFile: musicFileDocument }
+    return { success: true, musicFile: toPlainObject(musicFileDocument) }
   } catch (error) {
     console.error('Error uploading music file:', error)
     throw new Error(

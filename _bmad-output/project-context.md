@@ -17,39 +17,47 @@ _This file contains critical rules and patterns that AI agents must follow when 
 ## Technology Stack & Versions
 
 **Framework & Runtime**
-- Next.js `15.2.8` — App Router, Server Actions, Turbopack dev (`next dev --turbopack`)
-- React `19.0.3` + `react-dom 19.0.3` (pinned exactly)
-- TypeScript `^5` — strict mode, `target: ES2017`, `moduleResolution: bundler`
-- Node.js via `tsx ^4.19` for Appwrite setup scripts
+- Next.js `16.2.3` — App Router, Server Actions, Turbopack (default bundler in v16)
+- React `19.2.5` + `react-dom 19.2.5` (pinned exactly)
+- TypeScript `^6.0` — strict mode, `target: ES2017`, `moduleResolution: bundler`, `jsx: react-jsx` (set by Next.js 16)
+- Node.js `>=24.12` — Dockerfile uses `node:24-alpine`
+- `tsx ^4.21` for Appwrite setup scripts
 
 **Backend / BaaS**
 - Appwrite server `1.9.0` (latest) — self-hosted standalone deployment
-- `node-appwrite ^15.0.0` — server SDK ONLY (no client/browser SDK in this project); must remain compatible with Appwrite server `1.9.x`
+- `node-appwrite ^23.1.0` — server SDK ONLY (no client/browser SDK in this project); must remain compatible with Appwrite server `1.9.x`
 - Appwrite resources: Databases, Storage (single bucket), Users, Teams, Account
+- **node-appwrite v23 change:** `IndexType` renamed to `DatabasesIndexType`; `Models.Document` no longer has `[key: string]: any` — use `Models.DefaultDocument` for documents with custom fields
 
 **UI**
-- Tailwind CSS `^4` via `@tailwindcss/postcss ^4` (v4, NOT v3 — no `tailwind.config.js`)
+- Tailwind CSS `^4.2` via `@tailwindcss/postcss ^4.2` (v4, NOT v3 — no `tailwind.config.js`)
 - shadcn/ui components in `src/components/ui/` built on Radix primitives
   (`@radix-ui/react-{alert-dialog,dialog,dropdown-menu,label,progress,radio-group,select,slot,switch,tabs}`)
-- `tailwind-merge ^3`, `tailwindcss-animate ^1`, `class-variance-authority ^0.7`, `clsx ^2`
-- Icons: `lucide-react ^0.477` (primary) and `react-icons ^5.5`
+- `tailwind-merge ^3.5`, `tailwindcss-animate ^1`, `class-variance-authority ^0.7`, `clsx ^2`
+- Icons: `lucide-react ^1.8` (primary)
 - Toasts: `sonner ^2.0` (NOT a custom toaster)
 
 **Forms & Validation**
-- `react-hook-form ^7.54` + `@hookform/resolvers ^4.1` + `zod ^3.24`
+- `react-hook-form ^7.72` + `@hookform/resolvers ^5.2` + `zod ^4.3`
+- **Zod v4 change:** `required_error` option removed — use `error` instead (e.g. `z.string({ error: 'message' })`)
 
 **Domain**
-- `music-metadata ^11` — audio duration extraction (buffer-based parsing)
-- `dotenv ^16.4` — Appwrite setup scripts
+- `music-metadata ^11.12` — audio duration extraction (buffer-based parsing)
+- `dotenv ^17.4` — Appwrite setup scripts
 
 **Tooling**
-- ESLint `^9` flat config extending `next/core-web-vitals` + `next/typescript`
+- ESLint `^9.39` flat config importing native flat config arrays from `eslint-config-next/core-web-vitals` + `eslint-config-next/typescript` (no FlatCompat needed)
+- `next lint` removed in Next.js 16 — lint script uses `eslint src/` directly
 - No test framework configured (Jest/Vitest/Playwright absent)
 - Path alias: `@/*` → `./src/*`
 
 **Version constraints**
-- `@types/react 19.0.12` / `@types/react-dom 19.0.4` pinned via `overrides` — do NOT bump without coordination
-- React 19 + Next 15 + Tailwind v4 are a tightly coupled triple; upgrading one usually requires upgrading the others
+- `@types/react 19.2.14` / `@types/react-dom 19.2.3` pinned via `overrides` — do NOT bump without coordination
+- React 19 + Next 16 + Tailwind v4 are a tightly coupled triple; upgrading one usually requires upgrading the others
+
+**Next.js 16 deprecations**
+- `middleware.ts` has been renamed to `proxy.ts` (Next.js 16 convention); function export renamed from `middleware` to `proxy`
+- Synchronous `cookies()`, `headers()`, `params`, `searchParams` access fully removed — must `await` all of them
 
 ## Critical Implementation Rules
 
@@ -96,7 +104,7 @@ _This file contains critical rules and patterns that AI agents must follow when 
 
 **Auth & routing**
 - Session cookie is named `mm-session`; HTTP-only, 7-day expiry, set via `cookies().set()` inside a Server Action ONLY (cannot be set from middleware or RSC)
-- [src/middleware.ts](src/middleware.ts) only forwards the cookie + sets cache headers — it does NOT gate routes. Route protection happens in layout `page.tsx`/`layout.tsx` via `getCurrentUser()` + `redirect()` (see [src/app/dashboard/layout.tsx](src/app/dashboard/layout.tsx))
+- [src/proxy.ts](src/proxy.ts) only forwards the cookie + sets cache headers — it does NOT gate routes. Route protection happens in layout `page.tsx`/`layout.tsx` via `getCurrentUser()` + `redirect()` (see [src/app/dashboard/layout.tsx](src/app/dashboard/layout.tsx))
 - Role is derived from Appwrite user `labels` (`'admin'` vs `'competitor'`) — NOT from a database field. Use `getUserRole()` or inspect `user.labels.includes('admin')` directly
 
 **Appwrite client discipline**
@@ -215,7 +223,7 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - Role is read from `user.labels`, not from user preferences, a collection, or a team. Changing this model breaks middleware, layouts, and server actions simultaneously
 
 **Session cookie rules**
-- Cookie name is `mm-session` (literal; matched in [middleware.ts:16](src/middleware.ts#L16) and auth service). Renaming requires updating BOTH
+- Cookie name is `mm-session` (literal; matched in [proxy.ts:16](src/proxy.ts#L16) and auth service). Renaming requires updating BOTH
 - `cookies().set()` works ONLY inside Server Actions or Route Handlers. In RSC / layouts, you can READ cookies but not WRITE them — respect this or Next 15 will throw at runtime
 - `getCurrentUser()` must NOT delete invalid cookies — only a Server Action can. It returns `null` and lets the caller decide
 
@@ -266,6 +274,6 @@ _This file contains critical rules and patterns that AI agents must follow when 
 - Keep this file lean and focused on agent needs — prune obvious rules as the codebase matures
 - Update when the technology stack changes (Next.js / React / Appwrite server / node-appwrite major bumps)
 - Review periodically for stale line numbers and removed files
-- The Appwrite server version (`1.9.0` standalone) and the `node-appwrite` SDK pin are the two values most likely to drift — verify on each upgrade
+- The Appwrite server version (`1.9.0` standalone) and the `node-appwrite` SDK pin (`^23.1.0`) are the two values most likely to drift — verify on each upgrade
 
 Last Updated: 2026-04-12

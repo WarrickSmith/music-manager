@@ -99,15 +99,14 @@ export default function Navbar({ user }: NavbarProps) {
               onClick={handleLogoClick}
               className="flex items-center gap-3 transition-transform hover:scale-105 text-left cursor-pointer"
             >
-              <div className="relative">
+              <div className="relative w-9 h-9">
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
                 <Image
                   src={logoSrc}
                   alt="Music Manager Logo"
-                  width={36}
-                  height={36}
+                  fill
                   priority
-                  className="rounded-md relative"
+                  className="rounded-md object-contain"
                 />
               </div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -120,15 +119,14 @@ export default function Navbar({ user }: NavbarProps) {
               href="/"
               className="flex items-center gap-3 transition-transform hover:scale-105"
             >
-              <div className="relative">
+              <div className="relative w-9 h-9">
                 <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
                 <Image
                   src={logoSrc}
                   alt="Music Manager Logo"
-                  width={36}
-                  height={36}
+                  fill
                   priority
-                  className="rounded-md relative"
+                  className="rounded-md object-contain"
                 />
               </div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
