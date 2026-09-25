@@ -9,12 +9,12 @@
     "lint": "eslint src/",
     "setup:appwrite": "tsx scripts/setup-appwrite.ts",
     "setup:appwrite:db": "tsx scripts/setup-appwrite.ts --database",
-    "setup:appwrite:collections": "tsx scripts/setup-appwrite.ts --collections",
+    "setup:appwrite:tables": "tsx scripts/setup-appwrite.ts --tables",
     "setup:appwrite:storage": "tsx scripts/setup-appwrite.ts --storage",
     "setup:appwrite:grades": "tsx scripts/setup-appwrite.ts --default-grades",
     "setup:appwrite:indexes": "tsx scripts/setup-appwrite.ts --indexes",
     "setup:appwrite:teams": "tsx scripts/setup-appwrite.ts --teams",
-    "setup:appwrite:simple": "tsx scripts/setup-appwrite-simple.ts"
+    "test": "vitest run"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -33,7 +33,7 @@
     "lucide-react": "^1.8.0",
     "music-metadata": "^11.12.3",
     "next": "16.2.3",
-    "node-appwrite": "^23.1.0",
+    "node-appwrite": "^29.0.0",
     "react": "19.2.5",
     "react-dom": "19.2.5",
     "react-hook-form": "^7.72.1",
@@ -51,7 +51,8 @@
     "eslint-config-next": "16.2.3",
     "tailwindcss": "^4.2.2",
     "tsx": "^4.21.0",
-    "typescript": "^6.0.2"
+    "typescript": "^6.0.2",
+    "vitest": "^5.0.2"
   },
   "overrides": {
     "@types/react": "19.2.14",

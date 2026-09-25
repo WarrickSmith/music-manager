@@ -1,6 +1,6 @@
 import {
   Client,
-  Databases,
+  TablesDB,
   Storage,
   Users,
   ID as AppwriteID,
@@ -9,7 +9,7 @@ import {
 
 interface AppwriteServices {
   client: Client
-  databases: Databases
+  tablesDB: TablesDB
   storage: Storage
   users: Users
 }
@@ -54,7 +54,7 @@ function getServices() {
 
   cachedServices = {
     client,
-    databases: new Databases(client),
+    tablesDB: new TablesDB(client),
     storage: new Storage(client),
     users: new Users(client),
   }
@@ -96,7 +96,7 @@ function createLazyService<T extends object>(resolver: () => T): T {
 }
 
 export const client = createLazyService(() => getServices().client)
-export const databases = createLazyService(() => getServices().databases)
+export const tablesDB = createLazyService(() => getServices().tablesDB)
 export const storage = createLazyService(() => getServices().storage)
 export const users = createLazyService(() => getServices().users)
 export const ID = AppwriteID

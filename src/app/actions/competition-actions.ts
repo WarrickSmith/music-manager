@@ -1,6 +1,6 @@
 'use server'
 
-import { databases, ID, Query } from '@/lib/appwrite/server'
+import { tablesDB, ID, Query } from '@/lib/appwrite/server'
 import { Models } from 'node-appwrite'
 import { revalidatePath } from 'next/cache'
 import { defaultGrades } from '@/lib/appwrite/default-grades'
@@ -29,7 +29,7 @@ async function getAllDocuments(
 ) {
   const limit = 100 // Maximum allowed by Appwrite
   let offset = 0
-  let allDocuments: Models.DefaultDocument[] = []
+  let allDocuments: Models.DefaultRow[] = []
   let hasMoreDocuments = true
 
   // Add limit to queries if not already specified
@@ -39,16 +39,16 @@ async function getAllDocuments(
     // Add offset to queries
     const currentQueries = [...queriesWithLimit, Query.offset(offset)]
 
-    const response = await databases.listDocuments(
+    const response = await tablesDB.listRows({
       databaseId,
-      collectionId,
-      currentQueries
-    )
+      tableId: collectionId,
+      queries: currentQueries,
+    })
 
-    allDocuments = [...allDocuments, ...response.documents]
+    allDocuments = [...allDocuments, ...response.rows]
 
     // Check if there are more documents
-    if (response.documents.length < limit) {
+    if (response.rows.length < limit) {
       hasMoreDocuments = false
     } else {
       offset += limit
@@ -66,13 +66,17 @@ export async function getCompetitions() {
       return []
     }
 
-    const response = await databases.listDocuments(
+    const response = await tablesDB.listRows({
       databaseId,
-      competitionsCollectionId,
-      [Query.orderDesc('year'), Query.orderAsc('name'), Query.limit(100)]
-    )
+      tableId: competitionsCollectionId,
+      queries: [
+        Query.orderDesc('year'),
+        Query.orderAsc('name'),
+        Query.limit(100),
+      ],
+    })
 
-    return toPlainObject(response.documents)
+    return toPlainObject(response.rows)
   } catch (error) {
     console.error('Error fetching competitions:', error)
     throw new Error('Failed to fetch competitions')
@@ -102,32 +106,32 @@ export async function createCompetition({
     }
 
     // Create competition document
-    const competition = await databases.createDocument(
+    const competition = await tablesDB.createRow({
       databaseId,
-      competitionsCollectionId,
-      ID.unique(),
-      {
+      tableId: competitionsCollectionId,
+      rowId: ID.unique(),
+      data: {
         name,
         year,
         active,
-      }
-    )
+      },
+    })
 
     // Create associated grades
     if (useDefaultGrades) {
       // Use default grades from template
       for (const grade of defaultGrades) {
-        await databases.createDocument(
+        await tablesDB.createRow({
           databaseId,
-          gradesCollectionId,
-          ID.unique(),
-          {
+          tableId: gradesCollectionId,
+          rowId: ID.unique(),
+          data: {
             name: grade.name,
             category: grade.category,
             segment: grade.segment,
             competitionId: competition.$id,
-          }
-        )
+          },
+        })
       }
     } else if (cloneFromCompetitionId) {
       // Clone grades from existing competition using the pagination utility
@@ -138,17 +142,17 @@ export async function createCompetition({
       )
 
       for (const grade of existingGrades) {
-        await databases.createDocument(
+        await tablesDB.createRow({
           databaseId,
-          gradesCollectionId,
-          ID.unique(),
-          {
+          tableId: gradesCollectionId,
+          rowId: ID.unique(),
+          data: {
             name: grade.name,
             category: grade.category,
             segment: grade.segment,
             competitionId: competition.$id,
-          }
-        )
+          },
+        })
       }
     }
 
@@ -173,12 +177,12 @@ export async function updateCompetitionStatus(
       )
     }
 
-    const result = await databases.updateDocument(
+    const result = await tablesDB.updateRow({
       databaseId,
-      competitionsCollectionId,
-      competitionId,
-      { active }
-    )
+      tableId: competitionsCollectionId,
+      rowId: competitionId,
+      data: { active },
+    })
 
     revalidatePath('/admin/dashboard')
     return toPlainObject(result)
@@ -211,11 +215,11 @@ export async function deleteCompetition(competitionId: string) {
         // Delete file from storage
         await storage.deleteFile(bucketId, file.fileId)
         // Delete file record from database
-        await databases.deleteDocument(
+        await tablesDB.deleteRow({
           databaseId,
-          musicFilesCollectionId,
-          file.$id
-        )
+          tableId: musicFilesCollectionId,
+          rowId: file.$id,
+        })
       } catch (fileError) {
         console.error(`Error deleting music file ${file.$id}:`, fileError)
         // Continue deleting other files even if one fails
@@ -229,15 +233,19 @@ export async function deleteCompetition(competitionId: string) {
 
     // Delete grades
     for (const grade of grades) {
-      await databases.deleteDocument(databaseId, gradesCollectionId, grade.$id)
+      await tablesDB.deleteRow({
+        databaseId,
+        tableId: gradesCollectionId,
+        rowId: grade.$id,
+      })
     }
 
     // Delete competition
-    await databases.deleteDocument(
+    await tablesDB.deleteRow({
       databaseId,
-      competitionsCollectionId,
-      competitionId
-    )
+      tableId: competitionsCollectionId,
+      rowId: competitionId,
+    })
 
     revalidatePath('/admin/dashboard')
     return true
@@ -258,16 +266,16 @@ export async function getActiveCompetitions() {
       return []
     }
 
-    const response = await databases.listDocuments(
+    const response = await tablesDB.listRows({
       databaseId,
-      competitionsCollectionId,
-      [
+      tableId: competitionsCollectionId,
+      queries: [
         Query.equal('active', true),
         Query.orderDesc('year'),
         Query.orderAsc('name'),
-      ]
-    )
-    return toPlainObject(response.documents)
+      ],
+    })
+    return toPlainObject(response.rows)
   } catch (error) {
     console.error('Error fetching active competitions:', error)
     throw new Error('Failed to fetch active competitions')
@@ -294,13 +302,13 @@ export async function getGradesForCompetition(
       queries.push(Query.equal('category', category))
     }
 
-    const response = await databases.listDocuments(
+    const response = await tablesDB.listRows({
       databaseId,
-      gradesCollectionId,
-      queries
-    )
+      tableId: gradesCollectionId,
+      queries,
+    })
 
-    return toPlainObject(response.documents)
+    return toPlainObject(response.rows)
   } catch (error) {
     console.error('Error fetching grades:', error)
     throw new Error('Failed to fetch grades')
@@ -318,14 +326,14 @@ export async function getGradeCategoriesForCompetition(competitionId: string) {
       return []
     }
 
-    const response = await databases.listDocuments(
+    const response = await tablesDB.listRows({
       databaseId,
-      gradesCollectionId,
-      [Query.equal('competitionId', competitionId)]
-    )
+      tableId: gradesCollectionId,
+      queries: [Query.equal('competitionId', competitionId)],
+    })
 
     const categories = new Set<string>()
-    response.documents.forEach((doc) => {
+    response.rows.forEach((doc) => {
       if (doc.category) {
         categories.add(doc.category)
       }

@@ -70,14 +70,14 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>
 
-interface Competition extends Models.DefaultDocument {
+interface Competition extends Models.DefaultRow {
   $id: string
   name: string
   year: number
   active: boolean
 }
 
-interface Grade extends Models.DefaultDocument {
+interface Grade extends Models.DefaultRow {
   $id: string
   name: string
   category: string

@@ -1,6 +1,6 @@
 'use server'
 
-import { databases, ID, Query } from '@/lib/appwrite/server'
+import { tablesDB, ID, Query } from '@/lib/appwrite/server'
 import { revalidatePath } from 'next/cache'
 import { toPlainObject } from '@/lib/utils'
 
@@ -9,13 +9,13 @@ const gradesCollectionId = process.env.APPWRITE_GRADES_COLLECTION_ID!
 
 export async function getGradesByCompetition(competitionId: string) {
   try {
-    const response = await databases.listDocuments(
+    const response = await tablesDB.listRows({
       databaseId,
-      gradesCollectionId,
-      [Query.equal('competitionId', competitionId), Query.limit(100)]
-    )
+      tableId: gradesCollectionId,
+      queries: [Query.equal('competitionId', competitionId), Query.limit(100)],
+    })
 
-    return toPlainObject(response.documents)
+    return toPlainObject(response.rows)
   } catch (error) {
     console.error('Error fetching grades:', error)
     throw new Error('Failed to fetch grades')
@@ -34,17 +34,17 @@ export async function createGrade({
   competitionId: string
 }) {
   try {
-    const result = await databases.createDocument(
+    const result = await tablesDB.createRow({
       databaseId,
-      gradesCollectionId,
-      ID.unique(),
-      {
+      tableId: gradesCollectionId,
+      rowId: ID.unique(),
+      data: {
         name,
         category,
         segment,
         competitionId,
-      }
-    )
+      },
+    })
 
     revalidatePath('/admin/dashboard')
     return toPlainObject(result)
@@ -63,12 +63,12 @@ export async function updateGrade(
   }
 ) {
   try {
-    const result = await databases.updateDocument(
+    const result = await tablesDB.updateRow({
       databaseId,
-      gradesCollectionId,
-      gradeId,
-      data
-    )
+      tableId: gradesCollectionId,
+      rowId: gradeId,
+      data,
+    })
 
     revalidatePath('/admin/dashboard')
     return toPlainObject(result)
@@ -80,7 +80,11 @@ export async function updateGrade(
 
 export async function deleteGrade(gradeId: string) {
   try {
-    await databases.deleteDocument(databaseId, gradesCollectionId, gradeId)
+    await tablesDB.deleteRow({
+      databaseId,
+      tableId: gradesCollectionId,
+      rowId: gradeId,
+    })
 
     revalidatePath('/admin/dashboard')
     return true
