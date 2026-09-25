@@ -4,7 +4,7 @@
 
 ## Database: MusicManagerDB (Appwrite)
 
-The application uses Appwrite as its backend service. All database operations are performed server-side via the `node-appwrite` SDK with API key authentication.
+The application uses Appwrite as its backend service. All database operations are performed server-side via the `node-appwrite` SDK's **TablesDB** API with API key authentication. Appwrite now calls collections *tables*, attributes *columns* and documents *rows*; this document keeps the app's original names (e.g. "Competitions Collection") where they match IDs and environment variables.
 
 ## Collections
 

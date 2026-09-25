@@ -30,7 +30,7 @@
 
 ## Reference Documentation
 
-- [Appwrite Database API](./AppwriteAPI/appwrite-database-server-api.md) — Server-side database SDK examples
+- [Appwrite TablesDB API](./AppwriteAPI/appwrite-tablesdb-server-api.md) — Server-side TablesDB SDK examples
 - [Appwrite Storage API](./AppwriteAPI/appwrite-storage-server-api.md) — Server-side storage SDK examples
 - [Appwrite Users API](./AppwriteAPI/appwrite-users-server-api.md) — Server-side users SDK examples
 
