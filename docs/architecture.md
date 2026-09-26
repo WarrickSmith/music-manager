@@ -111,8 +111,8 @@ src/app/
 
 The app includes an **in-app initialisation flow** (`src/lib/appwrite/initialization-service.ts`):
 
-- `checkAppwriteInitialization()`: checks if database, collections, and storage bucket exist
-- `initializeAppwrite()`: runs `setup-appwrite.ts` script to create all Appwrite resources
+- `checkAppwriteInitialization()`: checks if the database, tables (competitions, grades, music files) and storage bucket exist, and reports Appwrite errors such as missing API key scopes separately from missing resources
+- `initializeAppwrite()`: runs the `setup-appwrite.ts` script to create all Appwrite resources via the TablesDB API, and returns any errors to the UI instead of throwing
 - Admin dashboard shows an initialisation UI when resources are missing
 - This allows the Docker image to bootstrap its own Appwrite resources on first run
 

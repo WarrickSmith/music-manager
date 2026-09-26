@@ -56,8 +56,10 @@ export interface InitializationStatus {
     databaseExists: boolean
     musicFilesCollectionExists: boolean
     competitionsCollectionExists: boolean
+    gradesCollectionExists: boolean
     storageBucketExists: boolean
   }
+  errors: string[]
 }
 
 export default function AppwriteInitialization() {
@@ -85,8 +87,15 @@ export default function AppwriteInitialization() {
   const runInitialization = async () => {
     setIsInitializing(true)
     try {
-      await initializeAppwrite()
-      toast.success('Appwrite initialization successful!')
+      const result = await initializeAppwrite()
+      if (result.success) {
+        toast.success('Appwrite initialization successful!')
+      } else {
+        toast.error(
+          `Initialization failed: ${result.errors?.[0] ?? result.message}`
+        )
+        console.error('Initialization errors:', result.errors)
+      }
       await checkStatus()
     } catch (error) {
       toast.error(
@@ -176,6 +185,20 @@ export default function AppwriteInitialization() {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {status?.errors && status.errors.length > 0 && (
+          <Alert className="bg-red-50 border-red-200 text-red-800 mb-4">
+            <AlertTitle>Appwrite returned errors</AlertTitle>
+            <AlertDescription>
+              Some resources could not be checked. This usually means the API
+              key is missing a required scope.
+              <ul className="mt-2 space-y-1 text-sm break-words">
+                {status.errors.map((error) => (
+                  <li key={error}>{error}</li>
+                ))}
+              </ul>
+            </AlertDescription>
+          </Alert>
+        )}
         <Alert className="bg-amber-50 mb-4">
           <AlertTitle>Initialization Required</AlertTitle>
           <AlertDescription>
@@ -197,6 +220,12 @@ export default function AppwriteInitialization() {
                 <li className="flex items-center gap-2">
                   <XCircle className="h-4 w-4 text-amber-600" />
                   Competitions Collection
+                </li>
+              )}
+              {!status?.details.gradesCollectionExists && (
+                <li className="flex items-center gap-2">
+                  <XCircle className="h-4 w-4 text-amber-600" />
+                  Grades Collection
                 </li>
               )}
               {!status?.details.storageBucketExists && (

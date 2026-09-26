@@ -20,13 +20,12 @@ music-manager/
 │   ├── development-guide.md         # Dev setup and workflows
 │   ├── deployment-guide.md          # Docker, CI/CD, Portainer
 │   └── AppwriteAPI/                 # Appwrite SDK reference examples
-│       ├── appwrite-database-server-api.md
+│       ├── appwrite-tablesdb-server-api.md
 │       ├── appwrite-storage-server-api.md
 │       └── appwrite-users-server-api.md
 ├── public/                          # Static assets (favicon, images)
 ├── scripts/
-│   ├── setup-appwrite.ts            # Main Appwrite setup script (DB, collections, storage, grades, indexes)
-│   └── setup-appwrite-simple.ts     # Simplified Appwrite setup variant
+│   └── setup-appwrite.ts            # Appwrite setup script (DB, tables, storage, teams, indexes)
 ├── src/
 │   ├── app/                         # Next.js App Router
 │   │   ├── layout.tsx               # ★ Root layout (auth, theme, navbar, toaster)

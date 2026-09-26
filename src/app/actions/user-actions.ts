@@ -4,7 +4,7 @@ import { Account, Models } from 'node-appwrite'
 import { revalidatePath } from 'next/cache'
 import { getCurrentUser } from '@/lib/auth/auth-service'
 import {
-  databases,
+  tablesDB,
   storage,
   Query,
   users,
@@ -29,7 +29,7 @@ async function getAllDocuments(
 ) {
   const limit = 100 // Maximum allowed by Appwrite
   let offset = 0
-  let allDocuments: Models.DefaultDocument[] = []
+  let allDocuments: Models.DefaultRow[] = []
   let hasMoreDocuments = true
 
   // Add limit to queries if not already specified
@@ -39,16 +39,16 @@ async function getAllDocuments(
     // Add offset to queries
     const currentQueries = [...queriesWithLimit, Query.offset(offset)]
 
-    const response = await databases.listDocuments(
+    const response = await tablesDB.listRows({
       databaseId,
-      collectionId,
-      currentQueries
-    )
+      tableId: collectionId,
+      queries: currentQueries,
+    })
 
-    allDocuments = [...allDocuments, ...response.documents]
+    allDocuments = [...allDocuments, ...response.rows]
 
     // Check if there are more documents
-    if (response.documents.length < limit) {
+    if (response.rows.length < limit) {
       hasMoreDocuments = false
     } else {
       offset += limit
@@ -158,11 +158,11 @@ export async function deleteUser(userId: string) {
         // Delete file from storage
         await storage.deleteFile(bucketId, file.fileId)
         // Delete file record from database
-        await databases.deleteDocument(
+        await tablesDB.deleteRow({
           databaseId,
-          musicFilesCollectionId,
-          file.$id
-        )
+          tableId: musicFilesCollectionId,
+          rowId: file.$id,
+        })
       } catch (fileError) {
         console.error(`Error deleting music file ${file.$id}:`, fileError)
         // Continue deleting other files even if one fails

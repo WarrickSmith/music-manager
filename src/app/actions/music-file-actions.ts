@@ -1,6 +1,6 @@
 'use server'
 
-import { databases, storage, ID, Query } from '@/lib/appwrite/server'
+import { tablesDB, storage, ID, Query } from '@/lib/appwrite/server'
 import { revalidatePath } from 'next/cache'
 import * as musicMetadata from 'music-metadata'
 import { Models } from 'node-appwrite'
@@ -22,12 +22,16 @@ export async function getUserMusicFiles(userId: string) {
       return []
     }
 
-    const response = await databases.listDocuments(
+    const response = await tablesDB.listRows({
       databaseId,
-      musicFilesCollectionId,
-      [Query.equal('userId', userId), Query.orderDesc('uploadedAt')]
-    )
-    return toPlainObject(response.documents)
+      tableId: musicFilesCollectionId,
+      queries: [
+        Query.equal('userId', userId),
+        Query.orderDesc('uploadedAt'),
+        Query.limit(100),
+      ],
+    })
+    return toPlainObject(response.rows)
   } catch (error) {
     console.error('Error fetching user music files:', error)
     throw new Error('Failed to fetch your music files')
@@ -48,7 +52,7 @@ export async function getAllMusicFiles() {
     // Fetch all music files with pagination handling
     const limit = 100 // Maximum allowed by Appwrite
     let offset = 0
-    let allDocuments: Models.DefaultDocument[] = []
+    let allDocuments: Models.DefaultRow[] = []
     let hasMoreDocuments = true
 
     // Add limit to queries
@@ -58,16 +62,16 @@ export async function getAllMusicFiles() {
       // Add offset to queries
       const currentQueries = [...queriesWithLimit, Query.offset(offset)]
 
-      const response = await databases.listDocuments(
+      const response = await tablesDB.listRows({
         databaseId,
-        musicFilesCollectionId,
-        currentQueries
-      )
+        tableId: musicFilesCollectionId,
+        queries: currentQueries,
+      })
 
-      allDocuments = [...allDocuments, ...response.documents]
+      allDocuments = [...allDocuments, ...response.rows]
 
       // Check if there are more documents
-      if (response.documents.length < limit) {
+      if (response.rows.length < limit) {
         hasMoreDocuments = false
       } else {
         offset += limit
@@ -179,17 +183,17 @@ export async function uploadMusicFile(formData: FormData) {
     }
 
     // Get competition and grade details for denormalization
-    const competition = await databases.getDocument(
+    const competition = await tablesDB.getRow({
       databaseId,
-      process.env.APPWRITE_COMPETITIONS_COLLECTION_ID!,
-      competitionId
-    )
+      tableId: process.env.APPWRITE_COMPETITIONS_COLLECTION_ID!,
+      rowId: competitionId,
+    })
 
-    const grade = await databases.getDocument(
+    const grade = await tablesDB.getRow({
       databaseId,
-      process.env.APPWRITE_GRADES_COLLECTION_ID!,
-      gradeId
-    )
+      tableId: process.env.APPWRITE_GRADES_COLLECTION_ID!,
+      rowId: gradeId,
+    })
 
     // Format the user name to get first name and last name initial
     const fullName = (formData.get('userName') as string).trim()
@@ -223,11 +227,11 @@ export async function uploadMusicFile(formData: FormData) {
     )
 
     // Create document in MusicFiles collection
-    const musicFileDocument = await databases.createDocument(
+    const musicFileDocument = await tablesDB.createRow({
       databaseId,
-      musicFilesCollectionId,
-      ID.unique(),
-      {
+      tableId: musicFilesCollectionId,
+      rowId: ID.unique(),
+      data: {
         fileId: uploadedFile.$id,
         originalName: file.name,
         fileName: formattedFileName,
@@ -246,8 +250,8 @@ export async function uploadMusicFile(formData: FormData) {
         duration: duration, // Add the extracted duration to the metadata
         size: file.size,
         status: 'ready',
-      }
-    )
+      },
+    })
 
     console.log('Music file document created with duration:', duration)
 
@@ -272,11 +276,11 @@ export async function deleteMusicFile(fileId: string, musicFileId: string) {
     await storage.deleteFile(bucketId, fileId)
 
     // Delete document from MusicFiles collection
-    await databases.deleteDocument(
+    await tablesDB.deleteRow({
       databaseId,
-      musicFilesCollectionId,
-      musicFileId
-    )
+      tableId: musicFilesCollectionId,
+      rowId: musicFileId,
+    })
 
     revalidatePath('/dashboard')
     return { success: true }
@@ -298,17 +302,17 @@ export async function getMusicFileDownloadUrl(fileId: string) {
     await storage.getFile(bucketId, fileId)
 
     // Find the corresponding database record to get the original file name
-    const fileRecords = await databases.listDocuments(
+    const fileRecords = await tablesDB.listRows({
       databaseId,
-      musicFilesCollectionId,
-      [Query.equal('fileId', fileId)]
-    )
+      tableId: musicFilesCollectionId,
+      queries: [Query.equal('fileId', fileId)],
+    })
 
     let originalName = ''
 
-    if (fileRecords.documents.length > 0) {
+    if (fileRecords.rows.length > 0) {
       // Get the file metadata from the database
-      originalName = fileRecords.documents[0].originalName || ''
+      originalName = fileRecords.rows[0].originalName || ''
       console.log('Found file record with name:', originalName)
     } else {
       console.log('No file record found in database, using default file name')

@@ -1,24 +1,26 @@
 #!/usr/bin/env node
 import {
   Client,
-  Databases,
+  TablesDB,
   Storage,
   Permission,
+  Query,
   Role,
   Teams,
-  type DatabasesIndexType,
+  TablesDBIndexType,
 } from 'node-appwrite'
 
 // Custom error type for better type safety
 interface AppwriteError extends Error {
   code?: number
+  type?: string
   response?: unknown
 }
 
 // Setup options interface
 interface SetupOptions {
   database?: boolean
-  collections?: boolean
+  tables?: boolean
   storage?: boolean
   indexes?: boolean
   teams?: boolean
@@ -32,8 +34,8 @@ interface SetupResult {
   errors?: string[]
 }
 
-// Attribute interface
-interface Attribute {
+// Column interface
+export interface Column {
   key: string
   type: 'string' | 'integer' | 'boolean' | 'float' | 'datetime'
   size?: number
@@ -42,140 +44,171 @@ interface Attribute {
   default?: string | number | boolean
 }
 
-// Collection definition interface
-interface CollectionDefinition {
+// Table definition interface
+export interface TableDefinition {
   id: string
   name: string
   permissions: string[]
-  attributes: Attribute[]
+  columns: Column[]
 }
 
-// Appwrite attribute response interface
-interface AppwriteAttributeList {
-  total: number
-  attributes: {
-    key: string
-    type: string
-    size?: number
-    required: boolean
-    array: boolean
-    status: string
-  }[]
+// Index definition interface
+export interface IndexDefinition {
+  key: string
+  columns: string[]
+  type: TablesDBIndexType
 }
 
-// Index definition interface is commented out for now
-/*
-interface IndexDefinition {
-  id: string
-  attributes: string[]
-  type: 'key' | 'fulltext' | 'unique'
+/**
+ * Table IDs. The app reads these from the APPWRITE_*_COLLECTION_ID
+ * environment variables, so setup uses the same values (falling back to the
+ * historical defaults) to keep the two in sync.
+ */
+export function getTableIds() {
+  return {
+    competitions:
+      process.env.APPWRITE_COMPETITIONS_COLLECTION_ID || 'competitions',
+    grades: process.env.APPWRITE_GRADES_COLLECTION_ID || 'grades',
+    musicFiles: process.env.APPWRITE_MUSIC_FILES_COLLECTION_ID || 'musicfiles',
+  }
 }
-*/
 
-// Collection definitions
-const collections: CollectionDefinition[] = [
-  {
-    id: 'competitions',
-    name: 'Competitions Collection',
-    permissions: [
-      Permission.read(Role.team('admin')),
-      Permission.read(Role.team('competitor')),
-      Permission.write(Role.team('admin')),
-      Permission.delete(Role.team('admin')),
-    ],
-    attributes: [
-      { key: 'name', type: 'string', size: 255, required: true },
-      { key: 'year', type: 'integer', required: true },
-      { key: 'active', type: 'boolean', required: true },
-      { key: 'description', type: 'string', size: 1000, required: false },
-    ],
-  },
-  {
-    id: 'grades',
-    name: 'Grades Collection',
-    permissions: [
-      Permission.read(Role.team('admin')),
-      Permission.read(Role.team('competitor')),
-      Permission.write(Role.team('admin')),
-      Permission.delete(Role.team('admin')),
-    ],
-    attributes: [
-      { key: 'name', type: 'string', size: 255, required: true },
-      { key: 'category', type: 'string', size: 255, required: true },
-      { key: 'segment', type: 'string', size: 255, required: true },
-      { key: 'competitionId', type: 'string', size: 255, required: true },
-      { key: 'isTemplate', type: 'boolean', required: false, default: false },
-      { key: 'description', type: 'string', size: 1000, required: false },
-    ],
-  },
-  {
-    id: 'musicfiles',
-    name: 'Music Files Collection',
-    permissions: [
-      Permission.read(Role.team('admin')),
-      Permission.read(Role.team('competitor')),
-      Permission.write(Role.team('admin')),
-      Permission.write(Role.team('competitor')),
-      Permission.delete(Role.team('admin')),
-      Permission.delete(Role.team('competitor')),
-    ],
-    attributes: [
-      { key: 'originalName', type: 'string', size: 255, required: true },
-      { key: 'fileName', type: 'string', size: 255, required: true },
-      { key: 'storagePath', type: 'string', size: 255, required: true },
-      // downloadURL attribute removed as it is now redundant
-      { key: 'competitionId', type: 'string', size: 255, required: true },
-      { key: 'competitionName', type: 'string', size: 255, required: true },
-      { key: 'competitionYear', type: 'integer', required: true },
-      { key: 'gradeId', type: 'string', size: 255, required: true },
-      { key: 'gradeType', type: 'string', size: 255, required: true },
-      { key: 'gradeCategory', type: 'string', size: 255, required: true },
-      { key: 'gradeSegment', type: 'string', size: 255, required: true },
-      { key: 'userId', type: 'string', size: 255, required: true },
-      { key: 'userName', type: 'string', size: 255, required: true },
-      { key: 'uploadedAt', type: 'string', size: 255, required: true },
-      { key: 'duration', type: 'integer', required: false },
-      { key: 'size', type: 'integer', required: true },
-      { key: 'status', type: 'string', size: 255, required: true },
-      { key: 'fileId', type: 'string', size: 255, required: true },
-    ],
-  },
-]
+// Table definitions
+export function getTableDefinitions(): TableDefinition[] {
+  const tableIds = getTableIds()
 
-// Index definitions are commented out for now as they're not being used
-/*
-const indexes: Record<string, IndexDefinition[]> = {
-  competitions: [
-    { id: 'idx_active', attributes: ['active'], type: 'key' },
-    { id: 'idx_year', attributes: ['year'], type: 'key' },
-  ],
-  grades: [
-    { id: 'idx_competition', attributes: ['competitionId'], type: 'key' },
+  return [
     {
-      id: 'idx_competition_template',
-      attributes: ['competitionId', 'isTemplate'],
-      type: 'key',
+      id: tableIds.competitions,
+      name: 'Competitions Collection',
+      permissions: [
+        Permission.read(Role.team('admin')),
+        Permission.read(Role.team('competitor')),
+        Permission.write(Role.team('admin')),
+        Permission.delete(Role.team('admin')),
+      ],
+      columns: [
+        { key: 'name', type: 'string', size: 255, required: true },
+        { key: 'year', type: 'integer', required: true },
+        { key: 'active', type: 'boolean', required: true },
+        { key: 'description', type: 'string', size: 1000, required: false },
+      ],
     },
-  ],
-  musicfiles: [
-    { id: 'idx_user', attributes: ['userId'], type: 'key' },
-    { id: 'idx_competition', attributes: ['competitionId'], type: 'key' },
-    { id: 'idx_grade', attributes: ['gradeId'], type: 'key' },
     {
-      id: 'idx_competition_grade',
-      attributes: ['competitionId', 'gradeId'],
-      type: 'key',
+      id: tableIds.grades,
+      name: 'Grades Collection',
+      permissions: [
+        Permission.read(Role.team('admin')),
+        Permission.read(Role.team('competitor')),
+        Permission.write(Role.team('admin')),
+        Permission.delete(Role.team('admin')),
+      ],
+      columns: [
+        { key: 'name', type: 'string', size: 255, required: true },
+        { key: 'category', type: 'string', size: 255, required: true },
+        { key: 'segment', type: 'string', size: 255, required: true },
+        { key: 'competitionId', type: 'string', size: 255, required: true },
+        { key: 'isTemplate', type: 'boolean', required: false, default: false },
+        { key: 'description', type: 'string', size: 1000, required: false },
+      ],
     },
-    { id: 'idx_file', attributes: ['fileId'], type: 'unique' },
-  ],
+    {
+      id: tableIds.musicFiles,
+      name: 'Music Files Collection',
+      permissions: [
+        Permission.read(Role.team('admin')),
+        Permission.read(Role.team('competitor')),
+        Permission.write(Role.team('admin')),
+        Permission.write(Role.team('competitor')),
+        Permission.delete(Role.team('admin')),
+        Permission.delete(Role.team('competitor')),
+      ],
+      columns: [
+        { key: 'originalName', type: 'string', size: 255, required: true },
+        { key: 'fileName', type: 'string', size: 255, required: true },
+        { key: 'storagePath', type: 'string', size: 255, required: true },
+        { key: 'competitionId', type: 'string', size: 255, required: true },
+        { key: 'competitionName', type: 'string', size: 255, required: true },
+        { key: 'competitionYear', type: 'integer', required: true },
+        { key: 'gradeId', type: 'string', size: 255, required: true },
+        { key: 'gradeType', type: 'string', size: 255, required: true },
+        { key: 'gradeCategory', type: 'string', size: 255, required: true },
+        { key: 'gradeSegment', type: 'string', size: 255, required: true },
+        { key: 'userId', type: 'string', size: 255, required: true },
+        { key: 'userName', type: 'string', size: 255, required: true },
+        { key: 'uploadedAt', type: 'string', size: 255, required: true },
+        { key: 'duration', type: 'integer', required: false },
+        { key: 'size', type: 'integer', required: true },
+        { key: 'status', type: 'string', size: 255, required: true },
+        { key: 'fileId', type: 'string', size: 255, required: true },
+      ],
+    },
+  ]
 }
-*/
+
+// Index definitions, keyed by table ID
+export function getIndexDefinitions(): Record<string, IndexDefinition[]> {
+  const tableIds = getTableIds()
+
+  const key = (k: string, columns: string[]): IndexDefinition => ({
+    key: k,
+    columns,
+    type: TablesDBIndexType.Key,
+  })
+
+  return {
+    [tableIds.competitions]: [
+      key('idx_active', ['active']),
+      key('idx_year', ['year']),
+    ],
+    [tableIds.grades]: [
+      key('idx_competition', ['competitionId']),
+      key('idx_competition_template', ['competitionId', 'isTemplate']),
+    ],
+    [tableIds.musicFiles]: [
+      key('idx_user', ['userId']),
+      key('idx_competition', ['competitionId']),
+      key('idx_grade', ['gradeId']),
+      key('idx_competition_grade', ['competitionId', 'gradeId']),
+      { key: 'idx_file', columns: ['fileId'], type: TablesDBIndexType.Unique },
+    ],
+  }
+}
 
 // Team definitions
 const teams = [
   { id: 'admin', name: 'Administrators' },
   { id: 'competitor', name: 'Competitors' },
 ]
+
+// How long to wait for Appwrite to finish building new columns
+const COLUMN_WAIT_TIMEOUT_MS = 60_000
+const COLUMN_POLL_INTERVAL_MS = 1_000
+
+// Appwrite returns 25 items per page by default; tables here are far smaller
+const LIST_ALL = [Query.limit(100)]
+
+function isNotFound(error: unknown) {
+  return (error as AppwriteError).code === 404
+}
+
+/**
+ * Turn an Appwrite error into a message that says what to fix. A 401 here
+ * almost always means the API key is missing a scope.
+ */
+export function describeAppwriteError(error: unknown): string {
+  const appwriteError = error as AppwriteError
+  const message = appwriteError?.message || String(error)
+
+  if (
+    appwriteError?.code === 401 ||
+    appwriteError?.type === 'general_unauthorized_scope'
+  ) {
+    return `${message}. Check that APPWRITE_API_KEY has the required scopes (see docs/deployment-guide.md).`
+  }
+
+  return message
+}
 
 // Validate environment variables
 function validateEnvironment(): { valid: boolean; missing: string[] } {
@@ -198,7 +231,7 @@ function validateEnvironment(): { valid: boolean; missing: string[] } {
 // Initialize Appwrite client
 function initializeClient(): {
   client: Client
-  databases: Databases
+  tablesDB: TablesDB
   storage: Storage
   teams: Teams
 } {
@@ -220,7 +253,7 @@ function initializeClient(): {
 
   return {
     client,
-    databases: new Databases(client),
+    tablesDB: new TablesDB(client),
     storage: new Storage(client),
     teams: new Teams(client),
   }
@@ -228,7 +261,7 @@ function initializeClient(): {
 
 // Setup database
 async function setupDatabase(
-  { databases }: { databases: Databases },
+  { tablesDB }: { tablesDB: TablesDB },
   results: string[],
   errors: string[]
 ): Promise<boolean> {
@@ -236,299 +269,253 @@ async function setupDatabase(
     const databaseId = process.env.APPWRITE_DATABASE_ID!
 
     try {
-      await databases.get(databaseId)
+      await tablesDB.get({ databaseId })
       results.push(`Database '${databaseId}' already exists`)
     } catch (error: unknown) {
-      const appwriteError = error as AppwriteError
-      if (appwriteError.code === 404) {
-        await databases.create(databaseId, 'Music Manager Database')
-        results.push(`Created database '${databaseId}'`)
-      } else {
+      if (!isNotFound(error)) {
         throw error
       }
+      await tablesDB.create({ databaseId, name: 'Music Manager Database' })
+      results.push(`Created database '${databaseId}'`)
     }
 
     return true
   } catch (error: unknown) {
-    const appwriteError = error as AppwriteError
-    const message = `Error setting up database: ${appwriteError.message}`
+    const message = `Error setting up database: ${describeAppwriteError(error)}`
     errors.push(message)
     console.error(message, error)
     return false
   }
 }
 
-// Setup collections
-async function setupCollections(
-  { databases }: { databases: Databases },
+// Setup tables
+async function setupTables(
+  { tablesDB }: { tablesDB: TablesDB },
   results: string[],
   errors: string[]
 ): Promise<boolean> {
-  try {
-    const databaseId = process.env.APPWRITE_DATABASE_ID!
-    let success = true
+  const databaseId = process.env.APPWRITE_DATABASE_ID!
+  let success = true
 
-    // Setup each collection
-    for (const collection of collections) {
+  for (const table of getTableDefinitions()) {
+    try {
       try {
-        // Check if collection exists
-        try {
-          await databases.getCollection(databaseId, collection.id)
+        await tablesDB.getTable({ databaseId, tableId: table.id })
+        results.push(`Table '${table.id}' already exists, checking columns...`)
+      } catch (error: unknown) {
+        if (!isNotFound(error)) {
+          throw error
+        }
+        await tablesDB.createTable({
+          databaseId,
+          tableId: table.id,
+          name: table.name,
+          permissions: table.permissions,
+        })
+        results.push(`Created table '${table.id}'`)
+      }
+
+      await ensureColumns(
+        tablesDB,
+        databaseId,
+        table.id,
+        table.columns,
+        results
+      )
+    } catch (error: unknown) {
+      const message = `Error setting up table '${table.id}': ${describeAppwriteError(error)}`
+      errors.push(message)
+      console.error(message, error)
+      success = false
+    }
+  }
+
+  return success
+}
+
+// Create a single column using the TablesDB API
+async function createColumn(
+  tablesDB: TablesDB,
+  databaseId: string,
+  tableId: string,
+  column: Column
+) {
+  const base = {
+    databaseId,
+    tableId,
+    key: column.key,
+    required: column.required,
+    array: column.array,
+  }
+
+  switch (column.type) {
+    case 'string':
+      return tablesDB.createVarcharColumn({
+        ...base,
+        size: column.size || 255,
+        xdefault: column.default as string | undefined,
+      })
+    case 'integer':
+      return tablesDB.createIntegerColumn({
+        ...base,
+        xdefault: column.default as number | undefined,
+      })
+    case 'boolean':
+      return tablesDB.createBooleanColumn({
+        ...base,
+        xdefault: column.default as boolean | undefined,
+      })
+    case 'float':
+      return tablesDB.createFloatColumn({
+        ...base,
+        xdefault: column.default as number | undefined,
+      })
+    case 'datetime':
+      return tablesDB.createDatetimeColumn({
+        ...base,
+        xdefault: column.default as string | undefined,
+      })
+  }
+}
+
+// Ensure columns exist on a table and are ready to use
+async function ensureColumns(
+  tablesDB: TablesDB,
+  databaseId: string,
+  tableId: string,
+  columns: Column[],
+  results: string[]
+): Promise<void> {
+  const response = await tablesDB.listColumns({
+    databaseId,
+    tableId,
+    queries: LIST_ALL,
+  })
+  const existingKeys = new Set(response.columns.map((column) => column.key))
+
+  for (const column of columns) {
+    if (existingKeys.has(column.key)) {
+      continue
+    }
+
+    try {
+      await createColumn(tablesDB, databaseId, tableId, column)
+      results.push(
+        `Created ${column.type} column '${column.key}' in table '${tableId}'`
+      )
+    } catch (error: unknown) {
+      // If the column is already being created, continue
+      if ((error as AppwriteError).code === 409) {
+        results.push(
+          `Column '${column.key}' is already being created in table '${tableId}'`
+        )
+      } else {
+        throw error
+      }
+    }
+  }
+
+  await waitForColumns(tablesDB, databaseId, tableId)
+}
+
+/**
+ * Appwrite builds columns in the background. Wait until none are still
+ * processing so indexes and writes that depend on them don't fail.
+ */
+async function waitForColumns(
+  tablesDB: TablesDB,
+  databaseId: string,
+  tableId: string
+): Promise<void> {
+  const deadline = Date.now() + COLUMN_WAIT_TIMEOUT_MS
+
+  while (true) {
+    const { columns } = await tablesDB.listColumns({
+      databaseId,
+      tableId,
+      queries: LIST_ALL,
+    })
+
+    const failed = columns.filter(
+      (column) => column.status === 'failed' || column.status === 'stuck'
+    )
+    if (failed.length > 0) {
+      throw new Error(
+        `Columns failed to build in table '${tableId}': ${failed
+          .map((column) => `${column.key} (${column.error || column.status})`)
+          .join(', ')}`
+      )
+    }
+
+    if (columns.every((column) => column.status === 'available')) {
+      return
+    }
+
+    if (Date.now() > deadline) {
+      throw new Error(
+        `Timed out waiting for columns to become available in table '${tableId}'`
+      )
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, COLUMN_POLL_INTERVAL_MS))
+  }
+}
+
+// Setup indexes
+async function setupIndexes(
+  { tablesDB }: { tablesDB: TablesDB },
+  results: string[],
+  errors: string[]
+): Promise<boolean> {
+  const databaseId = process.env.APPWRITE_DATABASE_ID!
+  let success = true
+
+  for (const [tableId, indexes] of Object.entries(getIndexDefinitions())) {
+    try {
+      const response = await tablesDB.listIndexes({
+        databaseId,
+        tableId,
+        queries: LIST_ALL,
+      })
+      const existingKeys = new Set(response.indexes.map((index) => index.key))
+
+      for (const index of indexes) {
+        if (existingKeys.has(index.key)) {
           results.push(
-            `Collection '${collection.id}' already exists, checking attributes...`
+            `Index '${index.key}' already exists on table '${tableId}'`
           )
+          continue
+        }
+
+        try {
+          await tablesDB.createIndex({
+            databaseId,
+            tableId,
+            key: index.key,
+            type: index.type,
+            columns: index.columns,
+          })
+          results.push(`Created index '${index.key}' on table '${tableId}'`)
         } catch (error: unknown) {
-          const appwriteError = error as AppwriteError
-          if (appwriteError.code === 404) {
-            // Create collection
-            await databases.createCollection(
-              databaseId,
-              collection.id,
-              collection.name,
-              collection.permissions
+          if ((error as AppwriteError).code === 409) {
+            results.push(
+              `Index '${index.key}' already exists on table '${tableId}'`
             )
-            results.push(`Created collection '${collection.id}'`)
           } else {
             throw error
           }
         }
-
-        // Setup attributes
-        await ensureAttributes(
-          databases,
-          databaseId,
-          collection.id,
-          collection.attributes,
-          results
-        )
-      } catch (error: unknown) {
-        const appwriteError = error as AppwriteError
-        const message = `Error setting up collection '${collection.id}': ${appwriteError.message}`
-        errors.push(message)
-        console.error(message, error)
-        success = false
       }
-    }
-
-    return success
-  } catch (error: unknown) {
-    const appwriteError = error as AppwriteError
-    const message = `Error setting up collections: ${appwriteError.message}`
-    errors.push(message)
-    console.error(message, error)
-    return false
-  }
-}
-
-// No type definitions needed as we're using the methods directly
-
-// Ensure attributes exist on collection
-async function ensureAttributes(
-  databases: Databases,
-  databaseId: string,
-  collectionId: string,
-  attributes: Attribute[],
-  results: string[]
-): Promise<void> {
-  // Get existing attributes
-  const response = await databases.listAttributes(databaseId, collectionId)
-  const attributeList = response as unknown as AppwriteAttributeList
-  const existingKeys = new Set(
-    attributeList.attributes?.map((attr) => attr.key) || []
-  )
-
-  // Create missing attributes
-  for (const attr of attributes) {
-    if (!existingKeys.has(attr.key)) {
-      try {
-        switch (attr.type) {
-          case 'string':
-            await databases.createStringAttribute(
-              databaseId,
-              collectionId,
-              attr.key,
-              attr.size || 255,
-              attr.required,
-              attr.default as string | undefined
-            )
-            results.push(
-              `Created string attribute '${attr.key}' in collection '${collectionId}'`
-            )
-            break
-          case 'integer':
-            await databases.createIntegerAttribute(
-              databaseId,
-              collectionId,
-              attr.key,
-              attr.required,
-              attr.default as number | undefined
-            )
-            results.push(
-              `Created integer attribute '${attr.key}' in collection '${collectionId}'`
-            )
-            break
-          case 'boolean':
-            await databases.createBooleanAttribute(
-              databaseId,
-              collectionId,
-              attr.key,
-              attr.required,
-              attr.default as boolean | undefined
-            )
-            results.push(
-              `Created boolean attribute '${attr.key}' in collection '${collectionId}'`
-            )
-            break
-          case 'float':
-            await databases.createFloatAttribute(
-              databaseId,
-              collectionId,
-              attr.key,
-              attr.required,
-              attr.default as number | undefined
-            )
-            results.push(
-              `Created float attribute '${attr.key}' in collection '${collectionId}'`
-            )
-            break
-          case 'datetime':
-            await databases.createDatetimeAttribute(
-              databaseId,
-              collectionId,
-              attr.key,
-              attr.required,
-              attr.default as string | undefined
-            )
-            results.push(
-              `Created datetime attribute '${attr.key}' in collection '${collectionId}'`
-            )
-            break
-        }
-      } catch (error: unknown) {
-        const appwriteError = error as AppwriteError
-        // If attribute is already being created, continue
-        if (appwriteError.code === 409) {
-          results.push(
-            `Attribute '${attr.key}' is already being created in collection '${collectionId}'`
-          )
-        } else {
-          throw error
-        }
-      }
+    } catch (error: unknown) {
+      const message = `Error setting up indexes for table '${tableId}': ${describeAppwriteError(error)}`
+      errors.push(message)
+      console.error(message, error)
+      success = false
     }
   }
+
+  return success
 }
-
-// Index creation functionality is commented out for now as it's causing issues
-// We'll add it back in a future update once we resolve the compatibility issues
-
-/*
-// Setup indexes
-async function setupIndexes(
-  { databases }: { databases: Databases },
-  results: string[],
-  errors: string[]
-): Promise<boolean> {
-  try {
-    const databaseId = process.env.APPWRITE_DATABASE_ID!
-    let success = true
-
-    // Setup indexes for each collection
-    for (const [collectionId, collectionIndexes] of Object.entries(indexes)) {
-      try {
-        for (const index of collectionIndexes) {
-          await createIndexIfNotExists(
-            databases,
-            databaseId,
-            collectionId,
-            index.id,
-            index.attributes,
-            index.type,
-            results
-          )
-        }
-      } catch (error: unknown) {
-        const appwriteError = error as AppwriteError
-        const message = `Error setting up indexes for collection '${collectionId}': ${appwriteError.message}`
-        errors.push(message)
-        console.error(message, error)
-        success = false
-      }
-    }
-
-    return success
-  } catch (error: unknown) {
-    const appwriteError = error as AppwriteError
-    const message = `Error setting up indexes: ${appwriteError.message}`
-    errors.push(message)
-    console.error(message, error)
-    return false
-  }
-}
-
-// Create index if it doesn't exist
-async function createIndexIfNotExists(
-  databases: Databases,
-  databaseId: string,
-  collectionId: string,
-  indexId: string,
-  attributes: string[],
-  type: 'key' | 'fulltext' | 'unique',
-  results: string[]
-): Promise<void> {
-  try {
-    await databases.getIndex(databaseId, collectionId, indexId)
-    results.push(
-      `Index '${indexId}' already exists on collection '${collectionId}'`
-    )
-  } catch (error: unknown) {
-    const appwriteError = error as AppwriteError
-    if (appwriteError.code === 404) {
-      // Convert attributes to object with key properties
-      const attributesObject: Record<string, string> = {}
-      attributes.forEach((attr) => {
-        attributesObject[attr] = 'ASC'
-      })
-
-      // Debug the index creation parameters
-      console.log(
-        `Creating index '${indexId}' with type '${type}' and attributes:`,
-        attributesObject
-      )
-
-      // Use string literals directly in the array to avoid any type issues
-      if (type === 'key') {
-        await databases.createIndex(
-          databaseId,
-          collectionId,
-          indexId,
-          attributesObject as unknown as DatabasesIndexType,
-          ['key'] // Use string literal directly
-        )
-      } else if (type === 'fulltext') {
-        await databases.createIndex(
-          databaseId,
-          collectionId,
-          indexId,
-          attributesObject as unknown as DatabasesIndexType,
-          ['fulltext'] // Use string literal directly
-        )
-      } else if (type === 'unique') {
-        await databases.createIndex(
-          databaseId,
-          collectionId,
-          indexId,
-          attributesObject as unknown as DatabasesIndexType,
-          ['unique'] // Use string literal directly
-        )
-      }
-      results.push(`Created index '${indexId}' on collection '${collectionId}'`)
-    } else {
-      throw error
-    }
-  }
-}
-*/
 
 // Setup storage
 async function setupStorage(
@@ -587,8 +574,7 @@ async function setupStorage(
     }
     return true
   } catch (error: unknown) {
-    const appwriteError = error as AppwriteError
-    const message = `Error setting up storage: ${appwriteError.message}`
+    const message = `Error setting up storage: ${describeAppwriteError(error)}`
     errors.push(message)
     console.error(message, error)
     return false
@@ -640,8 +626,7 @@ async function setupTeams(
 
     return true
   } catch (error: unknown) {
-    const appwriteError = error as AppwriteError
-    const message = `Error setting up teams: ${appwriteError.message}`
+    const message = `Error setting up teams: ${describeAppwriteError(error)}`
     errors.push(message)
     console.error(message, error)
     return false
@@ -672,13 +657,13 @@ export async function setupAppwrite(
     }
 
     // Initialize client
-    const { databases, storage, teams } = initializeClient()
+    const { tablesDB, storage, teams } = initializeClient()
 
     // If no options provided or options.all is true, run all setup steps
     if (!options || options.all) {
       options = {
         database: true,
-        collections: true,
+        tables: true,
         storage: true,
         indexes: true,
         teams: true,
@@ -686,12 +671,14 @@ export async function setupAppwrite(
     }
 
     // Execute setup steps based on options
+    let databaseReady = true
     if (options.database) {
-      await setupDatabase({ databases }, results, errors)
+      databaseReady = await setupDatabase({ tablesDB }, results, errors)
     }
 
-    if (options.collections) {
-      await setupCollections({ databases }, results, errors)
+    let tablesReady = databaseReady
+    if (options.tables && databaseReady) {
+      tablesReady = await setupTables({ tablesDB }, results, errors)
     }
 
     if (options.storage) {
@@ -702,9 +689,9 @@ export async function setupAppwrite(
       await setupTeams({ teams }, results, errors)
     }
 
-    // Skip index creation for now as it's causing issues
-    if (options.indexes) {
-      results.push('Skipping index creation due to compatibility issues')
+    // Indexes depend on the tables and their columns
+    if (options.indexes && tablesReady) {
+      await setupIndexes({ tablesDB }, results, errors)
     }
 
     // Log end time and duration
@@ -726,10 +713,7 @@ export async function setupAppwrite(
     return {
       success: false,
       results,
-      errors: [
-        ...errors,
-        error instanceof Error ? error.message : String(error),
-      ],
+      errors: [...errors, describeAppwriteError(error)],
     }
   }
 }
@@ -746,7 +730,9 @@ if (typeof require !== 'undefined' && require.main === module) {
 
     if (args.includes('--all')) options.all = true
     if (args.includes('--database')) options.database = true
-    if (args.includes('--collections')) options.collections = true
+    // --collections is kept as an alias for existing scripts and habits
+    if (args.includes('--tables') || args.includes('--collections'))
+      options.tables = true
     if (args.includes('--storage')) options.storage = true
     if (args.includes('--indexes')) options.indexes = true
     if (args.includes('--teams')) options.teams = true

@@ -1,12 +1,14 @@
 'use server'
 
-import { databases, storage } from '@/lib/appwrite/server'
-import { setupAppwrite } from '../../../scripts/setup-appwrite'
+import { tablesDB, storage } from '@/lib/appwrite/server'
+import {
+  describeAppwriteError,
+  getTableIds,
+  setupAppwrite,
+} from '../../../scripts/setup-appwrite'
 
 const databaseId = process.env.APPWRITE_DATABASE_ID!
 const bucketId = process.env.APPWRITE_BUCKET_ID!
-const musicFilesCollectionId = 'musicfiles'
-const competitionsCollectionId = 'competitions'
 
 // Define an error interface for type checking inside catch blocks
 interface AppwriteError {
@@ -15,63 +17,71 @@ interface AppwriteError {
 }
 
 /**
+ * Run a lookup and report whether the resource exists. A 404 means it is
+ * missing; anything else (usually a 401 for a missing API key scope) is
+ * recorded so the admin sees the real cause instead of "missing".
+ */
+async function resourceExists(
+  label: string,
+  lookup: () => Promise<unknown>,
+  errors: string[]
+): Promise<boolean> {
+  try {
+    await lookup()
+    return true
+  } catch (err: unknown) {
+    const appwriteError = err as AppwriteError
+    if (appwriteError.code !== 404) {
+      console.error(`Error checking ${label}:`, err)
+      errors.push(`${label}: ${describeAppwriteError(err)}`)
+    }
+    return false
+  }
+}
+
+/**
  * Check if Appwrite resources are properly initialized
  */
 export async function checkAppwriteInitialization() {
   try {
-    // Check if database exists
-    let databaseExists = false
-    let musicFilesCollectionExists = false
-    let competitionsCollectionExists = false
-    let storageBucketExists = false
+    const tableIds = getTableIds()
+    const errors: string[] = []
 
-    try {
-      await databases.get(databaseId)
-      databaseExists = true
+    const databaseExists = await resourceExists(
+      'database',
+      () => tablesDB.get({ databaseId }),
+      errors
+    )
 
-      // If database exists, check if collections exist
-      try {
-        await databases.getCollection(databaseId, musicFilesCollectionId)
-        musicFilesCollectionExists = true
-      } catch (err: unknown) {
-        // Type check the error to see if it's an Appwrite error with a code
-        const appwriteError = err as AppwriteError
-        if (appwriteError.code !== 404) {
-          console.error('Error checking music files collection:', err)
-        }
-      }
+    // Only check tables if the database exists
+    const [
+      musicFilesCollectionExists,
+      competitionsCollectionExists,
+      gradesCollectionExists,
+    ] = databaseExists
+      ? await Promise.all(
+          [tableIds.musicFiles, tableIds.competitions, tableIds.grades].map(
+            (tableId) =>
+              resourceExists(
+                `${tableId} table`,
+                () => tablesDB.getTable({ databaseId, tableId }),
+                errors
+              )
+          )
+        )
+      : [false, false, false]
 
-      try {
-        await databases.getCollection(databaseId, competitionsCollectionId)
-        competitionsCollectionExists = true
-      } catch (err: unknown) {
-        const appwriteError = err as AppwriteError
-        if (appwriteError.code !== 404) {
-          console.error('Error checking competitions collection:', err)
-        }
-      }
-    } catch (err: unknown) {
-      const appwriteError = err as AppwriteError
-      if (appwriteError.code !== 404) {
-        console.error('Error checking database:', err)
-      }
-    }
-
-    // Check if storage bucket exists
-    try {
-      await storage.getBucket(bucketId)
-      storageBucketExists = true
-    } catch (err: unknown) {
-      const appwriteError = err as AppwriteError
-      if (appwriteError.code !== 404) {
-        console.error('Error checking storage bucket:', err)
-      }
-    }
+    const storageBucketExists = await resourceExists(
+      'storage bucket',
+      () => storage.getBucket(bucketId),
+      errors
+    )
 
     const isInitialized =
       databaseExists &&
       musicFilesCollectionExists &&
       competitionsCollectionExists &&
+      gradesCollectionExists &&
       storageBucketExists
 
     return {
@@ -80,8 +90,10 @@ export async function checkAppwriteInitialization() {
         databaseExists,
         musicFilesCollectionExists,
         competitionsCollectionExists,
+        gradesCollectionExists,
         storageBucketExists,
       },
+      errors,
     }
   } catch (error) {
     console.error('Error checking Appwrite initialization:', error)
@@ -92,8 +104,15 @@ export async function checkAppwriteInitialization() {
 /**
  * Initialize Appwrite resources inside the app runtime so the Docker image
  * only needs the traced standalone bundle.
+ *
+ * Returns the outcome rather than throwing, because Next.js hides thrown
+ * server action messages in production builds.
  */
-export async function initializeAppwrite() {
+export async function initializeAppwrite(): Promise<{
+  success: boolean
+  message: string
+  errors?: string[]
+}> {
   try {
     console.log('Running Appwrite initialization...')
     const result = await setupAppwrite({ all: true })
@@ -103,7 +122,15 @@ export async function initializeAppwrite() {
     )
 
     if (!result.success) {
-      throw new Error(result.errors?.join('; ') || 'Unknown setup failure')
+      const errors = result.errors?.length
+        ? result.errors
+        : ['Unknown setup failure']
+      console.error('Error initializing Appwrite:', errors.join('; '))
+      return {
+        success: false,
+        message: 'Failed to initialize Appwrite resources',
+        errors,
+      }
     }
 
     return {
@@ -112,6 +139,10 @@ export async function initializeAppwrite() {
     }
   } catch (error) {
     console.error('Error initializing Appwrite:', error)
-    throw new Error('Failed to initialize Appwrite resources')
+    return {
+      success: false,
+      message: 'Failed to initialize Appwrite resources',
+      errors: [describeAppwriteError(error)],
+    }
   }
 }

@@ -39,22 +39,18 @@ For Docker/Portainer deployments, use `.env` instead of `.env.local`.
 
 ### 3. Appwrite Setup
 
-The Appwrite database, collections, storage bucket, indexes, and default grades can be provisioned via setup scripts:
+The Appwrite database, tables, storage bucket, indexes and teams can be provisioned via setup scripts. They use the TablesDB API, so the API key needs the scopes listed in the [deployment guide](deployment-guide.md#api-key-scopes).
 
 ```bash
-# Full setup (database + collections + storage + indexes + default grades)
+# Full setup (database + tables + storage + teams + indexes)
 npm run setup:appwrite
 
 # Individual components
 npm run setup:appwrite:db          # Database only
-npm run setup:appwrite:collections # Collections only
+npm run setup:appwrite:tables      # Tables and columns only
 npm run setup:appwrite:storage     # Storage bucket only
-npm run setup:appwrite:grades      # Default grades only
-npm run setup:appwrite:indexes     # Database indexes only
+npm run setup:appwrite:indexes     # Table indexes only
 npm run setup:appwrite:teams       # Teams setup
-
-# Simplified setup variant
-npm run setup:appwrite:simple
 ```
 
 Alternatively, the admin dashboard provides an **in-app initialisation UI** that runs the same setup when Appwrite resources are missing.
@@ -112,7 +108,13 @@ Configuration is in `components.json` (new-york style, RSC enabled, Lucide icons
 
 ## Testing
 
-No automated test suite is currently configured. Manual testing is the primary verification method.
+Unit tests use [Vitest](https://vitest.dev) and live in `tests/`:
+
+```bash
+npm test
+```
+
+They cover the Appwrite setup script and initialisation status check against an in-memory fake of Appwrite (`tests/fake-appwrite.ts`), including missing API key scopes and columns that are still building. `tests/competition-actions.test.ts` checks grade lookups return every page of results, not just Appwrite's default 25 rows. A guard test also fails if any code uses the deprecated Databases API (`listDocuments`, `createCollection`, etc.) instead of TablesDB. UI flows are still verified manually.
 
 ## Useful Patterns
 
@@ -124,8 +126,8 @@ Appwrite SDK returns class instances that can't cross the Server→Client Compon
 import { toPlainObject } from '@/lib/utils'
 
 export async function getCompetitions() {
-  const response = await databases.listDocuments(...)
-  return toPlainObject(response.documents)
+  const response = await tablesDB.listRows({ databaseId, tableId, queries })
+  return toPlainObject(response.rows)
 }
 ```
 
