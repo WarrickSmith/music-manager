@@ -150,6 +150,10 @@ export default function AppwriteInitialization() {
             </li>
             <li className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-green-500" />
+              Grades Collection: Available
+            </li>
+            <li className="flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-green-500" />
               Storage Bucket: Available
             </li>
           </ul>

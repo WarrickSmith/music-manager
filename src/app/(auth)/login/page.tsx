@@ -131,17 +131,9 @@ export default function LoginPage() {
         </div>
 
         <div className="space-y-2">
-          <div className="flex justify-between">
-            <label htmlFor="password" className="block text-sm font-medium">
-              Password
-            </label>
-            <a
-              href="#"
-              className="text-sm text-blue-600 hover:underline dark:text-sky-300"
-            >
-              Forgot password?
-            </a>
-          </div>
+          <label htmlFor="password" className="block text-sm font-medium">
+            Password
+          </label>
           <Input
             id="password"
             name="password"
@@ -153,6 +145,15 @@ export default function LoginPage() {
             onChange={handleChange}
             className="w-full bg-background/70"
           />
+          {/* Below the input so tabbing goes email -> password */}
+          <div className="flex justify-end">
+            <a
+              href="#"
+              className="text-sm text-blue-600 hover:underline dark:text-sky-300"
+            >
+              Forgot password?
+            </a>
+          </div>
         </div>
 
         <Button
