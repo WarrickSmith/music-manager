@@ -273,6 +273,7 @@ export async function getActiveCompetitions() {
         Query.equal('active', true),
         Query.orderDesc('year'),
         Query.orderAsc('name'),
+        Query.limit(100),
       ],
     })
     return toPlainObject(response.rows)
@@ -302,13 +303,10 @@ export async function getGradesForCompetition(
       queries.push(Query.equal('category', category))
     }
 
-    const response = await tablesDB.listRows({
-      databaseId,
-      tableId: gradesCollectionId,
-      queries,
-    })
+    // A competition has ~80 default grades, more than one page of results
+    const rows = await getAllDocuments(databaseId, gradesCollectionId, queries)
 
-    return toPlainObject(response.rows)
+    return toPlainObject(rows)
   } catch (error) {
     console.error('Error fetching grades:', error)
     throw new Error('Failed to fetch grades')
@@ -326,14 +324,12 @@ export async function getGradeCategoriesForCompetition(competitionId: string) {
       return []
     }
 
-    const response = await tablesDB.listRows({
-      databaseId,
-      tableId: gradesCollectionId,
-      queries: [Query.equal('competitionId', competitionId)],
-    })
+    const rows = await getAllDocuments(databaseId, gradesCollectionId, [
+      Query.equal('competitionId', competitionId),
+    ])
 
     const categories = new Set<string>()
-    response.rows.forEach((doc) => {
+    rows.forEach((doc) => {
       if (doc.category) {
         categories.add(doc.category)
       }

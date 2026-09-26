@@ -114,7 +114,7 @@ Unit tests use [Vitest](https://vitest.dev) and live in `tests/`:
 npm test
 ```
 
-They cover the Appwrite setup script and initialisation status check against an in-memory fake of Appwrite (`tests/fake-appwrite.ts`), including missing API key scopes and columns that are still building. A guard test also fails if any code uses the deprecated Databases API (`listDocuments`, `createCollection`, etc.) instead of TablesDB. UI flows are still verified manually.
+They cover the Appwrite setup script and initialisation status check against an in-memory fake of Appwrite (`tests/fake-appwrite.ts`), including missing API key scopes and columns that are still building. `tests/competition-actions.test.ts` checks grade lookups return every page of results, not just Appwrite's default 25 rows. A guard test also fails if any code uses the deprecated Databases API (`listDocuments`, `createCollection`, etc.) instead of TablesDB. UI flows are still verified manually.
 
 ## Useful Patterns
 

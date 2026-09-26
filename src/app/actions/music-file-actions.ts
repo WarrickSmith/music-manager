@@ -25,7 +25,11 @@ export async function getUserMusicFiles(userId: string) {
     const response = await tablesDB.listRows({
       databaseId,
       tableId: musicFilesCollectionId,
-      queries: [Query.equal('userId', userId), Query.orderDesc('uploadedAt')],
+      queries: [
+        Query.equal('userId', userId),
+        Query.orderDesc('uploadedAt'),
+        Query.limit(100),
+      ],
     })
     return toPlainObject(response.rows)
   } catch (error) {

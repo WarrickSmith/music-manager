@@ -30,6 +30,7 @@ interface FakeTable {
   permissions: string[]
   columns: Map<string, FakeColumn>
   indexes: Map<string, { key: string; type: string; columns: string[] }>
+  rows: Record<string, unknown>[]
 }
 
 export interface FakeState {
@@ -150,6 +151,7 @@ export function createFakeTablesDB(state: FakeState) {
         permissions: params.permissions ?? [],
         columns: new Map(),
         indexes: new Map(),
+        rows: [],
       })
       return { $id: params.tableId }
     },
@@ -185,6 +187,20 @@ export function createFakeTablesDB(state: FakeState) {
     createBooleanColumn: addColumn('boolean'),
     createFloatColumn: addColumn('float'),
     createDatetimeColumn: addColumn('datetime'),
+    async listRows({
+      databaseId,
+      tableId,
+      queries,
+    }: {
+      databaseId: string
+      tableId: string
+      queries?: string[]
+    }) {
+      requireScope(state, 'rows.read')
+      const table = getTableOrThrow(databaseId, tableId)
+      const rows = applyQueries(table.rows, queries)
+      return { total: table.rows.length, rows }
+    },
     async listIndexes({
       databaseId,
       tableId,
@@ -220,6 +236,33 @@ export function createFakeTablesDB(state: FakeState) {
       return { key: params.key }
     },
   }
+}
+
+/**
+ * Apply the subset of Appwrite queries the app uses. Like Appwrite, results
+ * are capped at 25 rows unless a limit is given.
+ */
+function applyQueries(rows: Record<string, unknown>[], queries: string[] = []) {
+  let limit = 25
+  let offset = 0
+  let result = [...rows]
+  for (const raw of queries) {
+    const query = JSON.parse(raw) as {
+      method: string
+      attribute?: string
+      values?: unknown[]
+    }
+    if (query.method === 'equal') {
+      result = result.filter((row) =>
+        query.values!.includes(row[query.attribute!])
+      )
+    } else if (query.method === 'limit') {
+      limit = query.values![0] as number
+    } else if (query.method === 'offset') {
+      offset = query.values![0] as number
+    }
+  }
+  return result.slice(offset, offset + limit)
 }
 
 export function createFakeStorage(state: FakeState) {

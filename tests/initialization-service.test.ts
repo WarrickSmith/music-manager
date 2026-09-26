@@ -51,6 +51,7 @@ function createAllResources() {
       permissions: [],
       columns: new Map(),
       indexes: new Map(),
+      rows: [],
     })
   }
 }
