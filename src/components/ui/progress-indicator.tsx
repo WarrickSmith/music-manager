@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
 import {
-  formatMegabytes,
+  formatBytes,
   formatSpeed,
   formatTimeLeft,
 } from '@/lib/upload/format'
@@ -84,9 +84,9 @@ export function ProgressIndicator({
           <>
             <span>
               <b className="font-medium text-foreground">
-                {formatMegabytes(loaded)}
+                {formatBytes(loaded)}
               </b>{' '}
-              of {formatMegabytes(total)} MB
+              of {formatBytes(total)}
             </span>
             <span>{formatSpeed(bytesPerSecond)}</span>
             <span>{formatTimeLeft(loaded, total, bytesPerSecond)}</span>
@@ -94,18 +94,18 @@ export function ProgressIndicator({
         )}
         {status === 'processing' && (
           <span>
-            All {formatMegabytes(total)} MB sent. Reading the length and saving
+            All {formatBytes(total)} sent. Reading the length and saving
             your file.
           </span>
         )}
         {status === 'complete' && (
           <span className="text-success">
-            Uploaded {formatMegabytes(total)} MB. Your file is ready.
+            Uploaded {formatBytes(total)}. Your file is ready.
           </span>
         )}
         {failed && (
           <span className="text-destructive">
-            Stopped at {formatMegabytes(loaded)} of {formatMegabytes(total)} MB.
+            Stopped at {formatBytes(loaded)} of {formatBytes(total)}.
           </span>
         )}
       </div>

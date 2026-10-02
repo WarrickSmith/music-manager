@@ -9,7 +9,7 @@ const unique = (values: (string | number | undefined | null)[]) =>
  * music screens so both filter in exactly the same way.
  */
 export function useMusicFilters(files: MusicFile[]) {
-  const [filters, setFilters] = useState<MusicFilters>(EMPTY_FILTERS)
+  const [selected, setFilters] = useState<MusicFilters>(EMPTY_FILTERS)
 
   const options = useMemo(
     () => ({
@@ -24,6 +24,27 @@ export function useMusicFilters(files: MusicFile[]) {
     }),
     [files],
   )
+
+  // A selected value whose files are gone (for example after a delete) counts
+  // as "all", so the list never shows an empty result behind a stale filter
+  const filters = useMemo(() => {
+    const available: Record<string, string[]> = {
+      year: options.years,
+      competition: options.competitions,
+      grade: options.grades,
+      category: options.categories,
+      segment: options.segments,
+      competitor: options.competitors,
+    }
+    const next = { ...selected }
+    for (const [key, values] of Object.entries(available)) {
+      const current = selected[key as keyof MusicFilters]
+      if (current !== 'all' && !values.includes(current)) {
+        next[key as keyof MusicFilters] = 'all'
+      }
+    }
+    return next
+  }, [selected, options])
 
   const filtered = useMemo(() => {
     const search = filters.search.trim().toLowerCase()

@@ -181,8 +181,8 @@ export async function checkAppwriteInitialization(): Promise<InitializationStatu
       definitions.map(async (definition) => {
         const table: SetupTable = {
           id: definition.id,
-          label: definition.name,
-          detail: `Table ID: ${definition.id}`,
+          label: definition.id,
+          detail: `Name: ${definition.name}`,
           purpose: TABLE_PURPOSES[definition.id] ?? '',
           state: 'missing',
           columns: [],

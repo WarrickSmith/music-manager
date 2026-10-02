@@ -61,6 +61,7 @@ export default async function RootLayout({
           <Navbar initialTheme={initialTheme} user={user} />
           <main className="flex-grow">{children}</main>
           <Toaster
+            theme={initialTheme}
             position="bottom-right"
             closeButton
             className="toast-container"

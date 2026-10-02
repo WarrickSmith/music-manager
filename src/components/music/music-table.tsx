@@ -58,13 +58,11 @@ export default function MusicTable({
             </TableHead>
           )}
           <TableHead>Grade</TableHead>
-          <TableHead>File</TableHead>
-          <TableHead>Segment</TableHead>
+          <TableHead>Programme</TableHead>
           <TableHead>Competition</TableHead>
           {showCompetitor && <TableHead>Competitor</TableHead>}
           <TableHead>Length</TableHead>
-          <TableHead>Size</TableHead>
-          <TableHead>Uploaded</TableHead>
+          <TableHead>Uploaded / size</TableHead>
           <TableHead className="text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
@@ -103,15 +101,15 @@ export default function MusicTable({
               <TableCell>
                 <div className="flex flex-col">
                   <span className="font-semibold">{file.gradeCategory}</span>
+                  <span className="text-sm">{file.gradeSegment}</span>
                   <span
-                    className="max-w-56 truncate font-mono text-xs text-muted-foreground"
+                    className="max-w-48 truncate font-mono text-xs text-muted-foreground"
                     title={file.originalName}
                   >
                     {file.originalName}
                   </span>
                 </div>
               </TableCell>
-              <TableCell>{file.gradeSegment}</TableCell>
               <TableCell>
                 {file.competitionYear} {file.competitionName}
               </TableCell>
@@ -119,11 +117,11 @@ export default function MusicTable({
               <TableCell className="font-mono tabular-nums">
                 {file.duration ? formatDuration(file.duration) : '--:--'}
               </TableCell>
-              <TableCell className="font-mono tabular-nums">
-                {formatFileSize(file.size || 0)}
-              </TableCell>
-              <TableCell className="font-mono tabular-nums">
+              <TableCell className="font-mono text-xs tabular-nums">
                 {file.uploadedAt ? formatDate(file.uploadedAt) : 'N/A'}
+                <span className="block text-muted-foreground">
+                  {formatFileSize(file.size || 0)}
+                </span>
               </TableCell>
               <TableCell>
                 <div className="flex justify-end gap-1.5">
