@@ -18,6 +18,7 @@ Stores competition definitions. Each competition has a name, year, and active/in
 | `name` | string | Yes | Competition name |
 | `year` | integer | Yes | Competition year |
 | `active` | boolean | Yes | Whether visible to competitors |
+| `uploadDeadline` | datetime | No | After this time competitors cannot upload, replace or delete their music. Empty means no deadline. Admins are never locked out. |
 
 **Key operations:**
 - List with ordering by year (desc) then name (asc)
@@ -65,11 +66,29 @@ Tracks uploaded music files with comprehensive denormalised metadata for efficie
 | `size` | integer | Yes | File size in bytes |
 | `status` | string | Yes | File status: `"ready"`, `"processing"`, or `"error"` |
 
+**One file per skater per grade:** a skater has at most one music file for each grade. A second upload must be a confirmed replace; the old file is deleted only after the new one is stored. Indexed by `idx_user_grade` (`userId`, `gradeId`).
+
 **Standardised file naming convention:**
 ```
 {year}-{competition}-{category}-{segment}-{firstname}-{lastinitial}.{ext}
 ```
 Example: `2026-nationals-junior-girls-free-skate-sarah-j.mp3`
+
+### 4. Entries
+
+Which skater is entered in which grade of a competition. Admins manage entries; the Entries screen compares them with the uploaded music to show whose music is missing. A skater's music counts as received when they have a music file for that grade.
+
+| Attribute | Type | Required | Description |
+|---|---|---|---|
+| `$id` | string | Auto | Appwrite row ID |
+| `competitionId` | string (36) | Yes | Reference to competition |
+| `gradeId` | string (36) | Yes | Reference to grade |
+| `userId` | string (36) | Yes | The entered skater's Appwrite user ID |
+| `userName` | string | Yes | Denormalised skater name |
+
+A unique index on (`competitionId`, `gradeId`, `userId`) stops the same skater being entered twice in a grade. The table ID comes from `APPWRITE_ENTRIES_COLLECTION_ID` (default `entries`).
+
+**Upgrading an existing project:** open the admin **Setup** tab and run setup. It adds the `uploadDeadline` column, the `idx_user_grade` index and the entries table without touching existing data. Until then the Entries screen and deadlines explain that setup is needed; everything else keeps working.
 
 ## Storage
 

@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     if (error instanceof UploadValidationError) {
       return NextResponse.json(
         { success: false, error: error.message },
-        { status: 400 },
+        { status: 400 }
       )
     }
     console.error('Error uploading music file:', error)
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
           error instanceof Error ? error.message : 'Unknown error'
         }`,
       },
-      { status: 500 },
+      { status: 500 }
     )
   }
 }

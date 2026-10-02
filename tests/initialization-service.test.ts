@@ -25,7 +25,9 @@ vi.mock('@/lib/appwrite/server', () => ({
     {},
     {
       get: (_target, prop) =>
-        createFakeTeams(state)[prop as keyof ReturnType<typeof createFakeTeams>],
+        createFakeTeams(state)[
+          prop as keyof ReturnType<typeof createFakeTeams>
+        ],
     }
   ),
   storage: new Proxy(
@@ -152,7 +154,10 @@ describe('setup report', () => {
 
     const { report } = await checkAppwriteInitialization()
 
-    expect(report.database).toMatchObject({ id: 'MusicManagerDB', state: 'ready' })
+    expect(report.database).toMatchObject({
+      id: 'MusicManagerDB',
+      state: 'ready',
+    })
     expect(report.bucket).toMatchObject({ id: 'mmfiles', state: 'ready' })
     expect(report.teams.map((team) => team.state)).toEqual(['ready', 'ready'])
     expect(report.tables.map((table) => table.id)).toEqual([
@@ -182,7 +187,9 @@ describe('setup report', () => {
 
     const grades = report.tables.find((t) => t.id === 'grades')!
     expect(grades.state).toBe('missing')
-    expect(grades.columns.find((c) => c.id === 'segment')?.state).toBe('missing')
+    expect(grades.columns.find((c) => c.id === 'segment')?.state).toBe(
+      'missing'
+    )
     expect(grades.columns.find((c) => c.id === 'name')?.state).toBe('ready')
     expect(report.teams[1].state).toBe('missing')
     expect(errors).toEqual([])
@@ -190,7 +197,9 @@ describe('setup report', () => {
 
   it('reports a column that failed to build, with its reason', async () => {
     createAllResources()
-    const column = state.tables.get('MusicManagerDB/musicfiles')!.columns.get('size')!
+    const column = state.tables
+      .get('MusicManagerDB/musicfiles')!
+      .columns.get('size')!
     column.status = 'failed'
     column.error = 'Simulated build failure'
 
@@ -206,7 +215,9 @@ describe('setup report', () => {
 
   it('shows a column still building as building, not missing', async () => {
     createAllResources()
-    const column = state.tables.get('MusicManagerDB/grades')!.columns.get('name')!
+    const column = state.tables
+      .get('MusicManagerDB/grades')!
+      .columns.get('name')!
     column.status = 'processing'
     // The fake advances a processing column on every listing; keep it building
     column.pollsUntilAvailable = 5
@@ -257,7 +268,9 @@ describe('setup report', () => {
 
     expect(report.database.state).toBe('missing')
     expect(report.tables.every((t) => t.state === 'missing')).toBe(true)
-    expect(report.tables[0].columns.every((c) => c.state === 'missing')).toBe(true)
+    expect(report.tables[0].columns.every((c) => c.state === 'missing')).toBe(
+      true
+    )
   })
 })
 

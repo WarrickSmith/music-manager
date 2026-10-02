@@ -61,7 +61,7 @@ export default function AddEntriesDialog({
   const alreadyEntered = useMemo(
     () =>
       new Set(entries.filter((e) => e.userId === userId).map((e) => e.gradeId)),
-    [entries, userId],
+    [entries, userId]
   )
 
   const visible = useMemo(() => {
@@ -70,14 +70,13 @@ export default function AddEntriesDialog({
       .sort((a, b) => compareGrades(asLike(a), asLike(b)))
       .filter(
         (g) =>
-          !q ||
-          `${g.name} ${g.category} ${g.segment}`.toLowerCase().includes(q),
+          !q || `${g.name} ${g.category} ${g.segment}`.toLowerCase().includes(q)
       )
   }, [grades, search])
 
   const toggle = (id: string) =>
     setPicked((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     )
 
   const submit = async () => {
@@ -99,7 +98,7 @@ export default function AddEntriesDialog({
       const { added, skipped } = result.data
       toast.success(
         `${competitor.name} entered in ${added} ${added === 1 ? 'grade' : 'grades'}` +
-          (skipped ? ` (${skipped} already entered)` : ''),
+          (skipped ? ` (${skipped} already entered)` : '')
       )
       setPicked([])
       onAdded()
@@ -240,7 +239,7 @@ export default function AddEntriesDialog({
               ? 'Adding...'
               : `Add ${picked.length || ''} ${picked.length === 1 ? 'entry' : 'entries'}`.replace(
                   /\s+/g,
-                  ' ',
+                  ' '
                 )}
           </Button>
         </DialogFooter>

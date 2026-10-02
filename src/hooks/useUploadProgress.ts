@@ -71,7 +71,7 @@ export const useUploadProgress = () => {
             ? error
             : new UploadError(
                 'The upload failed unexpectedly.',
-                error instanceof Error ? error.message : String(error),
+                error instanceof Error ? error.message : String(error)
               )
         setFailure({
           message: uploadError.message,
@@ -84,7 +84,7 @@ export const useUploadProgress = () => {
         abortRef.current = null
       }
     },
-    [],
+    []
   )
 
   // Stop an in-flight upload if the form is closed

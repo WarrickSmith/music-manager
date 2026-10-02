@@ -44,7 +44,7 @@ export interface EntryOverview {
  * entered in which grade, the grades themselves, and the music uploaded so far.
  */
 export async function getEntryOverview(
-  competitionId: string,
+  competitionId: string
 ): Promise<ActionResult<EntryOverview>> {
   if (!(await getAdminUser())) return fail(ADMIN_ONLY_MESSAGE)
   try {
@@ -79,7 +79,7 @@ export async function getEntryOverview(
           uploadedAt: r.uploadedAt,
           duration: r.duration ?? null,
         })),
-      }),
+      })
     )
   } catch (error) {
     console.error('Error loading entries:', error)
@@ -165,7 +165,7 @@ export interface OutstandingMusic {
  * does not appear until an admin has run setup.
  */
 export async function getOutstandingMusic(
-  userId: string,
+  userId: string
 ): Promise<ActionResult<OutstandingMusic[]>> {
   const user = await getSessionUser()
   if (!user || (user.$id !== userId && !isAdminUser(user))) {
@@ -180,11 +180,11 @@ export async function getOutstandingMusic(
     const [grades, competitions, files] = await Promise.all([
       getRowsByIds(
         gradesTable(),
-        entries.map((e) => e.gradeId),
+        entries.map((e) => e.gradeId)
       ),
       getRowsByIds(
         competitionsTable(),
-        entries.map((e) => e.competitionId),
+        entries.map((e) => e.competitionId)
       ),
       listAllRows(musicFilesTable(), [Query.equal('userId', userId)]),
     ])
@@ -245,7 +245,7 @@ export async function listCompetitors(): Promise<
       offset += 100
     }
     found.sort((a, b) =>
-      a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }),
+      a.name.localeCompare(b.name, undefined, { sensitivity: 'base' })
     )
     return ok(found)
   } catch (error) {

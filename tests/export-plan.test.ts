@@ -29,9 +29,26 @@ describe('safeName', () => {
 
 describe('planExport', () => {
   const files = [
-    file({ $id: '1', gradeCategory: 'Junior Girls', gradeSegment: 'Free Skate', userName: 'Zed', originalName: 'a.WAV' }),
-    file({ $id: '2', gradeCategory: 'Junior Girls', gradeSegment: 'Short Program', userName: 'Bea' }),
-    file({ $id: '3', gradeCategory: 'Adult Silver', gradeSegment: 'Free Skate', userName: 'Amy', gradeType: 'Adult Singles' }),
+    file({
+      $id: '1',
+      gradeCategory: 'Junior Girls',
+      gradeSegment: 'Free Skate',
+      userName: 'Zed',
+      originalName: 'a.WAV',
+    }),
+    file({
+      $id: '2',
+      gradeCategory: 'Junior Girls',
+      gradeSegment: 'Short Program',
+      userName: 'Bea',
+    }),
+    file({
+      $id: '3',
+      gradeCategory: 'Adult Silver',
+      gradeSegment: 'Free Skate',
+      userName: 'Amy',
+      gradeType: 'Adult Singles',
+    }),
   ]
 
   it('numbers files in running order, padded, keeping the original extension', () => {
@@ -65,7 +82,10 @@ describe('planExport', () => {
   })
 
   it('falls back to a generic extension', () => {
-    const [entry] = planExport([file({ originalName: 'no-extension' })], 'grade')
+    const [entry] = planExport(
+      [file({ originalName: 'no-extension' })],
+      'grade'
+    )
     expect(entry.path.endsWith('.audio')).toBe(true)
   })
 })
@@ -94,7 +114,9 @@ describe('manifestCsv', () => {
   })
 
   it('stops spreadsheet formulas in names from running', () => {
-    const csv = manifestCsv(planExport([file({ userName: '=HYPERLINK("x")' })], 'grade'))
+    const csv = manifestCsv(
+      planExport([file({ userName: '=HYPERLINK("x")' })], 'grade')
+    )
     expect(csv).toContain('"=HYPERLINK(""x"")"')
   })
 })

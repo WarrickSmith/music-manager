@@ -126,9 +126,7 @@ export async function findExistingMusicFile(
     return ok(rows.length > 0 ? summariseExisting(rows[0]) : null)
   } catch (error) {
     console.error('Error looking for an existing music file:', error)
-    return fail(
-      `Could not check for an existing file: ${errorMessage(error)}`
-    )
+    return fail(`Could not check for an existing file: ${errorMessage(error)}`)
   }
 }
 

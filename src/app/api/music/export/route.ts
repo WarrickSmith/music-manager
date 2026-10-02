@@ -56,13 +56,13 @@ export async function GET(request: Request) {
       {
         error: `Could not load the music files: ${error instanceof Error ? error.message : String(error)}`,
       },
-      500,
+      500
     )
   }
   if (rows.length === 0) {
     return json(
       { error: 'No music has been uploaded for this competition yet.' },
-      404,
+      404
     )
   }
 
@@ -71,7 +71,7 @@ export async function GET(request: Request) {
   const filename = zipFileName(
     first.competitionName,
     first.competitionYear,
-    order,
+    order
   )
 
   if (params.get('preflight')) {
@@ -81,7 +81,7 @@ export async function GET(request: Request) {
         bytes: plan.reduce((sum, p) => sum + (p.file.size ?? 0), 0),
         filename,
       },
-      200,
+      200
     )
   }
 
@@ -109,7 +109,7 @@ export async function GET(request: Request) {
             }
             try {
               const data = new Uint8Array(
-                await storage.getFileDownload(bucketId(), file.fileId),
+                await storage.getFileDownload(bucketId(), file.fileId)
               )
               const entry = new ZipPassThrough(path)
               if (file.uploadedAt) entry.mtime = new Date(file.uploadedAt)
@@ -118,7 +118,7 @@ export async function GET(request: Request) {
             } catch (error) {
               console.error(`Export: could not read ${path}:`, error)
               failures.push(
-                `${path}: ${error instanceof Error ? error.message : String(error)}`,
+                `${path}: ${error instanceof Error ? error.message : String(error)}`
               )
             }
           }
@@ -134,9 +134,9 @@ export async function GET(request: Request) {
             zip.add(problems)
             problems.push(
               text.encode(
-                `These files could not be added to the zip. Download again to retry.\r\n\r\n${failures.join('\r\n')}\r\n`,
+                `These files could not be added to the zip. Download again to retry.\r\n\r\n${failures.join('\r\n')}\r\n`
               ),
-              true,
+              true
             )
           }
           zip.end()
@@ -149,7 +149,7 @@ export async function GET(request: Request) {
         cancelled = true
       },
     },
-    new ByteLengthQueuingStrategy({ highWaterMark: 16 * 1024 * 1024 }),
+    new ByteLengthQueuingStrategy({ highWaterMark: 16 * 1024 * 1024 })
   )
 
   return new Response(stream, {

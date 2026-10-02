@@ -61,7 +61,7 @@ export default function OutstandingMusicPanel({ userId }: { userId: string }) {
               <span
                 className={cn(
                   'rounded-sm px-2 py-0.5 text-[13px] font-bold whitespace-nowrap',
-                  gradeChipClass(item.gradeType),
+                  gradeChipClass(item.gradeType)
                 )}
               >
                 {item.gradeType}
@@ -81,7 +81,7 @@ export default function OutstandingMusicPanel({ userId }: { userId: string }) {
                       ? 'text-destructive'
                       : deadline.state === 'closing-soon'
                         ? 'text-warning'
-                        : 'text-muted-foreground',
+                        : 'text-muted-foreground'
                   )}
                 >
                   {deadline.label}

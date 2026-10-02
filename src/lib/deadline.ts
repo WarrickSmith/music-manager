@@ -51,7 +51,7 @@ export function formatDeadlineDate(date: Date): string {
 
 export function deadlineStatus(
   deadline: string | null | undefined,
-  now: Date = new Date(),
+  now: Date = new Date()
 ): DeadlineStatus {
   if (!deadline) return { state: 'none', closesAt: null, label: 'No deadline' }
 
@@ -84,7 +84,7 @@ export function deadlineStatus(
 
 export function isPastDeadline(
   deadline: string | null | undefined,
-  now: Date = new Date(),
+  now: Date = new Date()
 ): boolean {
   return deadlineStatus(deadline, now).state === 'closed'
 }

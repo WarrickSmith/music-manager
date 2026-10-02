@@ -40,7 +40,7 @@ export default async function RootLayout({
 }>) {
   const cookieStore = await cookies()
   const initialTheme = resolveThemePreference(
-    cookieStore.get(THEME_COOKIE_NAME)?.value,
+    cookieStore.get(THEME_COOKIE_NAME)?.value
   )
   const user = await getCurrentUser()
   // The role picks the accent colour: sky for competitors (and signed-out

@@ -125,7 +125,7 @@ export async function storeMusicFile(
   }
   if (!ACCEPTED_AUDIO_TYPES.includes(file.type)) {
     throw new UploadValidationError(
-      'Invalid file type. Only MP3, WAV, M4A or AAC audio files are accepted.',
+      'Invalid file type. Only MP3, WAV, M4A or AAC audio files are accepted.'
     )
   }
   if (file.size > MAX_UPLOAD_BYTES) {
@@ -181,7 +181,7 @@ export async function storeMusicFile(
   const uploadedFile = await storage.createFile(
     bucketId,
     ID.unique(),
-    renamedFile,
+    renamedFile
   )
 
   const row = await tablesDB.createRow({

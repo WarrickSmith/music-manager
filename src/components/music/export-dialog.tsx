@@ -62,7 +62,7 @@ export default function ExportDialog({ files }: { files: MusicFile[] }) {
       map.set(f.competitionId, entry)
     }
     return [...map.values()].sort(
-      (a, b) => b.year - a.year || a.label.localeCompare(b.label),
+      (a, b) => b.year - a.year || a.label.localeCompare(b.label)
     )
   }, [files])
 
@@ -191,7 +191,7 @@ export default function ExportDialog({ files }: { files: MusicFile[] }) {
               aria-disabled={checking || !preflight}
               onClick={() =>
                 toast.info(
-                  'Preparing the zip. Large events can take a minute before the download starts.',
+                  'Preparing the zip. Large events can take a minute before the download starts.'
                 )
               }
             >

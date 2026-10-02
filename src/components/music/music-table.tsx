@@ -95,7 +95,7 @@ export default function MusicTable({
                 <span
                   className={cn(
                     'rounded-sm px-2 py-0.5 text-[13px] font-bold',
-                    gradeChipClass(file.gradeType),
+                    gradeChipClass(file.gradeType)
                   )}
                 >
                   {file.gradeType}

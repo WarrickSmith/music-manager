@@ -45,7 +45,7 @@ function extensionOf(originalName: string): string {
  */
 export function planExport(
   files: ExportFile[],
-  order: ExportOrder,
+  order: ExportOrder
 ): PlannedEntry[] {
   const sorted = sortForExport(files, order)
   const width = Math.max(3, String(sorted.length).length)
@@ -110,7 +110,7 @@ export function manifestCsv(entries: PlannedEntry[]): string {
 export function zipFileName(
   competitionName: string,
   year: number,
-  order: ExportOrder,
+  order: ExportOrder
 ): string {
   return `${year}-${safeName(competitionName)}-music-by-${order}.zip`
 }

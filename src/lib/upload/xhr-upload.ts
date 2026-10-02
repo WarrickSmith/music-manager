@@ -43,7 +43,7 @@ const SPEED_SMOOTHING = 0.3
 export function uploadWithProgress<T = unknown>(
   url: string,
   body: FormData,
-  { onProgress, onProcessing, signal }: UploadHandlers = {},
+  { onProgress, onProcessing, signal }: UploadHandlers = {}
 ): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const xhr = new XMLHttpRequest()
@@ -79,15 +79,15 @@ export function uploadWithProgress<T = unknown>(
       reject(
         new UploadError(
           'The upload could not reach the server. Check your connection and try again.',
-          'Network error while sending the file',
-        ),
+          'Network error while sending the file'
+        )
       )
     xhr.ontimeout = () =>
       reject(
         new UploadError(
           'The upload timed out. Try again, or use a smaller file.',
-          'Request timed out',
-        ),
+          'Request timed out'
+        )
       )
     xhr.onabort = () =>
       reject(new UploadError('The upload was cancelled.', 'Upload aborted'))
@@ -122,7 +122,7 @@ export function uploadWithProgress<T = unknown>(
           xhr.status,
           payload?.code,
           payload ?? undefined
-        ),
+        )
       )
     }
 

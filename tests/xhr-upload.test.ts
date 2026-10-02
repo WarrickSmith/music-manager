@@ -105,7 +105,10 @@ describe('uploadWithProgress', () => {
     const error = (await promise.catch((e) => e)) as UploadError
     expect(error.code).toBe('exists')
     expect(error.status).toBe(409)
-    expect(error.payload?.existing).toEqual({ id: 'abc', originalName: 'swan.mp3' })
+    expect(error.payload?.existing).toEqual({
+      id: 'abc',
+      originalName: 'swan.mp3',
+    })
   })
 
   it('explains an oversized upload when the server returns 413', async () => {

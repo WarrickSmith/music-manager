@@ -15,12 +15,31 @@ import {
 } from '@/lib/music/grade-order'
 
 const grades: GradeInfo[] = [
-  { $id: 'g1', name: 'Singles', category: 'Junior Girls', segment: 'Free Skate' },
-  { $id: 'g2', name: 'Singles', category: 'Junior Girls', segment: 'Short Program' },
+  {
+    $id: 'g1',
+    name: 'Singles',
+    category: 'Junior Girls',
+    segment: 'Free Skate',
+  },
+  {
+    $id: 'g2',
+    name: 'Singles',
+    category: 'Junior Girls',
+    segment: 'Short Program',
+  },
   { $id: 'g3', name: 'Ice Dance', category: 'Junior', segment: 'Free Dance' },
 ]
-const entry = (id: string, gradeId: string, userId: string, userName: string): Entry => ({
-  $id: id, competitionId: 'c1', gradeId, userId, userName,
+const entry = (
+  id: string,
+  gradeId: string,
+  userId: string,
+  userName: string
+): Entry => ({
+  $id: id,
+  competitionId: 'c1',
+  gradeId,
+  userId,
+  userName,
 })
 const entries = [
   entry('e1', 'g1', 'u1', 'Mia Kowalski'),
@@ -29,7 +48,12 @@ const entries = [
   entry('e4', 'g3', 'u2', 'Anna Lee'),
 ]
 const files: FileInfo[] = [
-  { $id: 'f1', userId: 'u1', gradeId: 'g1', uploadedAt: '2026-06-01T00:00:00Z' },
+  {
+    $id: 'f1',
+    userId: 'u1',
+    gradeId: 'g1',
+    uploadedAt: '2026-06-01T00:00:00Z',
+  },
   { $id: 'f2', userId: 'u2', gradeId: 'g3' },
 ]
 
@@ -45,15 +69,25 @@ describe('matchEntries', () => {
     expect(statuses[0].grade?.category).toBe('Junior Girls')
   })
 
-  it('does not count another skater\'s file for the same grade', () => {
+  it("does not count another skater's file for the same grade", () => {
     const statuses = matchEntries(entries, grades, files)
     expect(statuses.find((s) => s.entry.$id === 'e3')?.received).toBe(false)
   })
 
   it('keeps the newest upload when a skater somehow has two', () => {
     const statuses = matchEntries(entries.slice(0, 1), grades, [
-      { $id: 'old', userId: 'u1', gradeId: 'g1', uploadedAt: '2026-01-01T00:00:00Z' },
-      { $id: 'new', userId: 'u1', gradeId: 'g1', uploadedAt: '2026-06-01T00:00:00Z' },
+      {
+        $id: 'old',
+        userId: 'u1',
+        gradeId: 'g1',
+        uploadedAt: '2026-01-01T00:00:00Z',
+      },
+      {
+        $id: 'new',
+        userId: 'u1',
+        gradeId: 'g1',
+        uploadedAt: '2026-06-01T00:00:00Z',
+      },
     ])
     expect(statuses[0].file?.$id).toBe('new')
   })
@@ -93,7 +127,9 @@ describe('missingListText', () => {
       '2026 Winter Cup'
     )
     expect(text).toContain('2026 Winter Cup: music still needed (2)')
-    expect(text).toContain('Singles · Junior Girls · Short Program\n  Mia Kowalski')
+    expect(text).toContain(
+      'Singles · Junior Girls · Short Program\n  Mia Kowalski'
+    )
     expect(text).toContain('Singles · Junior Girls · Free Skate\n  Anna Lee')
     expect(text).not.toContain('Ice Dance')
   })
@@ -110,18 +146,34 @@ describe('grade order', () => {
   it('puts the short or rhythm part of an event before the free part', () => {
     expect(segmentRank('Short Program')).toBeLessThan(segmentRank('Free Skate'))
     expect(segmentRank('Rhythm Dance')).toBeLessThan(segmentRank('Free Dance'))
-    expect(segmentRank('Pattern Dance')).toBeLessThan(segmentRank('Rhythm Dance'))
-    expect(segmentRank('Something else')).toBeGreaterThan(segmentRank('Free Skate'))
+    expect(segmentRank('Pattern Dance')).toBeLessThan(
+      segmentRank('Rhythm Dance')
+    )
+    expect(segmentRank('Something else')).toBeGreaterThan(
+      segmentRank('Free Skate')
+    )
   })
 
   it('sorts by type, then category, then segment', () => {
     const rows = [
       { gradeType: 'Singles', gradeCategory: 'B', gradeSegment: 'Free Skate' },
       { gradeType: 'Singles', gradeCategory: 'A', gradeSegment: 'Free Skate' },
-      { gradeType: 'Singles', gradeCategory: 'A', gradeSegment: 'Short Program' },
-      { gradeType: 'Adult Singles', gradeCategory: 'Z', gradeSegment: 'Free Skate' },
+      {
+        gradeType: 'Singles',
+        gradeCategory: 'A',
+        gradeSegment: 'Short Program',
+      },
+      {
+        gradeType: 'Adult Singles',
+        gradeCategory: 'Z',
+        gradeSegment: 'Free Skate',
+      },
     ]
-    expect([...rows].sort(compareGrades).map((r) => `${r.gradeType}/${r.gradeCategory}/${r.gradeSegment}`)).toEqual([
+    expect(
+      [...rows]
+        .sort(compareGrades)
+        .map((r) => `${r.gradeType}/${r.gradeCategory}/${r.gradeSegment}`)
+    ).toEqual([
       'Adult Singles/Z/Free Skate',
       'Singles/A/Short Program',
       'Singles/A/Free Skate',
@@ -129,18 +181,67 @@ describe('grade order', () => {
     ])
   })
 
+  it('breaks ties between identical names by upload time', () => {
+    const rows = [
+      {
+        gradeType: 'Singles',
+        gradeCategory: 'A',
+        gradeSegment: 'Free Skate',
+        userName: 'Mia',
+        uploadedAt: '2026-06-02',
+      },
+      {
+        gradeType: 'Singles',
+        gradeCategory: 'A',
+        gradeSegment: 'Free Skate',
+        userName: 'Mia',
+        uploadedAt: '2026-06-01',
+      },
+    ]
+    expect(sortForExport(rows, 'grade').map((r) => r.uploadedAt)).toEqual([
+      '2026-06-01',
+      '2026-06-02',
+    ])
+  })
+
   it('can order the export by segment first, then grade, then skater', () => {
     const rows = [
-      { gradeType: 'Singles', gradeCategory: 'A', gradeSegment: 'Free Skate', userName: 'Zed' },
-      { gradeType: 'Singles', gradeCategory: 'A', gradeSegment: 'Short Program', userName: 'Bea' },
-      { gradeType: 'Singles', gradeCategory: 'B', gradeSegment: 'Short Program', userName: 'Amy' },
-      { gradeType: 'Singles', gradeCategory: 'A', gradeSegment: 'Short Program', userName: 'Abe' },
+      {
+        gradeType: 'Singles',
+        gradeCategory: 'A',
+        gradeSegment: 'Free Skate',
+        userName: 'Zed',
+      },
+      {
+        gradeType: 'Singles',
+        gradeCategory: 'A',
+        gradeSegment: 'Short Program',
+        userName: 'Bea',
+      },
+      {
+        gradeType: 'Singles',
+        gradeCategory: 'B',
+        gradeSegment: 'Short Program',
+        userName: 'Amy',
+      },
+      {
+        gradeType: 'Singles',
+        gradeCategory: 'A',
+        gradeSegment: 'Short Program',
+        userName: 'Abe',
+      },
     ]
     expect(sortForExport(rows, 'segment').map((r) => r.userName)).toEqual([
-      'Abe', 'Bea', 'Amy', 'Zed',
+      'Abe',
+      'Bea',
+      'Amy',
+      'Zed',
     ])
     expect(sortForExport(rows, 'grade').map((r) => r.userName)).toEqual([
-      'Abe', 'Bea', 'Zed', 'Amy',
+      'Abe',
+      'Bea',
+      'Zed',
+      'Amy',
     ])
   })
 })

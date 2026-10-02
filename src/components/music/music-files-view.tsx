@@ -61,7 +61,7 @@ export default function MusicFilesView({
   const [downloadingIds, setDownloadingIds] = useState<string[]>([])
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [bulk, setBulk] = useState<{ index: number; total: number } | null>(
-    null,
+    null
   )
   const [actionError, setActionError] = useState<ActionError | null>(null)
 
@@ -168,11 +168,11 @@ export default function MusicFilesView({
 
   const toggleOne = (id: string) =>
     setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     )
   const toggleAll = () =>
     setSelectedIds(
-      selectedIds.length === filtered.length ? [] : filtered.map((f) => f.$id),
+      selectedIds.length === filtered.length ? [] : filtered.map((f) => f.$id)
     )
 
   const totalSeconds = filtered.reduce((sum, f) => sum + (f.duration || 0), 0)
@@ -238,7 +238,7 @@ export default function MusicFilesView({
                   value === 'list' && 'border-l',
                   view === value
                     ? 'bg-accent text-accent-foreground'
-                    : 'bg-card hover:bg-secondary',
+                    : 'bg-card hover:bg-secondary'
                 )}
               >
                 <Icon className="size-4" />

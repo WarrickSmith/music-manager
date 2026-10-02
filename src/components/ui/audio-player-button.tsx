@@ -54,7 +54,7 @@ export default function AudioPlayerButton({
             ? 'bg-primary text-primary-foreground hover:bg-primary/90'
             : 'bg-accent text-accent-foreground hover:bg-primary hover:text-primary-foreground',
         status === 'loading' && 'animate-pulse',
-        className,
+        className
       )}
       onClick={() => player.toggle({ fileId, title, subtitle })}
       disabled={status === 'loading'}

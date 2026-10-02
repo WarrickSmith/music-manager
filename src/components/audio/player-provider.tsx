@@ -66,7 +66,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     const audio = new Audio()
     audio.preload = 'metadata'
     audio.addEventListener('timeupdate', () =>
-      setCurrentTime(audio.currentTime),
+      setCurrentTime(audio.currentTime)
     )
     const syncDuration = () =>
       setDuration(Number.isFinite(audio.duration) ? audio.duration : 0)
@@ -88,7 +88,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       setStatus('error')
       setError(
         audio.error?.message ||
-          'The browser could not play this file. It may be in a format your browser does not support.',
+          'The browser could not play this file. It may be in a format your browser does not support.'
       )
     })
     audioRef.current = audio
@@ -141,7 +141,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
         setError(describe(e))
       }
     },
-    [getAudio, track, status],
+    [getAudio, track, status]
   )
 
   const pause = useCallback(() => audioRef.current?.pause(), [])
@@ -162,7 +162,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       if (track?.fileId === next.fileId && status === 'playing') pause()
       else play(next)
     },
-    [track, status, play, pause],
+    [track, status, play, pause]
   )
 
   // Stop playback when the whole app unmounts
@@ -170,7 +170,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   const api = useMemo<PlayerApi>(
     () => ({ track, status, play, toggle, pause, resume, seek, stop }),
-    [track, status, play, toggle, pause, resume, seek, stop],
+    [track, status, play, toggle, pause, resume, seek, stop]
   )
 
   return (
@@ -199,7 +199,13 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
                       : resume()
                 }
                 disabled={status === 'loading'}
-                aria-label={status === 'playing' ? 'Pause' : 'Play'}
+                aria-label={
+                  status === 'playing'
+                    ? 'Pause'
+                    : status === 'loading'
+                      ? 'Loading'
+                      : 'Play'
+                }
               >
                 {status === 'loading' ? (
                   <Loader2 className="animate-spin" />
@@ -237,11 +243,11 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
                   onChange={(e) => seek(Number(e.target.value))}
                   disabled={!duration}
                   aria-label="Seek"
-                  aria-valuetext={`${formatDuration(Math.floor(currentTime))} of ${formatDuration(Math.floor(duration))}`}
+                  aria-valuetext={`${formatDuration(Math.floor(currentTime))} of ${formatDuration(Math.round(duration))}`}
                   className="h-2 min-w-0 flex-1 cursor-pointer accent-[var(--primary)] disabled:cursor-default"
                 />
                 <span className="w-12 font-mono text-xs text-muted-foreground tabular-nums">
-                  {duration ? formatDuration(Math.floor(duration)) : '--:--'}
+                  {duration ? formatDuration(Math.round(duration)) : '--:--'}
                 </span>
               </div>
 

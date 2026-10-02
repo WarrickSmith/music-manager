@@ -32,7 +32,9 @@ describe('deadlineStatus', () => {
   it('is closed at and after the deadline', () => {
     expect(deadlineStatus('2026-06-10T00:00:00Z', now).state).toBe('closed')
     expect(deadlineStatus('2026-06-01T00:00:00Z', now).state).toBe('closed')
-    expect(deadlineStatus('2026-06-01T00:00:00Z', now).label).toMatch(/^Closed /)
+    expect(deadlineStatus('2026-06-01T00:00:00Z', now).label).toMatch(
+      /^Closed /
+    )
   })
 
   it('exposes a simple past-deadline check', () => {

@@ -6,7 +6,7 @@ const PAGE = 100 // The most rows Appwrite returns per request
 /** Every row matching the queries, fetched page by page */
 export async function listAllRows(
   tableId: string,
-  queries: string[] = [],
+  queries: string[] = []
 ): Promise<Models.DefaultRow[]> {
   const databaseId = process.env.APPWRITE_DATABASE_ID!
   const rows: Models.DefaultRow[] = []
@@ -26,7 +26,7 @@ export async function listAllRows(
 /** Rows with the given IDs, fetched in batches */
 export async function getRowsByIds(
   tableId: string,
-  ids: string[],
+  ids: string[]
 ): Promise<Models.DefaultRow[]> {
   const unique = [...new Set(ids)]
   const rows: Models.DefaultRow[] = []
@@ -34,7 +34,7 @@ export async function getRowsByIds(
     rows.push(
       ...(await listAllRows(tableId, [
         Query.equal('$id', unique.slice(i, i + PAGE)),
-      ])),
+      ]))
     )
   }
   return rows

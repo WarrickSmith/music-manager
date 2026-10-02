@@ -57,12 +57,12 @@ const formSchema = z.object({
     })
     .refine(
       (value) => value instanceof File && value.size <= MAX_UPLOAD_BYTES,
-      'File size must be less than 15MB',
+      'File size must be less than 15MB'
     )
     .refine(
       (value) =>
         value instanceof File && ACCEPTED_AUDIO_TYPES.includes(value.type),
-      'File must be an audio file (MP3, WAV, M4A, AAC)',
+      'File must be an audio file (MP3, WAV, M4A, AAC)'
     ),
   duration: z.number().nullable().optional(),
 })
@@ -106,7 +106,7 @@ function SilenceNote({ seconds }: { seconds: number }) {
         'rounded-md border px-3 py-2 text-sm',
         verdict === 'good'
           ? 'border-success/50 bg-success/10'
-          : 'border-warning/60 bg-warning/10',
+          : 'border-warning/60 bg-warning/10'
       )}
       role="status"
     >
@@ -249,7 +249,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
       try {
         setIsLoadingGrades(true)
         setGrades(
-          (await getGradesForCompetition(competitionId, category)) as Grade[],
+          (await getGradesForCompetition(competitionId, category)) as Grade[]
         )
         setValue('gradeId', '')
       } catch (error) {
@@ -448,7 +448,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
                             ? 'border-destructive/50 bg-destructive/10'
                             : deadline.state === 'closing-soon'
                               ? 'border-warning/60 bg-warning/10'
-                              : 'bg-background text-muted-foreground',
+                              : 'bg-background text-muted-foreground'
                         )}
                         role={deadline.state === 'closed' ? 'alert' : undefined}
                       >
@@ -631,7 +631,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
                         }}
                         className={cn(
                           'flex cursor-pointer flex-col items-center gap-1 rounded-lg border-2 border-dashed bg-background px-4 py-7 text-center text-muted-foreground transition-colors hover:border-primary hover:text-foreground',
-                          isDragging && 'border-primary text-foreground',
+                          isDragging && 'border-primary text-foreground'
                         )}
                       >
                         <Upload className="mb-1 size-7 text-primary" />

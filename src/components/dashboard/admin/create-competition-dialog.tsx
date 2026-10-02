@@ -93,10 +93,7 @@ export default function CreateCompetitionDialog({
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="grid grid-cols-4 gap-4">
             <div className="col-span-3">
-              <Label
-                htmlFor="competition-name"
-                className="font-medium"
-              >
+              <Label htmlFor="competition-name" className="font-medium">
                 Competition Name
               </Label>
               <Input
@@ -111,10 +108,7 @@ export default function CreateCompetitionDialog({
             </div>
 
             <div>
-              <Label
-                htmlFor="competition-year"
-                className="font-medium"
-              >
+              <Label htmlFor="competition-year" className="font-medium">
                 Year
               </Label>
               <Input
@@ -132,10 +126,7 @@ export default function CreateCompetitionDialog({
           </div>
 
           <div className="flex items-center justify-between space-x-2">
-            <Label
-              htmlFor="competition-active"
-              className="font-medium"
-            >
+            <Label htmlFor="competition-active" className="font-medium">
               Active Competition
             </Label>
             <Switch
@@ -160,8 +151,8 @@ export default function CreateCompetitionDialog({
               }
             />
             <p className="text-sm text-muted-foreground">
-              After this time competitors cannot upload, replace or delete
-              their music. Admins always can.
+              After this time competitors cannot upload, replace or delete their
+              music. Admins always can.
             </p>
           </div>
 
@@ -175,20 +166,12 @@ export default function CreateCompetitionDialog({
               className="space-y-2"
             >
               <div className="flex items-center space-x-2">
-                <RadioGroupItem
-                  value="default"
-                  id="default-grades"
-                />
-                <Label htmlFor="default-grades">
-                  Use default grades
-                </Label>
+                <RadioGroupItem value="default" id="default-grades" />
+                <Label htmlFor="default-grades">Use default grades</Label>
               </div>
 
               <div className="flex items-center space-x-2">
-                <RadioGroupItem
-                  value="clone"
-                  id="clone-grades"
-                />
+                <RadioGroupItem value="clone" id="clone-grades" />
                 <Label htmlFor="clone-grades">
                   Clone from existing competition
                 </Label>
@@ -209,10 +192,7 @@ export default function CreateCompetitionDialog({
                   </SelectTrigger>
                   <SelectContent>
                     {competitions.map((comp) => (
-                      <SelectItem
-                        key={comp.$id}
-                        value={comp.$id}
-                      >
+                      <SelectItem key={comp.$id} value={comp.$id}>
                         {comp.name} ({comp.year})
                       </SelectItem>
                     ))}

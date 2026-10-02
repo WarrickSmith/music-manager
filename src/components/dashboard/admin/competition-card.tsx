@@ -126,9 +126,7 @@ export default function CompetitionCard({
       onClick={onSelect}
     >
       <CardContent className="space-y-2 p-3">
-        <h3 className="font-display text-base font-bold">
-          {competition.name}
-        </h3>
+        <h3 className="font-display text-base font-bold">{competition.name}</h3>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <CalendarClock className="size-4 shrink-0" aria-hidden />
           <span

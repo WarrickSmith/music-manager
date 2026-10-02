@@ -61,7 +61,7 @@ export default function MusicCard({
     <article
       className={cn(
         'flex flex-col overflow-hidden rounded-lg border bg-card transition-colors hover:border-muted-foreground/60',
-        selected && 'border-primary',
+        selected && 'border-primary'
       )}
     >
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 px-4 pt-3">
@@ -77,7 +77,7 @@ export default function MusicCard({
         <span
           className={cn(
             'rounded-sm px-2 py-0.5 text-[13px] font-bold whitespace-nowrap',
-            gradeChipClass(file.gradeType),
+            gradeChipClass(file.gradeType)
           )}
         >
           {file.gradeType}
@@ -85,14 +85,6 @@ export default function MusicCard({
         <span className="rounded-sm border px-2 py-0.5 font-mono text-[11px] tracking-wide text-muted-foreground uppercase">
           {file.gradeSegment}
         </span>
-        {locked && (
-          <span
-            className="inline-flex items-center gap-1 rounded-sm bg-secondary px-1.5 py-0.5 text-[11px] font-semibold text-muted-foreground"
-            title="The upload deadline has passed, so this file is locked"
-          >
-            <Lock className="size-3" aria-hidden /> Locked
-          </span>
-        )}
         <span className="ml-auto font-mono text-[15px] tabular-nums">
           {file.duration ? formatDuration(file.duration) : '--:--'}
         </span>
@@ -122,6 +114,14 @@ export default function MusicCard({
         <span className="font-medium text-foreground">
           {file.competitionYear} {file.competitionName}
         </span>
+        {locked && (
+          <span
+            className="inline-flex items-center gap-1 rounded-sm bg-secondary px-1.5 py-0.5 text-[11px] font-semibold text-muted-foreground"
+            title="The upload deadline has passed, so this file is locked"
+          >
+            <Lock className="size-3" aria-hidden /> Locked
+          </span>
+        )}
         <span className="tabular-nums">
           {file.uploadedAt ? formatDate(file.uploadedAt) : 'N/A'} ·{' '}
           {formatFileSize(file.size || 0)}

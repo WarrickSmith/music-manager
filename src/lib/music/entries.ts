@@ -35,7 +35,7 @@ export interface EntryStatus {
 export function matchEntries(
   entries: Entry[],
   grades: GradeInfo[],
-  files: FileInfo[],
+  files: FileInfo[]
 ): EntryStatus[] {
   const gradeById = new Map(grades.map((g) => [g.$id, g]))
   // Newest upload wins if there is somehow more than one for a skater and grade
@@ -94,11 +94,11 @@ export function groupByGrade(statuses: EntryStatus[]): GradeGroup[] {
     group.items.sort((a, b) =>
       a.entry.userName.localeCompare(b.entry.userName, undefined, {
         sensitivity: 'base',
-      }),
+      })
     )
   }
   return list.sort((a, b) =>
-    compareGrades(asGradeLike(a.grade), asGradeLike(b.grade)),
+    compareGrades(asGradeLike(a.grade), asGradeLike(b.grade))
   )
 }
 
@@ -114,7 +114,7 @@ export function gradeLabel(grade: GradeInfo | undefined): string {
  */
 export function missingListText(
   statuses: EntryStatus[],
-  competitionLabel: string,
+  competitionLabel: string
 ): string {
   const missing = statuses.filter((s) => !s.received)
   if (missing.length === 0) {

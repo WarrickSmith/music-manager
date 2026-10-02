@@ -50,12 +50,15 @@ export function compareBySegment(a: GradeLike, b: GradeLike): number {
 
 export type ExportOrder = 'grade' | 'segment'
 
-export function sortForExport<T extends GradeLike & { userName: string }>(
-  items: T[],
-  order: ExportOrder,
-): T[] {
+export function sortForExport<
+  T extends GradeLike & { userName: string; uploadedAt?: string },
+>(items: T[], order: ExportOrder): T[] {
   const compare = order === 'segment' ? compareBySegment : compareGrades
+  // The upload time settles ties so the same data always gives the same order
   return [...items].sort(
-    (a, b) => compare(a, b) || text(a.userName, b.userName),
+    (a, b) =>
+      compare(a, b) ||
+      text(a.userName, b.userName) ||
+      (a.uploadedAt ?? '').localeCompare(b.uploadedAt ?? '')
   )
 }

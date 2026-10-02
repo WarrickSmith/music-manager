@@ -27,7 +27,10 @@ describe('leadingSilenceSeconds', () => {
   })
 
   it('uses whichever channel makes sound first', () => {
-    expect(leadingSilenceSeconds([track(2), track(0.5)], rate)).toBeCloseTo(0.5, 2)
+    expect(leadingSilenceSeconds([track(2), track(0.5)], rate)).toBeCloseTo(
+      0.5,
+      2
+    )
   })
 
   it('stops scanning after the opening seconds for a silent track', () => {

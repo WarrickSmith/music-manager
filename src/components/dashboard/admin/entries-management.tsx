@@ -62,7 +62,7 @@ function Stat({
     <div
       className={cn(
         'rounded-lg border bg-card px-4 py-3',
-        tone === 'warn' && 'border-warning/60',
+        tone === 'warn' && 'border-warning/60'
       )}
     >
       <p className="font-display text-2xl leading-tight font-bold tabular-nums">
@@ -146,7 +146,7 @@ export default function EntriesManagement() {
       overview
         ? matchEntries(overview.entries, overview.grades, overview.files)
         : [],
-    [overview],
+    [overview]
   )
   const summary = summarise(statuses)
 
@@ -159,7 +159,7 @@ export default function EntriesManagement() {
           s.entry.userName.toLowerCase().includes(q) ||
           `${s.grade?.name} ${s.grade?.category} ${s.grade?.segment}`
             .toLowerCase()
-            .includes(q)),
+            .includes(q))
     )
     return groupByGrade(shown)
   }, [statuses, missingOnly, search])
@@ -181,7 +181,7 @@ export default function EntriesManagement() {
       setOverview((prev) =>
         prev
           ? { ...prev, entries: prev.entries.filter((e) => e.$id !== entryId) }
-          : prev,
+          : prev
       )
     } finally {
       setRemoving(null)
@@ -323,7 +323,7 @@ export default function EntriesManagement() {
                         <span
                           className={cn(
                             'rounded-sm px-2 py-0.5 text-[13px] font-bold whitespace-nowrap',
-                            gradeChipClass(group.grade.name),
+                            gradeChipClass(group.grade.name)
                           )}
                         >
                           {group.grade.name}

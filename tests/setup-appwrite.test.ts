@@ -140,7 +140,9 @@ describe('setupAppwrite', () => {
 
   it('upgrades a project set up before deadlines and entries existed', async () => {
     await runSetup({ all: true })
-    state.tables.get('MusicManagerDB/competitions')!.columns.delete('uploadDeadline')
+    state.tables
+      .get('MusicManagerDB/competitions')!
+      .columns.delete('uploadDeadline')
     state.tables.delete('MusicManagerDB/entries')
 
     const result = await runSetup({ all: true })
