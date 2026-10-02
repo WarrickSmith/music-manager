@@ -10,16 +10,19 @@ export type AudioPlayerVariant = 'admin' | 'competitor'
 
 interface AudioPlayerButtonProps {
   fileId: string
+  /** Kept so existing callers still compile; colours now follow the theme */
   variant?: AudioPlayerVariant
   size?: 'default' | 'sm' | 'icon'
+  /** Show Play / Stop text beside the icon */
+  showLabel?: boolean
   className?: string
   onPlayStateChange?: (isPlaying: boolean) => void
 }
 
 export default function AudioPlayerButton({
   fileId,
-  variant = 'admin',
   size = 'icon',
+  showLabel = false,
   className,
   onPlayStateChange,
 }: AudioPlayerButtonProps) {
@@ -195,36 +198,18 @@ export default function AudioPlayerButton({
     }
   }
 
-  // Get the appropriate colors based on variant and state
-  const getButtonClasses = () => {
-    const baseClasses = cn(
-      'transition-all duration-300',
-      {
-        // Admin variant (purple theme)
-        'bg-purple-50 hover:bg-purple-100 text-purple-600 dark:bg-violet-500/10 dark:text-violet-300 dark:hover:bg-violet-500/20':
-          variant === 'admin' && !isPlaying && !isLoading && !error,
-        'bg-purple-600 hover:bg-purple-700 text-white dark:bg-violet-500 dark:hover:bg-violet-400':
-          variant === 'admin' && isPlaying,
-        'bg-purple-50 hover:bg-purple-100 text-purple-600 animate-pulse dark:bg-violet-500/10 dark:text-violet-300 dark:hover:bg-violet-500/20':
-          variant === 'admin' && isLoading,
-        'bg-red-50 hover:bg-red-100 text-red-600 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/20':
-          variant === 'admin' && !!error,
-
-        // Competitor variant (blue theme)
-        'bg-sky-50 hover:bg-sky-100 text-sky-600 dark:bg-sky-500/10 dark:text-sky-300 dark:hover:bg-sky-500/20':
-          variant === 'competitor' && !isPlaying && !isLoading && !error,
-        'bg-sky-600 hover:bg-sky-700 text-white dark:bg-sky-500 dark:hover:bg-sky-400':
-          variant === 'competitor' && isPlaying,
-        'bg-sky-50 hover:bg-sky-100 text-sky-600 animate-pulse dark:bg-sky-500/10 dark:text-sky-300 dark:hover:bg-sky-500/20':
-          variant === 'competitor' && isLoading,
-        'bg-red-100 hover:bg-red-200 text-red-700 dark:bg-red-500/15 dark:text-red-300 dark:hover:bg-red-500/25':
-          variant === 'competitor' && !!error,
-      },
+  // Colours come from the theme, so the player follows the signed-in role
+  const getButtonClasses = () =>
+    cn(
+      'transition-colors',
+      error
+        ? 'bg-destructive/15 text-destructive hover:bg-destructive/25'
+        : isPlaying
+          ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+          : 'bg-accent text-accent-foreground hover:bg-primary hover:text-primary-foreground',
+      isLoading && 'animate-pulse',
       className
     )
-
-    return baseClasses
-  }
 
   // Get the appropriate icon based on state
   const getIcon = () => {
@@ -260,6 +245,7 @@ export default function AudioPlayerButton({
       aria-label={error ? error : isPlaying ? 'Stop' : 'Play'}
     >
       {getIcon()}
+      {showLabel && (isPlaying ? 'Stop' : error ? 'Retry' : 'Play')}
     </Button>
   )
 }

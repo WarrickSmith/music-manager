@@ -4,14 +4,13 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { registerAction, logoutAction } from '@/app/actions/auth-actions'
 import { showToast } from '@/components/ui/toast'
 import LoadingOverlay from '@/components/ui/loading-overlay'
 
-// Import logo at the component level for stability
-import logoSrc from '../../../../public/mm-logo.png'
+import Logo from '@/components/ui/logo'
+import ErrorNotice from '@/components/ui/error-notice'
 
 export default function RegisterPage() {
   const [formState, setFormState] = useState({
@@ -24,6 +23,9 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false)
   const [initializing, setInitializing] = useState(true)
   const [isRedirecting, setIsRedirecting] = useState(false)
+  const [error, setError] = useState<{ message: string; details?: string } | null>(
+    null
+  )
   const router = useRouter()
 
   // Clear any existing session when the register page loads
@@ -50,9 +52,11 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setError(null)
 
     // Validate passwords match
     if (formState.password !== formState.confirmPassword) {
+      setError({ message: 'Passwords do not match.' })
       showToast.error('Passwords do not match')
       setLoading(false)
       return
@@ -60,6 +64,7 @@ export default function RegisterPage() {
 
     // Validate minimum password length
     if (formState.password.length < 8) {
+      setError({ message: 'Password must be at least 8 characters.' })
       showToast.error('Password must be at least 8 characters')
       setLoading(false)
       return
@@ -89,10 +94,15 @@ export default function RegisterPage() {
           return
         }
       } else {
+        setError({ message: result.error || 'Registration failed' })
         showToast.error(result.error || 'Registration failed')
       }
     } catch (error) {
       console.error('Registration error:', error)
+      setError({
+        message: 'Something went wrong while creating your account. Please try again.',
+        details: error instanceof Error ? error.message : String(error),
+      })
       showToast.error('An unexpected error occurred')
     }
 
@@ -117,28 +127,29 @@ export default function RegisterPage() {
         />
       )}
 
-      <div className="flex flex-col items-center mb-8">
-        <div className="mb-4 flex min-h-[90px] items-center gap-4 animate-fade-in">
-          <Image
-            src={logoSrc}
-            alt="Music Manager Logo"
-            priority
-            className="h-auto w-12 rounded-2xl shadow-lg shadow-slate-950/10"
-          />
-          <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text pb-1 text-4xl font-bold leading-[1.2] text-transparent dark:from-sky-300 dark:to-violet-300">
+      <div className="mb-8 flex flex-col items-center text-center">
+        <div className="mb-4 flex items-center gap-3 animate-fade-in">
+          <Logo className="h-12 w-12" />
+          <h1 className="font-display text-4xl font-extrabold tracking-tight">
             Music Manager
           </h1>
         </div>
-        <p className="text-xl font-medium text-blue-600 dark:text-sky-300">
-          Create Account
-        </p>
+        <p className="text-xl font-semibold text-primary">Create account</p>
         <p className="text-muted-foreground">Sign up for Music Manager</p>
       </div>
+
+      {error && (
+        <ErrorNotice
+          title="Could not create your account"
+          message={error.message}
+          details={error.details}
+        />
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label htmlFor="firstName" className="block text-sm font-medium">
+            <label htmlFor="firstName" className="label-mono block">
               First Name
             </label>
             <Input
@@ -149,12 +160,12 @@ export default function RegisterPage() {
               placeholder="First name"
               value={formState.firstName}
               onChange={handleChange}
-              className="w-full bg-background/70"
+              className="w-full"
             />
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="lastName" className="block text-sm font-medium">
+            <label htmlFor="lastName" className="label-mono block">
               Last Name
             </label>
             <Input
@@ -165,13 +176,13 @@ export default function RegisterPage() {
               placeholder="Last name"
               value={formState.lastName}
               onChange={handleChange}
-              className="w-full bg-background/70"
+              className="w-full"
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="email" className="block text-sm font-medium">
+          <label htmlFor="email" className="label-mono block">
             Email
           </label>
           <Input
@@ -183,12 +194,12 @@ export default function RegisterPage() {
             placeholder="your@email.com"
             value={formState.email}
             onChange={handleChange}
-            className="w-full bg-background/70"
+            className="w-full"
           />
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="password" className="block text-sm font-medium">
+          <label htmlFor="password" className="label-mono block">
             Password
           </label>
           <Input
@@ -200,14 +211,14 @@ export default function RegisterPage() {
             placeholder="Create a password (min. 8 characters)"
             value={formState.password}
             onChange={handleChange}
-            className="w-full bg-background/70"
+            className="w-full"
           />
         </div>
 
         <div className="space-y-2">
           <label
             htmlFor="confirmPassword"
-            className="block text-sm font-medium"
+            className="label-mono block"
           >
             Confirm Password
           </label>
@@ -220,14 +231,14 @@ export default function RegisterPage() {
             placeholder="Confirm your password"
             value={formState.confirmPassword}
             onChange={handleChange}
-            className="w-full bg-background/70"
+            className="w-full"
           />
         </div>
 
         <Button
           type="submit"
           disabled={loading || isRedirecting}
-          className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 py-2.5 font-medium text-white hover:from-blue-500 hover:to-violet-500 dark:from-sky-500 dark:to-indigo-500 dark:hover:from-sky-400 dark:hover:to-violet-400"
+          className="w-full"
         >
           Create Account
         </Button>
@@ -238,7 +249,7 @@ export default function RegisterPage() {
           Already have an account?{' '}
           <Link
             href="/login"
-            className="font-medium text-blue-600 hover:underline dark:text-sky-300"
+            className="font-semibold text-primary hover:underline"
           >
             Sign in
           </Link>

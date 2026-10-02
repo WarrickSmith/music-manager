@@ -86,30 +86,21 @@ export default function CompetitionList({
       <div className="mb-4">
         <Label
           htmlFor="year-filter"
-          className="mb-1 block text-xs font-semibold text-indigo-800 dark:text-indigo-200"
+          className="label-mono mb-1 block"
         >
           Filter by Year
         </Label>
         <Select value={selectedYear} onValueChange={setSelectedYear}>
           <SelectTrigger
             id="year-filter"
-            className="border-indigo-100 bg-background/80 font-medium text-indigo-800 dark:border-indigo-500/30 dark:bg-background dark:text-indigo-100"
+            className="w-full"
           >
             <SelectValue placeholder="Select year" />
           </SelectTrigger>
-          <SelectContent className="border-indigo-100 dark:border-indigo-500/30">
-            <SelectItem
-              value="all"
-              className="font-medium text-indigo-800 dark:text-indigo-100"
-            >
-              All Years
-            </SelectItem>
+          <SelectContent>
+            <SelectItem value="all">All Years</SelectItem>
             {uniqueYears.map((year) => (
-              <SelectItem
-                key={year}
-                value={year.toString()}
-                className="text-indigo-800 dark:text-indigo-100"
-              >
+              <SelectItem key={year} value={year.toString()}>
                 {year}
               </SelectItem>
             ))}
@@ -122,7 +113,7 @@ export default function CompetitionList({
           {sortedYears.length > 0 ? (
             sortedYears.map((year) => (
               <div key={year}>
-                <h3 className="mb-2 text-sm font-medium text-indigo-700 dark:text-indigo-200">
+                <h3 className="label-mono mb-2">
                   {year}
                 </h3>
                 <div className="space-y-2">
@@ -143,7 +134,7 @@ export default function CompetitionList({
               </div>
             ))
           ) : (
-            <div className="py-4 text-center text-indigo-600 dark:text-indigo-200/80">
+            <div className="py-4 text-center text-muted-foreground">
               No competitions found for the selected year.
             </div>
           )}

@@ -5,19 +5,21 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import Link from 'next/link'
-import Image from 'next/image'
 import { loginAction, logoutAction } from '@/app/actions/auth-actions'
 import { showToast } from '@/components/ui/toast'
 import LoadingOverlay from '@/components/ui/loading-overlay'
 
-// Import logo at the component level for stability
-import logoSrc from '../../../../public/mm-logo.png'
+import Logo from '@/components/ui/logo'
+import ErrorNotice from '@/components/ui/error-notice'
 
 export default function LoginPage() {
   const [formState, setFormState] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [initializing, setInitializing] = useState(true)
   const [isRedirecting, setIsRedirecting] = useState(false)
+  const [error, setError] = useState<{ message: string; details?: string } | null>(
+    null
+  )
   const router = useRouter()
 
   // Clear any existing session when the login page loads
@@ -39,6 +41,7 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setError(null)
 
     try {
       // Create FormData object to match the expected format in loginAction
@@ -62,10 +65,15 @@ export default function LoginPage() {
           return
         }
       } else {
+        setError({ message: result.error || 'Login failed' })
         showToast.error(result.error || 'Login failed')
       }
     } catch (error) {
       console.error('Login error:', error)
+      setError({
+        message: 'Something went wrong while signing in. Please try again.',
+        details: error instanceof Error ? error.message : String(error),
+      })
       showToast.error('An unexpected error occurred')
     }
 
@@ -94,27 +102,24 @@ export default function LoginPage() {
         />
       )}
 
-      <div className="flex flex-col items-center mb-8">
-        <div className="mb-4 flex min-h-[90px] items-center gap-4 animate-fade-in">
-          <Image
-            src={logoSrc}
-            alt="Music Manager Logo"
-            priority
-            className="h-auto w-12 rounded-2xl shadow-lg shadow-slate-950/10"
-          />
-          <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text pb-1 text-4xl font-bold leading-[1.2] text-transparent dark:from-sky-300 dark:to-violet-300">
+      <div className="mb-8 flex flex-col items-center text-center">
+        <div className="mb-4 flex items-center gap-3 animate-fade-in">
+          <Logo className="h-12 w-12" />
+          <h1 className="font-display text-4xl font-extrabold tracking-tight">
             Music Manager
           </h1>
         </div>
-        <p className="text-xl font-medium text-blue-600 dark:text-sky-300">
-          Welcome Back
-        </p>
+        <p className="text-xl font-semibold text-primary">Welcome back</p>
         <p className="text-muted-foreground">Sign in to your account</p>
       </div>
 
+      {error && (
+        <ErrorNotice title="Could not sign in" message={error.message} details={error.details} />
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-2">
-          <label htmlFor="email" className="block text-sm font-medium">
+          <label htmlFor="email" className="label-mono block">
             Email
           </label>
           <Input
@@ -126,12 +131,12 @@ export default function LoginPage() {
             placeholder="your@email.com"
             value={formState.email}
             onChange={handleChange}
-            className="w-full bg-background/70"
+            className="w-full"
           />
         </div>
 
         <div className="space-y-2">
-          <label htmlFor="password" className="block text-sm font-medium">
+          <label htmlFor="password" className="label-mono block">
             Password
           </label>
           <Input
@@ -143,13 +148,13 @@ export default function LoginPage() {
             placeholder="Enter your password"
             value={formState.password}
             onChange={handleChange}
-            className="w-full bg-background/70"
+            className="w-full"
           />
           {/* Below the input so tabbing goes email -> password */}
           <div className="flex justify-end">
             <a
               href="#"
-              className="text-sm text-blue-600 hover:underline dark:text-sky-300"
+              className="text-sm font-medium text-primary hover:underline"
             >
               Forgot password?
             </a>
@@ -159,7 +164,7 @@ export default function LoginPage() {
         <Button
           type="submit"
           disabled={loading || isRedirecting}
-          className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 py-2.5 font-medium text-white hover:from-blue-500 hover:to-violet-500 dark:from-sky-500 dark:to-indigo-500 dark:hover:from-sky-400 dark:hover:to-violet-400"
+          className="w-full"
         >
           Sign In
         </Button>
@@ -170,7 +175,7 @@ export default function LoginPage() {
           Don&apos;t have an account?{' '}
           <Link
             href="/register"
-            className="font-medium text-blue-600 hover:underline dark:text-sky-300"
+            className="font-semibold text-primary hover:underline"
           >
             Register
           </Link>

@@ -1,11 +1,11 @@
 'use server'
 
-import { tablesDB, storage, ID, Query } from '@/lib/appwrite/server'
+import { tablesDB, storage, Query } from '@/lib/appwrite/server'
 import { revalidatePath } from 'next/cache'
-import * as musicMetadata from 'music-metadata'
 import { Models } from 'node-appwrite'
 import { checkAppwriteInitialization } from '@/lib/appwrite/initialization-service'
 import { toPlainObject } from '@/lib/utils'
+import { storeMusicFile } from '@/lib/music/upload-service'
 
 const databaseId = process.env.APPWRITE_DATABASE_ID!
 const bucketId = process.env.APPWRITE_BUCKET_ID!
@@ -86,177 +86,14 @@ export async function getAllMusicFiles() {
 }
 
 /**
- * Upload a new music file
+ * Upload a new music file. The upload form posts to /api/music/upload so it
+ * can show byte-level progress; this action remains for server-side callers.
  */
 export async function uploadMusicFile(formData: FormData) {
   try {
-    const file = formData.get('file') as File
-    const competitionId = formData.get('competitionId') as string
-    const gradeId = formData.get('gradeId') as string
-    const userId = formData.get('userId') as string
-    // Get duration from form data if available
-    const durationFromForm = formData.get('duration')
-    let initialDuration: number | null = null
-    if (durationFromForm && !isNaN(Number(durationFromForm))) {
-      initialDuration = Number(durationFromForm)
-      console.log('Using duration from form data:', initialDuration)
-    }
-
-    if (!file || !competitionId || !gradeId || !userId) {
-      throw new Error('Missing required information')
-    }
-
-    // Validate file type
-    const validTypes = [
-      'audio/mpeg',
-      'audio/wav',
-      'audio/x-wav',
-      'audio/x-m4a',
-      'audio/mp4',
-      'audio/aac',
-      'audio/x-aac',
-    ]
-    if (!validTypes.includes(file.type)) {
-      throw new Error('Invalid file type. Only audio files are accepted.')
-    }
-
-    console.log('Starting metadata extraction for file:', file.name)
-    console.log('File type:', file.type)
-    console.log('File size:', file.size)
-
-    // Use the duration from form data if available, otherwise try to extract it
-    let duration: number | null = initialDuration
-
-    // Only try to extract duration if it wasn't provided in the form data
-    if (duration === null) {
-      try {
-        console.log('No duration from form data, extracting from file...')
-        // Convert the File to ArrayBuffer for music-metadata parsing
-        const buffer = await file.arrayBuffer()
-        console.log(
-          'Successfully converted file to ArrayBuffer:',
-          buffer.byteLength,
-          'bytes'
-        )
-
-        // Use a different parsing approach based on file type
-        let metadata
-        try {
-          console.log('Attempting to parse audio metadata...')
-          metadata = await musicMetadata.parseBuffer(
-            new Uint8Array(buffer),
-            file.type
-          )
-          console.log(
-            'Metadata parsing successful:',
-            JSON.stringify(metadata.format, null, 2)
-          )
-        } catch (parseError) {
-          console.error(
-            'Error during parseBuffer, trying alternate approach:',
-            parseError
-          )
-          // Try without specifying content type as fallback
-          metadata = await musicMetadata.parseBuffer(new Uint8Array(buffer))
-          console.log('Fallback metadata parsing successful')
-        }
-
-        // Get duration in seconds and round to nearest second
-        if (metadata && metadata.format && metadata.format.duration) {
-          duration = Math.round(metadata.format.duration)
-          console.log(`Extracted audio duration: ${duration} seconds`)
-        } else {
-          console.log('Could not extract duration from metadata:', metadata)
-        }
-      } catch (metadataError) {
-        console.error('Error extracting audio metadata:', metadataError)
-        console.error(
-          'Stack trace:',
-          metadataError instanceof Error
-            ? metadataError.stack
-            : 'No stack trace'
-        )
-        // We'll continue without the duration if extraction fails
-      }
-    } else {
-      console.log(`Using provided duration: ${duration} seconds`)
-    }
-
-    // Get competition and grade details for denormalization
-    const competition = await tablesDB.getRow({
-      databaseId,
-      tableId: process.env.APPWRITE_COMPETITIONS_COLLECTION_ID!,
-      rowId: competitionId,
-    })
-
-    const grade = await tablesDB.getRow({
-      databaseId,
-      tableId: process.env.APPWRITE_GRADES_COLLECTION_ID!,
-      rowId: gradeId,
-    })
-
-    // Format the user name to get first name and last name initial
-    const fullName = (formData.get('userName') as string).trim()
-    let formattedUserName = fullName
-
-    // Process the name to extract first name and last name initial
-    if (fullName.includes(' ')) {
-      const nameParts = fullName.split(' ')
-      const firstName = nameParts[0]
-      const lastName = nameParts[nameParts.length - 1]
-      const lastNameInitial = lastName.charAt(0).toLowerCase()
-      formattedUserName = `${firstName}-${lastNameInitial}`
-    }
-
-    // Generate standardized file name with extension
-    const fileExtension = file.name.split('.').pop()
-    const formattedFileName =
-      `${competition.year}-${competition.name}-${grade.category}-${grade.segment}-${formattedUserName}`
-        .replace(/[^a-zA-Z0-9-]/g, '-')
-        .toLowerCase()
-    const fullFileName = `${formattedFileName}.${fileExtension}`
-
-    // Create a new File object with the formatted name
-    const renamedFile = new File([file], fullFileName, { type: file.type })
-
-    // Upload file to storage
-    const uploadedFile = await storage.createFile(
-      bucketId,
-      ID.unique(),
-      renamedFile
-    )
-
-    // Create document in MusicFiles collection
-    const musicFileDocument = await tablesDB.createRow({
-      databaseId,
-      tableId: musicFilesCollectionId,
-      rowId: ID.unique(),
-      data: {
-        fileId: uploadedFile.$id,
-        originalName: file.name,
-        fileName: formattedFileName,
-        storagePath: `${bucketId}/${uploadedFile.$id}`,
-        // Don't store downloadURL in the database as it may expire
-        competitionId,
-        competitionName: competition.name,
-        competitionYear: competition.year,
-        gradeId,
-        gradeType: grade.name,
-        gradeCategory: grade.category,
-        gradeSegment: grade.segment,
-        userId,
-        userName: formData.get('userName') as string,
-        uploadedAt: new Date().toISOString(),
-        duration: duration, // Add the extracted duration to the metadata
-        size: file.size,
-        status: 'ready',
-      },
-    })
-
-    console.log('Music file document created with duration:', duration)
-
+    const musicFile = await storeMusicFile(formData)
     revalidatePath('/dashboard')
-    return { success: true, musicFile: toPlainObject(musicFileDocument) }
+    return { success: true, musicFile }
   } catch (error) {
     console.error('Error uploading music file:', error)
     throw new Error(

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Table,
   TableHeader,
@@ -34,6 +33,10 @@ import {
   deleteUser,
 } from '@/app/actions/user-actions'
 import LocalLoadingCard from '@/components/ui/local-loading-card'
+import ErrorNotice from '@/components/ui/error-notice'
+import PageHeader from '@/components/layout/page-header'
+import { buttonVariants } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 
 // Define interface for user object
 interface User {
@@ -56,6 +59,7 @@ export default function UserManagement() {
   const [filteredUsers, setFilteredUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  const [loadError, setLoadError] = useState<string | null>(null)
 
   useEffect(() => {
     loadUsers()
@@ -74,23 +78,26 @@ export default function UserManagement() {
             user.$id?.toLowerCase().includes(query) ||
             `${user.firstName || ''} ${user.lastName || ''}`
               .toLowerCase()
-              .includes(query)
-        )
+              .includes(query),
+        ),
       )
     }
   }, [searchQuery, users])
 
   const loadUsers = async () => {
     setIsLoading(true)
+    setLoadError(null)
     try {
       const data = await getAllUsers()
       setUsers(data)
       setFilteredUsers(data)
     } catch (error) {
+      console.error('Failed to load users:', error)
+      setLoadError(error instanceof Error ? error.message : String(error))
       toast.error(
         `Failed to load users: ${
           error instanceof Error ? error.message : 'Unknown error'
-        }`
+        }`,
       )
     } finally {
       setIsLoading(false)
@@ -106,7 +113,7 @@ export default function UserManagement() {
       toast.error(
         `Failed to update user role: ${
           error instanceof Error ? error.message : 'Unknown error'
-        }`
+        }`,
       )
     }
   }
@@ -120,7 +127,7 @@ export default function UserManagement() {
       toast.error(
         `Failed to update user status: ${
           error instanceof Error ? error.message : 'Unknown error'
-        }`
+        }`,
       )
     }
   }
@@ -134,180 +141,171 @@ export default function UserManagement() {
       toast.error(
         `Failed to delete user: ${
           error instanceof Error ? error.message : 'Unknown error'
-        }`
+        }`,
       )
     }
   }
 
+  const displayName = (user: User) =>
+    user.name ||
+    `${user.firstName || ''} ${user.lastName || ''}`.trim() ||
+    'N/A'
+
+  const initials = (user: User) =>
+    displayName(user)
+      .split(' ')
+      .filter(Boolean)
+      .map((part) => part[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase()
+
+  const isActive = (user: User) =>
+    user.status === true || user.status === 'active'
+
   return (
-    <>
-      <Card className="border-blue-100">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-blue-400">
-            User Management
-          </CardTitle>
-          <div className="relative w-64">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search users..."
-              className="pl-8"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <LocalLoadingCard message="Loading users..." minHeight="300px" />
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-blue-500 font-medium">
-                    Name
-                  </TableHead>
-                  <TableHead className="text-blue-500 font-medium">
-                    Email
-                  </TableHead>
-                  <TableHead className="text-blue-500 font-medium">
-                    Phone
-                  </TableHead>
-                  <TableHead className="text-blue-500 font-medium">
-                    Role
-                  </TableHead>
-                  <TableHead className="text-blue-500 font-medium">
-                    Enabled
-                  </TableHead>
-                  <TableHead className="text-blue-500 font-medium text-right">
-                    Actions
-                  </TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredUsers.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={6}
-                      className="text-center h-24 text-blue-500"
-                    >
-                      {searchQuery
-                        ? 'No users matching your search'
-                        : 'No users found'}
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredUsers.map((user) => (
-                    <TableRow key={user.$id}>
-                      <TableCell className="font-medium text-blue-600">
-                        {user.name ||
-                          `${user.firstName || ''} ${
-                            user.lastName || ''
-                          }`.trim() ||
-                          'N/A'}
-                      </TableCell>
-                      <TableCell className="text-blue-600">
-                        {user.email}
-                      </TableCell>
-                      <TableCell className="text-blue-600">
-                        {user.phone || 'N/A'}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-center space-x-2">
-                          <Badge
-                            variant={user.isAdmin ? 'default' : 'outline'}
-                            className={`w-24 justify-center ${
-                              user.isAdmin
-                                ? 'bg-purple-500 hover:bg-purple-600'
-                                : user.status === true ||
-                                  user.status === 'active'
-                                ? 'border-green-500 text-green-500'
-                                : ''
-                            }`}
-                          >
-                            {user.isAdmin ? 'Admin' : 'Competitor'}
-                          </Badge>
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() =>
-                              handleRoleToggle(user.$id, user.isAdmin)
-                            }
-                            title={`Change to ${
-                              user.isAdmin ? 'competitor' : 'admin'
-                            }`}
-                            className="border-blue-200 hover:bg-blue-50"
-                          >
-                            {user.isAdmin ? (
-                              <Shield className="h-4 w-4 text-purple-500" />
-                            ) : (
-                              <ShieldAlert className="h-4 w-4 text-green-500" />
+    <div className="flex flex-col gap-5">
+      <PageHeader
+        title="Users"
+        description="Everyone with an account. Change a role, switch an account off, or remove an account and its files."
+      />
+
+      <div className="relative max-w-md">
+        <Search
+          className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
+          aria-hidden
+        />
+        <Input
+          aria-label="Search users"
+          placeholder="Search by name, email or ID"
+          className="pl-9"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
+
+      {isLoading ? (
+        <LocalLoadingCard message="Loading users..." minHeight="300px" />
+      ) : loadError ? (
+        <ErrorNotice
+          title="Could not load users"
+          message="The user list could not be loaded. Check that the API key has the users.read scope, then try again."
+          details={loadError}
+          onRetry={loadUsers}
+        />
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>User</TableHead>
+              <TableHead>Phone</TableHead>
+              <TableHead>Role</TableHead>
+              <TableHead>Enabled</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredUsers.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={5}
+                  className="h-24 text-center text-muted-foreground"
+                >
+                  {searchQuery
+                    ? 'No users match your search'
+                    : 'No users found'}
+                </TableCell>
+              </TableRow>
+            ) : (
+              filteredUsers.map((user) => (
+                <TableRow key={user.$id}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <span className="grid size-8 shrink-0 place-items-center rounded-md bg-accent font-display text-xs font-bold text-accent-foreground">
+                        {initials(user)}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="font-semibold">{displayName(user)}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {user.email}
+                        </p>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="font-mono text-sm">
+                    {user.phone || 'N/A'}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        variant={user.isAdmin ? 'accent' : 'outline'}
+                        className="w-24 justify-center"
+                      >
+                        {user.isAdmin ? 'Admin' : 'Competitor'}
+                      </Badge>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="size-8"
+                        onClick={() => handleRoleToggle(user.$id, user.isAdmin)}
+                        title={`Change to ${user.isAdmin ? 'competitor' : 'admin'}`}
+                        aria-label={`Change to ${user.isAdmin ? 'competitor' : 'admin'}`}
+                      >
+                        {user.isAdmin ? <Shield /> : <ShieldAlert />}
+                      </Button>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Switch
+                      checked={isActive(user)}
+                      onCheckedChange={() =>
+                        handleStatusToggle(user.$id, isActive(user))
+                      }
+                      aria-label={`User ${isActive(user) ? 'active' : 'inactive'}`}
+                    />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-muted-foreground hover:text-destructive"
+                          aria-label="Delete user"
+                          title="Delete user"
+                        >
+                          <Trash />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete user</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Delete {displayName(user)}? This permanently removes
+                            the account and every music file they uploaded. It
+                            cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            className={cn(
+                              buttonVariants({ variant: 'destructive' }),
                             )}
-                          </Button>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Switch
-                          checked={
-                            user.status === true || user.status === 'active'
-                          }
-                          onCheckedChange={() =>
-                            handleStatusToggle(
-                              user.$id,
-                              user.status === true || user.status === 'active'
-                            )
-                          }
-                          aria-label={`User ${
-                            user.status === true || user.status === 'active'
-                              ? 'active'
-                              : 'inactive'
-                          }`}
-                          className={
-                            user.status === true || user.status === 'active'
-                              ? 'data-[state=checked]:bg-green-500'
-                              : ''
-                          }
-                        />
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
-                            >
-                              <Trash className="h-4 w-4" />
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete User</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete this user? This
-                                action cannot be undone and will permanently
-                                delete the user account and all associated data.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                className="bg-destructive text-white font-medium hover:bg-destructive/90"
-                                onClick={() => handleDeleteUser(user.$id)}
-                              >
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-    </>
+                            onClick={() => handleDeleteUser(user.$id)}
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      )}
+    </div>
   )
 }

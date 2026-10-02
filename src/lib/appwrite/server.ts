@@ -2,6 +2,7 @@ import {
   Client,
   TablesDB,
   Storage,
+  Teams,
   Users,
   ID as AppwriteID,
   Query,
@@ -11,6 +12,7 @@ interface AppwriteServices {
   client: Client
   tablesDB: TablesDB
   storage: Storage
+  teams: Teams
   users: Users
 }
 
@@ -56,6 +58,7 @@ function getServices() {
     client,
     tablesDB: new TablesDB(client),
     storage: new Storage(client),
+    teams: new Teams(client),
     users: new Users(client),
   }
 
@@ -98,6 +101,7 @@ function createLazyService<T extends object>(resolver: () => T): T {
 export const client = createLazyService(() => getServices().client)
 export const tablesDB = createLazyService(() => getServices().tablesDB)
 export const storage = createLazyService(() => getServices().storage)
+export const teams = createLazyService(() => getServices().teams)
 export const users = createLazyService(() => getServices().users)
 export const ID = AppwriteID
 export { Query }

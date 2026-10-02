@@ -10,6 +10,8 @@ import {
 } from '@/app/actions/competition-actions'
 import { toast } from 'sonner'
 import { Trash, Loader2 } from 'lucide-react'
+import { buttonVariants } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -97,10 +99,10 @@ export default function CompetitionCard({
   // If the competition is being deleted, show a spinner instead of the card
   if (showDeleteSpinner) {
     return (
-      <div className="flex h-full min-h-[100px] items-center justify-center rounded-lg border border-indigo-100 bg-indigo-50 animate-pulse dark:border-indigo-500/20 dark:bg-indigo-950/30">
+      <div className="flex h-full min-h-[100px] animate-pulse items-center justify-center rounded-lg border bg-card">
         <div className="flex flex-col items-center space-y-3">
-          <Loader2 className="h-8 w-8 animate-spin text-indigo-500 dark:text-indigo-300" />
-          <span className="text-sm font-medium text-indigo-500 dark:text-indigo-200">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="text-sm font-medium text-muted-foreground">
             Deleting...
           </span>
         </div>
@@ -110,43 +112,27 @@ export default function CompetitionCard({
 
   return (
     <Card
-      className={`
-        cursor-pointer
-        border-indigo-100/80
-        transition-all
-        hover:shadow-md
-        dark:border-white/10
-        ${
-          isSelected
-            ? 'border-indigo-300 bg-gradient-to-r from-indigo-50 to-violet-50 shadow-sm dark:border-indigo-400/50 dark:from-indigo-950/45 dark:to-violet-950/30'
-            : 'hover:bg-slate-50 dark:hover:bg-white/5'
-        }
-      `}
+      className={cn(
+        'cursor-pointer gap-0 py-0 transition-colors',
+        isSelected
+          ? 'border-primary bg-accent'
+          : 'hover:border-muted-foreground/60'
+      )}
       onClick={onSelect}
     >
-      <CardContent className="p-3 space-y-2">
-        <h3 className="text-lg font-medium text-indigo-700 dark:text-indigo-100">
+      <CardContent className="space-y-2 p-3">
+        <h3 className="font-display text-base font-bold">
           {competition.name}
         </h3>
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <Badge
-              variant={competition.active ? 'default' : 'outline'}
-              className={
-                competition.active
-                  ? 'bg-green-500 text-white hover:bg-green-600 dark:bg-green-500 dark:hover:bg-green-400'
-                  : 'border-yellow-300 bg-yellow-100 text-yellow-800 hover:bg-yellow-200 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-200 dark:hover:bg-amber-500/20'
-              }
-            >
+            <Badge variant={competition.active ? 'success' : 'outline'}>
               {competition.active ? 'Active' : 'Inactive'}
             </Badge>
             <Switch
               checked={competition.active}
               onCheckedChange={handleStatusChange}
               onClick={(e: React.MouseEvent) => e.stopPropagation()}
-              className={
-                competition.active ? 'data-[state=checked]:bg-green-500' : ''
-              }
               aria-label={`Competition ${
                 competition.active ? 'active' : 'inactive'
               }`}
@@ -157,7 +143,7 @@ export default function CompetitionCard({
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-red-500 hover:bg-red-50 hover:text-red-700 dark:text-red-300 dark:hover:bg-red-500/10 dark:hover:text-red-200"
+                className="text-muted-foreground hover:text-destructive"
                 onClick={(e: React.MouseEvent) => e.stopPropagation()}
               >
                 <Trash className="h-4 w-4" />
@@ -175,7 +161,7 @@ export default function CompetitionCard({
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                 <AlertDialogAction
-                  className="bg-destructive text-white font-medium hover:bg-red-600"
+                  className={cn(buttonVariants({ variant: 'destructive' }))}
                   onClick={handleDeleteCompetition}
                 >
                   Delete
