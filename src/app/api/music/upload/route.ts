@@ -2,8 +2,11 @@ import { NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import {
   storeMusicFile,
+  UploadConflictError,
+  UploadDeadlineError,
   UploadValidationError,
 } from '@/lib/music/upload-service'
+import { getSessionUser, isAdminUser } from '@/lib/auth/guards'
 
 /**
  * Receives a music file upload. The browser posts here with XMLHttpRequest so
@@ -13,10 +16,28 @@ import {
 export async function POST(request: Request) {
   try {
     const formData = await request.formData()
-    const musicFile = await storeMusicFile(formData)
+    const actor = { isAdmin: isAdminUser(await getSessionUser()) }
+    const musicFile = await storeMusicFile(formData, actor)
     revalidatePath('/dashboard')
     return NextResponse.json({ success: true, musicFile })
   } catch (error) {
+    if (error instanceof UploadConflictError) {
+      return NextResponse.json(
+        {
+          success: false,
+          code: 'exists',
+          error: error.message,
+          existing: error.existing,
+        },
+        { status: 409 }
+      )
+    }
+    if (error instanceof UploadDeadlineError) {
+      return NextResponse.json(
+        { success: false, code: 'deadline', error: error.message },
+        { status: 403 }
+      )
+    }
     if (error instanceof UploadValidationError) {
       return NextResponse.json(
         { success: false, error: error.message },

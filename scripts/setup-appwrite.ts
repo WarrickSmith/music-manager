@@ -70,6 +70,7 @@ export function getTableIds() {
       process.env.APPWRITE_COMPETITIONS_COLLECTION_ID || 'competitions',
     grades: process.env.APPWRITE_GRADES_COLLECTION_ID || 'grades',
     musicFiles: process.env.APPWRITE_MUSIC_FILES_COLLECTION_ID || 'musicfiles',
+    entries: process.env.APPWRITE_ENTRIES_COLLECTION_ID || 'entries',
   }
 }
 
@@ -92,6 +93,8 @@ export function getTableDefinitions(): TableDefinition[] {
         { key: 'year', type: 'integer', required: true },
         { key: 'active', type: 'boolean', required: true },
         { key: 'description', type: 'string', size: 1000, required: false },
+        // When uploads close for competitors. Empty means no deadline.
+        { key: 'uploadDeadline', type: 'datetime', required: false },
       ],
     },
     {
@@ -143,6 +146,25 @@ export function getTableDefinitions(): TableDefinition[] {
         { key: 'fileId', type: 'string', size: 255, required: true },
       ],
     },
+    {
+      // Which skater is entered in which grade, so admins can see whose music
+      // is still missing. IDs are 36 characters at most, so a unique index
+      // across all three fits within Appwrite's index size limit.
+      id: tableIds.entries,
+      name: 'Entries Collection',
+      permissions: [
+        Permission.read(Role.team('admin')),
+        Permission.read(Role.team('competitor')),
+        Permission.write(Role.team('admin')),
+        Permission.delete(Role.team('admin')),
+      ],
+      columns: [
+        { key: 'competitionId', type: 'string', size: 36, required: true },
+        { key: 'gradeId', type: 'string', size: 36, required: true },
+        { key: 'userId', type: 'string', size: 36, required: true },
+        { key: 'userName', type: 'string', size: 255, required: true },
+      ],
+    },
   ]
 }
 
@@ -170,7 +192,17 @@ export function getIndexDefinitions(): Record<string, IndexDefinition[]> {
       key('idx_competition', ['competitionId']),
       key('idx_grade', ['gradeId']),
       key('idx_competition_grade', ['competitionId', 'gradeId']),
+      key('idx_user_grade', ['userId', 'gradeId']),
       { key: 'idx_file', columns: ['fileId'], type: TablesDBIndexType.Unique },
+    ],
+    [tableIds.entries]: [
+      key('idx_competition', ['competitionId']),
+      key('idx_user', ['userId']),
+      {
+        key: 'idx_competition_grade_user',
+        columns: ['competitionId', 'gradeId', 'userId'],
+        type: TablesDBIndexType.Unique,
+      },
     ],
   }
 }

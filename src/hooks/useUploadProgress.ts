@@ -17,6 +17,8 @@ export interface UploadFailure {
   message: string
   /** Technical detail to include in an error report */
   details: string
+  /** Machine-readable reason from the server, e.g. "exists" or "deadline" */
+  code?: string
 }
 
 /**
@@ -74,6 +76,7 @@ export const useUploadProgress = () => {
         setFailure({
           message: uploadError.message,
           details: uploadError.details,
+          code: uploadError.code,
         })
         setStatus('error')
         throw uploadError

@@ -4,6 +4,7 @@ import { Bricolage_Grotesque, Instrument_Sans, DM_Mono } from 'next/font/google'
 import { Toaster } from 'sonner'
 import './globals.css'
 import Navbar from '@/components/layout/navbar'
+import { PlayerProvider } from '@/components/audio/player-provider'
 import { getCurrentUser } from '@/lib/auth/auth-service'
 import { resolveThemePreference, THEME_COOKIE_NAME } from '@/lib/theme'
 
@@ -39,7 +40,7 @@ export default async function RootLayout({
 }>) {
   const cookieStore = await cookies()
   const initialTheme = resolveThemePreference(
-    cookieStore.get(THEME_COOKIE_NAME)?.value
+    cookieStore.get(THEME_COOKIE_NAME)?.value,
   )
   const user = await getCurrentUser()
   // The role picks the accent colour: sky for competitors (and signed-out
@@ -57,21 +58,23 @@ export default async function RootLayout({
         suppressHydrationWarning
         className={`${headingFont.variable} ${bodyFont.variable} ${dataFont.variable} bg-background text-foreground antialiased h-full overflow-x-hidden`}
       >
-        <div className="flex flex-col h-full">
-          <Navbar initialTheme={initialTheme} user={user} />
-          <main className="flex-grow">{children}</main>
-          <Toaster
-            theme={initialTheme}
-            position="bottom-right"
-            closeButton
-            className="toast-container"
-            toastOptions={{
-              className:
-                'toast-base border border-border bg-card text-card-foreground shadow-lg',
-              duration: 4000,
-            }}
-          />
-        </div>
+        <PlayerProvider>
+          <div className="flex flex-col h-full">
+            <Navbar initialTheme={initialTheme} user={user} />
+            <main className="flex-grow">{children}</main>
+            <Toaster
+              theme={initialTheme}
+              position="bottom-right"
+              closeButton
+              className="toast-container"
+              toastOptions={{
+                className:
+                  'toast-base border border-border bg-card text-card-foreground shadow-lg',
+                duration: 4000,
+              }}
+            />
+          </div>
+        </PlayerProvider>
       </body>
     </html>
   )

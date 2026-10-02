@@ -90,6 +90,24 @@ describe('uploadWithProgress', () => {
     expect(error.status).toBe(400)
   })
 
+  it('passes the error code and extra data through, e.g. an existing file', async () => {
+    const promise = uploadWithProgress('/api/x', new FormData())
+    const xhr = FakeXHR.last
+    xhr.status = 409
+    xhr.responseText = JSON.stringify({
+      success: false,
+      code: 'exists',
+      error: 'You already have a file for this programme.',
+      existing: { id: 'abc', originalName: 'swan.mp3' },
+    })
+    xhr.onload?.()
+
+    const error = (await promise.catch((e) => e)) as UploadError
+    expect(error.code).toBe('exists')
+    expect(error.status).toBe(409)
+    expect(error.payload?.existing).toEqual({ id: 'abc', originalName: 'swan.mp3' })
+  })
+
   it('explains an oversized upload when the server returns 413', async () => {
     const promise = uploadWithProgress('/api/x', new FormData())
     const xhr = FakeXHR.last

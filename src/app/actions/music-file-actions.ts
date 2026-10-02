@@ -5,7 +5,15 @@ import { revalidatePath } from 'next/cache'
 import { Models } from 'node-appwrite'
 import { checkAppwriteInitialization } from '@/lib/appwrite/initialization-service'
 import { toPlainObject } from '@/lib/utils'
-import { storeMusicFile } from '@/lib/music/upload-service'
+import {
+  findMusicFilesForGrade,
+  storeMusicFile,
+  summariseExisting,
+  type ExistingMusicSummary,
+} from '@/lib/music/upload-service'
+import { ActionResult, errorMessage, fail, ok } from '@/lib/action-result'
+import { getSessionUser, isAdminUser } from '@/lib/auth/guards'
+import { formatDeadlineDate, isPastDeadline } from '@/lib/deadline'
 
 const databaseId = process.env.APPWRITE_DATABASE_ID!
 const bucketId = process.env.APPWRITE_BUCKET_ID!
@@ -91,7 +99,8 @@ export async function getAllMusicFiles() {
  */
 export async function uploadMusicFile(formData: FormData) {
   try {
-    const musicFile = await storeMusicFile(formData)
+    const actor = { isAdmin: isAdminUser(await getSessionUser()) }
+    const musicFile = await storeMusicFile(formData, actor)
     revalidatePath('/dashboard')
     return { success: true, musicFile }
   } catch (error) {
@@ -105,10 +114,56 @@ export async function uploadMusicFile(formData: FormData) {
 }
 
 /**
- * Delete a music file
+ * The skater's current file for a grade, if any. The upload form uses this to
+ * warn that uploading will replace it.
  */
-export async function deleteMusicFile(fileId: string, musicFileId: string) {
+export async function findExistingMusicFile(
+  userId: string,
+  gradeId: string
+): Promise<ActionResult<ExistingMusicSummary | null>> {
   try {
+    const rows = await findMusicFilesForGrade(userId, gradeId)
+    return ok(rows.length > 0 ? summariseExisting(rows[0]) : null)
+  } catch (error) {
+    console.error('Error looking for an existing music file:', error)
+    return fail(
+      `Could not check for an existing file: ${errorMessage(error)}`
+    )
+  }
+}
+
+/**
+ * Delete a music file. Competitors cannot delete once the competition's upload
+ * deadline has passed; admins always can. Returns the reason instead of
+ * throwing for that rule so it reaches the screen in production.
+ */
+export async function deleteMusicFile(
+  fileId: string,
+  musicFileId: string
+): Promise<{ success: true } | { success: false; error: string }> {
+  try {
+    const user = await getSessionUser()
+    if (!isAdminUser(user)) {
+      const row = await tablesDB.getRow({
+        databaseId,
+        tableId: musicFilesCollectionId,
+        rowId: musicFileId,
+      })
+      const competition = await tablesDB
+        .getRow({
+          databaseId,
+          tableId: process.env.APPWRITE_COMPETITIONS_COLLECTION_ID!,
+          rowId: row.competitionId,
+        })
+        .catch(() => null)
+      if (competition && isPastDeadline(competition.uploadDeadline)) {
+        return {
+          success: false,
+          error: `Uploads for ${competition.name} closed on ${formatDeadlineDate(new Date(competition.uploadDeadline))}, so this file is locked. Ask a club admin to remove it.`,
+        }
+      }
+    }
+
     // Delete file from storage
     await storage.deleteFile(bucketId, fileId)
 

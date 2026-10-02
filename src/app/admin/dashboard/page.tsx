@@ -1,8 +1,16 @@
 import DashboardShell from '@/components/layout/dashboard-shell'
 import PageHeader from '@/components/layout/page-header'
 import { getCurrentUser } from '@/lib/auth/auth-service'
-import { Music, Trophy, Users, UserCog, Database } from 'lucide-react'
+import {
+  Music,
+  Trophy,
+  Users,
+  UserCog,
+  Database,
+  ClipboardList,
+} from 'lucide-react'
 import CompetitionManagement from '@/components/dashboard/admin/competition-management'
+import EntriesManagement from '@/components/dashboard/admin/entries-management'
 import UserManagement from '@/components/dashboard/admin/user-management'
 import AdminProfileManagement from '@/components/dashboard/admin/profile-management'
 import MusicFileManagement from '@/components/dashboard/admin/music-file-management'
@@ -42,6 +50,12 @@ export default async function AdminDashboardPage() {
           label: 'Competitions',
           icon: <Trophy />,
           content: <CompetitionManagement />,
+        },
+        {
+          value: 'entries',
+          label: 'Entries',
+          icon: <ClipboardList />,
+          content: <EntriesManagement />,
         },
         {
           value: 'users',

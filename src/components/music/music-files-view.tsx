@@ -11,6 +11,7 @@ import {
   getMusicFileDownloadUrl,
 } from '@/app/actions/music-file-actions'
 import { formatDuration, cn } from '@/lib/utils'
+import { isPastDeadline } from '@/lib/deadline'
 import MusicFilterBar from './music-filter-bar'
 import MusicCard from './music-card'
 import MusicTable from './music-table'
@@ -42,12 +43,17 @@ export default function MusicFilesView({
   isAdmin,
   emptyMessage,
   onFileDeleted,
+  deadlines,
 }: {
   files: MusicFile[]
   isAdmin: boolean
   emptyMessage: string
   onFileDeleted: (id: string) => void
+  /** Upload deadline per competition ID. Competitors cannot delete after it. */
+  deadlines?: Record<string, string>
 }) {
+  const isLocked = (file: MusicFile) =>
+    !isAdmin && isPastDeadline(deadlines?.[file.competitionId])
   const { filters, setFilter, reset, options, filtered, isFiltered } =
     useMusicFilters(files)
   const [view, setView] = useState<View>('cards')
@@ -106,7 +112,14 @@ export default function MusicFilesView({
     setActionError(null)
     setDeletingIds((prev) => [...prev, file.$id])
     try {
-      await deleteMusicFile(storageFileId(file), file.$id)
+      const result = await deleteMusicFile(storageFileId(file), file.$id)
+      if (!result.success) {
+        setActionError({
+          title: 'This file is locked',
+          message: result.error,
+        })
+        return
+      }
       onFileDeleted(file.$id)
       setSelectedIds((prev) => prev.filter((id) => id !== file.$id))
       toast.success('File deleted')
@@ -260,6 +273,7 @@ export default function MusicFilesView({
               showCompetitor={isAdmin}
               selected={isAdmin ? selectedIds.includes(file.$id) : undefined}
               onSelectChange={isAdmin ? () => toggleOne(file.$id) : undefined}
+              locked={isLocked(file)}
               isDeleting={deletingIds.includes(file.$id)}
               isDownloading={downloadingIds.includes(file.$id)}
               onDelete={handleDelete}
@@ -274,6 +288,7 @@ export default function MusicFilesView({
           selectedIds={isAdmin ? selectedIds : undefined}
           onToggle={isAdmin ? toggleOne : undefined}
           onToggleAll={isAdmin ? toggleAll : undefined}
+          isLocked={isLocked}
           deletingIds={deletingIds}
           downloadingIds={downloadingIds}
           onDelete={handleDelete}

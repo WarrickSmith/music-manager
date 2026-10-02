@@ -141,7 +141,7 @@ describe('checkAppwriteInitialization', () => {
     const status = await checkAppwriteInitialization()
 
     expect(status.isInitialized).toBe(false)
-    expect(status.errors).toHaveLength(3)
+    expect(status.errors).toHaveLength(4)
     expect(status.errors[0]).toContain('missing scopes (["tables.read"])')
   })
 })
@@ -159,6 +159,7 @@ describe('setup report', () => {
       'competitions',
       'grades',
       'musicfiles',
+      'entries',
     ])
     for (const table of report.tables) {
       expect(table.state).toBe('ready')

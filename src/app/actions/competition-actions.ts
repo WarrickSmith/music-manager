@@ -7,6 +7,8 @@ import { defaultGrades } from '@/lib/appwrite/default-grades'
 import { storage } from '@/lib/appwrite/server'
 import { checkAppwriteInitialization } from '@/lib/appwrite/initialization-service'
 import { toPlainObject } from '@/lib/utils'
+import { ActionResult, errorMessage, fail, ok } from '@/lib/action-result'
+import { ADMIN_ONLY_MESSAGE, getAdminUser } from '@/lib/auth/guards'
 
 const databaseId = process.env.APPWRITE_DATABASE_ID!
 const competitionsCollectionId =
@@ -89,12 +91,15 @@ export async function createCompetition({
   active,
   useDefaultGrades,
   cloneFromCompetitionId,
+  uploadDeadline,
 }: {
   name: string
   year: number
   active: boolean
   useDefaultGrades: boolean
   cloneFromCompetitionId?: string
+  /** ISO timestamp after which competitors cannot upload; omit for none */
+  uploadDeadline?: string | null
 }) {
   try {
     // Check if Appwrite resources are initialized
@@ -110,10 +115,13 @@ export async function createCompetition({
       databaseId,
       tableId: competitionsCollectionId,
       rowId: ID.unique(),
+      // The deadline column only exists after setup has been run since deadlines
+      // were added, so leave the field out entirely when there is no deadline
       data: {
         name,
         year,
         active,
+        ...(uploadDeadline ? { uploadDeadline } : {}),
       },
     })
 
@@ -339,5 +347,62 @@ export async function getGradeCategoriesForCompetition(competitionId: string) {
   } catch (error) {
     console.error('Error fetching grade categories:', error)
     throw new Error('Failed to fetch grade categories')
+  }
+}
+
+/**
+ * Set or clear the time after which competitors can no longer upload, replace
+ * or delete music for a competition. Admins are never locked out.
+ */
+export async function updateCompetitionDeadline(
+  competitionId: string,
+  uploadDeadline: string | null
+): Promise<ActionResult<{ uploadDeadline: string | null }>> {
+  if (!(await getAdminUser())) return fail(ADMIN_ONLY_MESSAGE)
+
+  if (uploadDeadline && Number.isNaN(new Date(uploadDeadline).getTime())) {
+    return fail('That deadline is not a valid date and time.')
+  }
+
+  try {
+    await tablesDB.updateRow({
+      databaseId,
+      tableId: competitionsCollectionId,
+      rowId: competitionId,
+      data: { uploadDeadline },
+    })
+    revalidatePath('/admin/dashboard')
+    revalidatePath('/dashboard')
+    return ok({ uploadDeadline })
+  } catch (error) {
+    console.error('Error updating competition deadline:', error)
+    const message = errorMessage(error)
+    return fail(
+      /unknown attribute|attribute not found|invalid document structure/i.test(
+        message
+      )
+        ? 'The deadline column is missing. Open the Setup tab and run setup to add it, then try again.'
+        : `Could not save the deadline: ${message}`
+    )
+  }
+}
+
+/**
+ * Deadline for every competition that has one, keyed by competition ID. Used
+ * to show locked music and closed competitions to competitors.
+ */
+export async function getCompetitionDeadlines(): Promise<
+  Record<string, string>
+> {
+  try {
+    const rows = await getAllDocuments(databaseId, competitionsCollectionId)
+    const deadlines: Record<string, string> = {}
+    for (const row of rows) {
+      if (row.uploadDeadline) deadlines[row.$id] = row.uploadDeadline
+    }
+    return deadlines
+  } catch (error) {
+    console.error('Error fetching competition deadlines:', error)
+    return {}
   }
 }

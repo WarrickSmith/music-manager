@@ -22,6 +22,7 @@ import {
 import { toast } from 'sonner'
 import { RefreshCw } from 'lucide-react'
 import { createCompetition } from '@/app/actions/competition-actions'
+import { fromDatetimeLocalValue } from '@/lib/deadline'
 
 interface Competition {
   $id: string
@@ -49,6 +50,7 @@ export default function CreateCompetitionDialog({
     active: true,
     gradeSource: 'default',
     cloneFromCompetitionId: '',
+    uploadDeadline: '',
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -67,6 +69,7 @@ export default function CreateCompetitionDialog({
           formData.gradeSource === 'clone'
             ? formData.cloneFromCompetitionId
             : undefined,
+        uploadDeadline: fromDatetimeLocalValue(formData.uploadDeadline),
       })
 
       toast.success('Competition created successfully')
@@ -142,6 +145,24 @@ export default function CreateCompetitionDialog({
                 setFormData({ ...formData, active: checked })
               }
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="competition-deadline" className="font-medium">
+              Upload deadline (optional)
+            </Label>
+            <Input
+              id="competition-deadline"
+              type="datetime-local"
+              value={formData.uploadDeadline}
+              onChange={(e) =>
+                setFormData({ ...formData, uploadDeadline: e.target.value })
+              }
+            />
+            <p className="text-sm text-muted-foreground">
+              After this time competitors cannot upload, replace or delete
+              their music. Admins always can.
+            </p>
           </div>
 
           <div className="space-y-2">

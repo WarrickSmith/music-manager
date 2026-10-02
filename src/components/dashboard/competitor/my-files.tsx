@@ -3,17 +3,20 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { getUserMusicFiles } from '@/app/actions/music-file-actions'
+import { getCompetitionDeadlines } from '@/app/actions/competition-actions'
 import LocalLoadingCard from '@/components/ui/local-loading-card'
 import ErrorNotice from '@/components/ui/error-notice'
 import { Button } from '@/components/ui/button'
 import PageHeader from '@/components/layout/page-header'
 import { useDashboardTab } from '@/components/layout/dashboard-shell'
+import OutstandingMusicPanel from './outstanding-music'
 import MusicFilesView from '@/components/music/music-files-view'
 import type { MusicFile } from '@/components/music/types'
 
 export default function MyFiles({ userId }: { userId: string }) {
   const goToTab = useDashboardTab()
   const [files, setFiles] = useState<MusicFile[]>([])
+  const [deadlines, setDeadlines] = useState<Record<string, string>>({})
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -21,8 +24,12 @@ export default function MyFiles({ userId }: { userId: string }) {
     setIsLoading(true)
     setError(null)
     try {
-      const userFiles = await getUserMusicFiles(userId)
+      const [userFiles, competitionDeadlines] = await Promise.all([
+        getUserMusicFiles(userId),
+        getCompetitionDeadlines(),
+      ])
       setFiles(userFiles as unknown as MusicFile[])
+      setDeadlines(competitionDeadlines)
     } catch (err) {
       console.error('Error loading music files:', err)
       setError(err instanceof Error ? err.message : String(err))
@@ -49,6 +56,8 @@ export default function MyFiles({ userId }: { userId: string }) {
         }
       />
 
+      <OutstandingMusicPanel userId={userId} />
+
       {isLoading ? (
         <LocalLoadingCard
           message="Loading your music files..."
@@ -65,6 +74,7 @@ export default function MyFiles({ userId }: { userId: string }) {
         <MusicFilesView
           files={files}
           isAdmin={false}
+          deadlines={deadlines}
           emptyMessage="You haven't uploaded any music yet. Use Upload to add your first file."
           onFileDeleted={(id) =>
             setFiles((prev) => prev.filter((f) => f.$id !== id))

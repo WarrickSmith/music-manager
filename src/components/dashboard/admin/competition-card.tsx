@@ -9,7 +9,9 @@ import {
   deleteCompetition,
 } from '@/app/actions/competition-actions'
 import { toast } from 'sonner'
-import { Trash, Loader2 } from 'lucide-react'
+import { Trash, Loader2, CalendarClock } from 'lucide-react'
+import DeadlineDialog from './deadline-dialog'
+import { deadlineStatus } from '@/lib/deadline'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import {
@@ -30,6 +32,7 @@ interface CompetitionCardProps {
     name: string
     year: number
     active: boolean
+    uploadDeadline?: string | null
   }
   isSelected: boolean
   onSelect: () => void
@@ -51,6 +54,8 @@ export default function CompetitionCard({
   // Use local state to track competition data, allowing for UI updates without refetching
   const [competition, setCompetition] = useState(initialCompetition)
   const [internalDeleting, setInternalDeleting] = useState(false)
+  const [showDeadline, setShowDeadline] = useState(false)
+  const deadline = deadlineStatus(competition.uploadDeadline)
 
   // Combine external and internal deleting states
   const showDeleteSpinner = isDeleting || internalDeleting
@@ -124,6 +129,30 @@ export default function CompetitionCard({
         <h3 className="font-display text-base font-bold">
           {competition.name}
         </h3>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <CalendarClock className="size-4 shrink-0" aria-hidden />
+          <span
+            className={
+              deadline.state === 'closed'
+                ? 'font-medium text-destructive'
+                : deadline.state === 'closing-soon'
+                  ? 'font-medium text-warning'
+                  : undefined
+            }
+          >
+            {deadline.state === 'none' ? 'No upload deadline' : deadline.label}
+          </span>
+          <button
+            type="button"
+            className="ml-auto font-semibold text-primary hover:underline"
+            onClick={(e) => {
+              e.stopPropagation()
+              setShowDeadline(true)
+            }}
+          >
+            {deadline.state === 'none' ? 'Set deadline' : 'Change'}
+          </button>
+        </div>
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-3">
             <Badge variant={competition.active ? 'success' : 'outline'}>
@@ -171,6 +200,17 @@ export default function CompetitionCard({
           </AlertDialog>
         </div>
       </CardContent>
+      <DeadlineDialog
+        competitionId={competition.$id}
+        competitionName={competition.name}
+        current={competition.uploadDeadline}
+        open={showDeadline}
+        onOpenChange={setShowDeadline}
+        onSaved={(uploadDeadline) => {
+          setCompetition({ ...competition, uploadDeadline })
+          if (onUpdate) onUpdate()
+        }}
+      />
     </Card>
   )
 }

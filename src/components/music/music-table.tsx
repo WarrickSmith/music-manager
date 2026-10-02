@@ -1,6 +1,6 @@
 'use client'
 
-import { Download, Loader2, Trash2 } from 'lucide-react'
+import { Download, Loader2, Lock, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import AudioPlayerButton from '@/components/ui/audio-player-button'
 import {
@@ -23,6 +23,7 @@ export default function MusicTable({
   selectedIds,
   onToggle,
   onToggleAll,
+  isLocked,
   deletingIds,
   downloadingIds,
   onDelete,
@@ -34,6 +35,8 @@ export default function MusicTable({
   selectedIds?: string[]
   onToggle?: (id: string) => void
   onToggleAll?: () => void
+  /** True when a competitor can no longer delete this file (deadline passed) */
+  isLocked: (file: MusicFile) => boolean
   deletingIds: string[]
   downloadingIds: string[]
   onDelete: (file: MusicFile) => void
@@ -127,6 +130,8 @@ export default function MusicTable({
                 <div className="flex justify-end gap-1.5">
                   <AudioPlayerButton
                     fileId={storageFileId(file)}
+                    title={`${file.gradeCategory} · ${file.gradeSegment}`}
+                    subtitle={`${file.userName} · ${file.competitionYear} ${file.competitionName}`}
                     size="icon"
                     className="size-8"
                   />
@@ -145,21 +150,34 @@ export default function MusicTable({
                       <Download />
                     )}
                   </Button>
-                  <DeleteFileDialog
-                    file={file}
-                    onConfirm={() => onDelete(file)}
-                  >
+                  {isLocked(file) ? (
                     <Button
                       variant="outline"
                       size="icon"
-                      className="size-8 hover:text-destructive"
-                      disabled={deleting}
-                      title="Delete"
-                      aria-label="Delete"
+                      className="size-8"
+                      disabled
+                      title="Locked after the upload deadline"
+                      aria-label="Locked after the upload deadline"
                     >
-                      <Trash2 />
+                      <Lock />
                     </Button>
-                  </DeleteFileDialog>
+                  ) : (
+                    <DeleteFileDialog
+                      file={file}
+                      onConfirm={() => onDelete(file)}
+                    >
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className="size-8 hover:text-destructive"
+                        disabled={deleting}
+                        title="Delete"
+                        aria-label="Delete"
+                      >
+                        <Trash2 />
+                      </Button>
+                    </DeleteFileDialog>
+                  )}
                 </div>
               </TableCell>
             </TableRow>
