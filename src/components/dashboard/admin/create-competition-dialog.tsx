@@ -80,9 +80,9 @@ export default function CreateCompetitionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px] border-indigo-100">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle className="text-indigo-700 text-xl font-semibold">
+          <DialogTitle className="font-display text-xl font-bold">
             Create New Competition
           </DialogTitle>
         </DialogHeader>
@@ -92,7 +92,7 @@ export default function CreateCompetitionDialog({
             <div className="col-span-3">
               <Label
                 htmlFor="competition-name"
-                className="text-indigo-700 font-medium"
+                className="font-medium"
               >
                 Competition Name
               </Label>
@@ -104,14 +104,13 @@ export default function CreateCompetitionDialog({
                   setFormData({ ...formData, name: e.target.value })
                 }
                 required
-                className="border-indigo-200 focus:border-indigo-400 focus:ring-indigo-400"
               />
             </div>
 
             <div>
               <Label
                 htmlFor="competition-year"
-                className="text-indigo-700 font-medium"
+                className="font-medium"
               >
                 Year
               </Label>
@@ -125,7 +124,6 @@ export default function CreateCompetitionDialog({
                   setFormData({ ...formData, year: Number(e.target.value) })
                 }
                 required
-                className="border-indigo-200 focus:border-indigo-400 focus:ring-indigo-400"
               />
             </div>
           </div>
@@ -133,7 +131,7 @@ export default function CreateCompetitionDialog({
           <div className="flex items-center justify-between space-x-2">
             <Label
               htmlFor="competition-active"
-              className="text-indigo-700 font-medium"
+              className="font-medium"
             >
               Active Competition
             </Label>
@@ -143,12 +141,11 @@ export default function CreateCompetitionDialog({
               onCheckedChange={(checked) =>
                 setFormData({ ...formData, active: checked })
               }
-              className="data-[state=checked]:bg-indigo-500"
             />
           </div>
 
           <div className="space-y-2">
-            <Label className="text-indigo-700 font-medium">Grade Source</Label>
+            <Label className="font-medium">Grade Source</Label>
             <RadioGroup
               value={formData.gradeSource}
               onValueChange={(value: string) =>
@@ -160,9 +157,8 @@ export default function CreateCompetitionDialog({
                 <RadioGroupItem
                   value="default"
                   id="default-grades"
-                  className="border-indigo-400 text-indigo-600"
                 />
-                <Label htmlFor="default-grades" className="text-indigo-600">
+                <Label htmlFor="default-grades">
                   Use default grades
                 </Label>
               </div>
@@ -171,9 +167,8 @@ export default function CreateCompetitionDialog({
                 <RadioGroupItem
                   value="clone"
                   id="clone-grades"
-                  className="border-indigo-400 text-indigo-600"
                 />
-                <Label htmlFor="clone-grades" className="text-indigo-600">
+                <Label htmlFor="clone-grades">
                   Clone from existing competition
                 </Label>
               </div>
@@ -188,7 +183,7 @@ export default function CreateCompetitionDialog({
                   }
                   required={formData.gradeSource === 'clone'}
                 >
-                  <SelectTrigger className="border-indigo-200 text-indigo-700">
+                  <SelectTrigger>
                     <SelectValue placeholder="Select a competition" />
                   </SelectTrigger>
                   <SelectContent>
@@ -196,7 +191,6 @@ export default function CreateCompetitionDialog({
                       <SelectItem
                         key={comp.$id}
                         value={comp.$id}
-                        className="text-indigo-700"
                       >
                         {comp.name} ({comp.year})
                       </SelectItem>
@@ -213,14 +207,13 @@ export default function CreateCompetitionDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
-              className="border-indigo-300 text-indigo-600 hover:bg-indigo-50"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="bg-indigo-500 hover:bg-indigo-600 text-white flex items-center gap-2"
+              className="text-white flex items-center gap-2"
             >
               {isSubmitting ? (
                 <>

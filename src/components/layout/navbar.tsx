@@ -1,8 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
-import { User, LogOut, Music, Moon, Sun } from 'lucide-react'
+import { User, LogOut, Music, Moon, Sun, UserPlus } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { logoutAction } from '@/app/actions/auth-actions'
@@ -25,8 +24,7 @@ type NavbarProps = {
   } | null
 }
 
-// Import logo at the component level for stability
-import logoSrc from '../../../public/mm-logo.png'
+import Logo from '@/components/ui/logo'
 
 export default function Navbar({ initialTheme, user }: NavbarProps) {
   const [theme, setTheme] = useState<Theme>(initialTheme ?? DEFAULT_THEME)
@@ -98,89 +96,72 @@ export default function Navbar({ initialTheme, user }: NavbarProps) {
     // If user is not logged in, default navigation will occur
   }
 
-  // Determine button color based on user status - explicitly set blue when logged out
-  const buttonColorClass = !user
-    ? 'text-blue-600 hover:bg-blue-50 dark:text-sky-300 dark:hover:bg-sky-400/10'
-    : userRole === 'admin'
-    ? 'text-purple-600 hover:bg-purple-50 dark:text-violet-300 dark:hover:bg-violet-400/10'
-    : 'text-green-600 hover:bg-green-50 dark:text-emerald-300 dark:hover:bg-emerald-400/10'
-
   const nextTheme = theme === 'dark' ? 'light' : 'dark'
 
   const toggleTheme = () => {
     setTheme((currentTheme) => {
-      const updatedTheme: Theme =
-        currentTheme === 'dark' ? 'light' : 'dark'
+      const updatedTheme: Theme = currentTheme === 'dark' ? 'light' : 'dark'
       persistThemePreference(updatedTheme)
       return updatedTheme
     })
   }
 
+  const brand = (
+    <>
+      <Logo className="h-9 w-9 shrink-0" />
+      <span className="font-display text-xl font-extrabold tracking-tight">
+        Music Manager
+      </span>
+    </>
+  )
+
   return (
     <>
       {isLoggingOut && <LoadingOverlay message="Signing out..." />}
-      <nav className="sticky top-0 z-50 w-full border-b border-slate-200/70 bg-gradient-to-r from-white/95 via-slate-50/90 to-indigo-50/90 px-6 py-4 shadow-sm backdrop-blur-xl transition-colors duration-300 dark:border-white/10 dark:from-slate-950/95 dark:via-slate-900/90 dark:to-indigo-950/75">
-        <div className="container mx-auto flex justify-between items-center">
-          {user ? (
-            // If user is logged in, use a button with click handler
-            <button
-              onClick={handleLogoClick}
-              className="group flex cursor-pointer items-center gap-3 text-left transition-transform hover:scale-105"
-            >
-              <div className="relative flex h-9 w-9 items-center justify-center">
-                <div className="absolute -inset-1 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 opacity-30 blur transition duration-300 group-hover:opacity-100 dark:from-sky-400 dark:to-violet-400"></div>
-                <Image
-                  src={logoSrc}
-                  alt="Music Manager Logo"
-                  priority
-                  className="relative z-10 h-auto w-9 rounded-md"
-                />
-              </div>
-              <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-xl font-bold text-transparent dark:from-sky-300 dark:to-violet-300">
-                Music Manager
-              </h1>
-            </button>
-          ) : (
-            // If no user is logged in, use regular Link
-            <Link
-              href="/"
-              className="group flex items-center gap-3 transition-transform hover:scale-105"
-            >
-              <div className="relative flex h-9 w-9 items-center justify-center">
-                <div className="absolute -inset-1 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 opacity-30 blur transition duration-300 group-hover:opacity-100 dark:from-sky-400 dark:to-violet-400"></div>
-                <Image
-                  src={logoSrc}
-                  alt="Music Manager Logo"
-                  priority
-                  className="relative z-10 h-auto w-9 rounded-md"
-                />
-              </div>
-              <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-xl font-bold text-transparent dark:from-sky-300 dark:to-violet-300">
-                Music Manager
-              </h1>
-            </Link>
-          )}
+      <nav className="sticky top-0 z-50 w-full border-b bg-card px-4 py-3 sm:px-6">
+        <div className="mx-auto flex max-w-[1400px] items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            {user ? (
+              // When signed in, the logo signs the user out (existing behaviour)
+              <button
+                onClick={handleLogoClick}
+                className="flex cursor-pointer items-center gap-3 text-left"
+                title="Sign out and return to the home page"
+              >
+                {brand}
+              </button>
+            ) : (
+              <Link href="/" className="flex items-center gap-3">
+                {brand}
+              </Link>
+            )}
+            {user && (
+              <span className="hidden rounded-sm bg-primary px-2 py-1 font-mono text-[11px] font-medium tracking-[0.08em] text-primary-foreground uppercase sm:inline">
+                {userRole === 'admin' ? 'Admin' : 'Competitor'}
+              </span>
+            )}
+          </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-3">
             {user && (
               <Link
                 href={userRole === 'admin' ? '/admin/dashboard' : '/dashboard'}
-                className="hidden items-center gap-2 rounded-full px-3 py-1.5 text-sm font-medium text-slate-700 transition-colors hover:text-blue-600 dark:text-slate-300 dark:hover:text-sky-300 md:flex"
+                className="hidden items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground md:flex"
               >
-                <Music className="w-4 h-4" />
+                <Music className="h-4 w-4" />
                 <span>My Music</span>
               </Link>
             )}
 
             <button
               onClick={toggleTheme}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200/70 bg-white/80 text-slate-700 shadow-sm transition-all duration-200 hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:text-amber-200"
+              className="flex h-10 w-10 items-center justify-center rounded-full border bg-secondary text-muted-foreground transition-colors hover:border-primary hover:text-foreground"
               aria-label={`Switch to ${nextTheme} mode`}
               title={`Switch to ${nextTheme} mode`}
               type="button"
             >
               {theme === 'dark' ? (
-                <Sun className="h-5 w-5" />
+                <Sun className="h-5 w-5 text-warning" />
               ) : (
                 <Moon className="h-5 w-5" />
               )}
@@ -189,47 +170,38 @@ export default function Navbar({ initialTheme, user }: NavbarProps) {
             <div className="relative">
               <button
                 onClick={toggleUserMenu}
-                className={`flex items-center justify-center rounded-full border border-slate-200/70 bg-white/80 p-2.5 shadow-sm transition-all duration-200 hover:shadow-md dark:border-white/10 dark:bg-white/5 ${buttonColorClass}`}
+                className="flex h-10 w-10 items-center justify-center rounded-full border bg-secondary text-primary transition-colors hover:border-primary"
                 aria-label={user ? 'User menu' : 'Login'}
+                aria-expanded={isUserMenuOpen}
                 type="button"
               >
                 {isLoggingOut ? (
-                  <div className="w-5 h-5 border-2 border-t-current border-r-transparent border-b-current border-l-transparent rounded-full animate-spin"></div>
+                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-current border-r-transparent"></div>
                 ) : (
-                  <User className="w-5 h-5" />
+                  <User className="h-5 w-5" />
                 )}
               </button>
 
               {isUserMenuOpen && (
-                <div className="absolute right-0 z-50 mt-2 w-52 rounded-xl border border-slate-200/80 bg-white/95 py-2 shadow-lg backdrop-blur-xl dark:border-white/10 dark:bg-slate-950/95">
+                <div className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-lg border bg-popover text-popover-foreground shadow-xl shadow-black/20">
                   {user ? (
                     <>
-                      <div className="border-b border-slate-200/70 px-4 py-2 dark:border-white/10">
-                        <p className="text-sm font-medium text-slate-800 dark:text-slate-100">
-                          {user.name}
-                        </p>
-                        <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                      <div className="border-b px-4 py-3">
+                        <p className="font-semibold">{user.name}</p>
+                        <p className="truncate text-xs text-muted-foreground">
                           {user.email}
                         </p>
-                        <p className="text-xs font-medium mt-1 capitalize">
-                          {userRole === 'admin' ? (
-                            <span className="text-purple-600 dark:text-violet-300">
-                              Admin
-                            </span>
-                          ) : (
-                            <span className="text-green-600 dark:text-emerald-300">
-                              Competitor
-                            </span>
-                          )}
+                        <p className="mt-1 text-xs font-semibold text-primary">
+                          {userRole === 'admin' ? 'Admin' : 'Competitor'}
                         </p>
                       </div>
                       <button
                         onClick={handleLogout}
                         disabled={isLoggingOut}
-                        className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 transition-colors hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-500/10"
+                        className="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-medium text-destructive transition-colors hover:bg-accent"
                         type="button"
                       >
-                        <LogOut className="w-4 h-4" />
+                        <LogOut className="h-4 w-4" />
                         <span>Logout</span>
                       </button>
                     </>
@@ -238,17 +210,17 @@ export default function Navbar({ initialTheme, user }: NavbarProps) {
                       <Link
                         href="/login"
                         onClick={closeUserMenu}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-blue-600 transition-colors hover:bg-blue-50 dark:text-sky-300 dark:hover:bg-sky-500/10"
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors hover:bg-accent"
                       >
-                        <User className="w-4 h-4" />
+                        <User className="h-4 w-4 text-primary" />
                         <span>Login</span>
                       </Link>
                       <Link
                         href="/register"
                         onClick={closeUserMenu}
-                        className="flex items-center gap-2 px-4 py-2 text-sm text-green-600 transition-colors hover:bg-green-50 dark:text-emerald-300 dark:hover:bg-emerald-500/10"
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors hover:bg-accent"
                       >
-                        <User className="w-4 h-4" />
+                        <UserPlus className="h-4 w-4 text-primary" />
                         <span>Register</span>
                       </Link>
                     </>

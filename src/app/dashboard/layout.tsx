@@ -19,5 +19,5 @@ export default async function DashboardLayout({
     redirect('/admin/dashboard')
   }
 
-  return <div className="container mx-auto px-4 py-8">{children}</div>
+  return <div className="mx-auto w-full max-w-[1400px] px-4 py-6 sm:px-6">{children}</div>
 }

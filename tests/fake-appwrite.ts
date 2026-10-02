@@ -119,6 +119,11 @@ export function createFakeTablesDB(state: FakeState) {
       if (!state.databases.has(databaseId)) throw notFound('Database')
       return { $id: databaseId }
     },
+    async list() {
+      requireScope(state, 'databases.read')
+      const databases = [...state.databases].map((id) => ({ $id: id, name: id }))
+      return { total: databases.length, databases }
+    },
     async create({ databaseId }: { databaseId: string; name: string }) {
       state.calls.push('create')
       requireScope(state, 'databases.write')

@@ -40,6 +40,8 @@ All backend operations are implemented as Next.js Server Actions (`'use server'`
 | `getUserMusicFiles` | `userId` | `Document[]` | Lists a user's files ordered by upload date (desc) |
 | `getAllMusicFiles` | — | `Document[]` | Lists all files with pagination (admin use) |
 | `uploadMusicFile` | `FormData` (file, competitionId, gradeId, userId, userName, duration?) | `{ success, musicFile }` | Validates file type, extracts metadata, renames file, uploads to storage, creates DB record |
+
+> The upload form does not call this action. It posts the same `FormData` to `POST /api/music/upload` with `XMLHttpRequest` so the browser can show real byte-level progress. The route returns `{ success: true, musicFile }` or `{ success: false, error }` with status 400 (validation) or 500. Both paths share `storeMusicFile` in `src/lib/music/upload-service.ts`.
 | `deleteMusicFile` | `fileId, musicFileId` | `{ success }` | Deletes file from storage and DB record |
 | `getMusicFileDownloadUrl` | `fileId` | `{ url }` | Generates authenticated download URL via Appwrite admin mode |
 | `getMusicFileViewUrl` | `fileId` | `{ url }` | Generates public streaming URL with cache-busting |

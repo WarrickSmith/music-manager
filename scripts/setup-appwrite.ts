@@ -181,6 +181,12 @@ const teams = [
   { id: 'competitor', name: 'Competitors' },
 ]
 
+export function getTeamDefinitions() {
+  return teams
+}
+
+export const STORAGE_BUCKET_NAME = 'Music Manager Files'
+
 // How long to wait for Appwrite to finish building new columns
 const COLUMN_WAIT_TIMEOUT_MS = 60_000
 const COLUMN_POLL_INTERVAL_MS = 1_000
@@ -532,7 +538,7 @@ async function setupStorage(
       // Update existing bucket permissions to include public read access
       await storage.updateBucket(
         bucketId,
-        'Music Manager Files',
+        STORAGE_BUCKET_NAME,
         [
           Permission.read(Role.any()), // Allow public read access for streaming
           Permission.read(Role.team('admin')),
@@ -553,7 +559,7 @@ async function setupStorage(
         // Create bucket with public read permissions
         await storage.createBucket(
           bucketId,
-          'Music Manager Files',
+          STORAGE_BUCKET_NAME,
           [
             Permission.read(Role.any()), // Allow public read access for streaming
             Permission.read(Role.team('admin')),

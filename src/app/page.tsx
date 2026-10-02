@@ -1,15 +1,30 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { Music, Upload, Headphones } from 'lucide-react'
+import { Music, Upload, Headphones, ChevronRight, Plus } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { logoutAction } from '@/app/actions/auth-actions'
 import LoadingOverlay from '@/components/ui/loading-overlay'
+import Logo from '@/components/ui/logo'
 
-// Import logo at the component level for stability
-import logoSrc from '../../public/mm-logo.png'
+const features = [
+  {
+    icon: Upload,
+    title: 'Easy uploads',
+    text: 'Pick your competition and grade, drop in the file, and follow live progress.',
+  },
+  {
+    icon: Music,
+    title: 'Organised by grade',
+    text: 'Every programme is filed by competition, grade and segment.',
+  },
+  {
+    icon: Headphones,
+    title: 'Preview anywhere',
+    text: 'Play your tracks back before competition day.',
+  },
+]
 
 export default function Home() {
   const [initializing, setInitializing] = useState(true)
@@ -19,7 +34,7 @@ export default function Home() {
     const clearExistingSession = async () => {
       try {
         await logoutAction()
-        // No toast notification needed for landing page session cleanup
+        // No toast needed for landing page session cleanup
       } catch (error) {
         console.error('Session cleanup error:', error)
       } finally {
@@ -35,102 +50,73 @@ export default function Home() {
   }
 
   return (
-    <main className="flex min-h-[calc(100vh-5rem)] flex-col items-center justify-center px-6 py-12">
-      <div className="app-panel relative mx-auto flex w-full max-w-5xl flex-col items-center overflow-hidden px-8 py-14 text-center sm:px-12">
-        <div className="absolute inset-x-0 top-0 h-48 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.22),transparent_60%)] dark:bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.22),transparent_58%)]" />
-        <div className="relative flex min-h-[10px] items-center gap-4 mb-6 animate-fade-in">
-          <Image
-            src={logoSrc}
-            alt="Music Manager Logo"
-            priority
-            className="h-auto w-16 rounded-2xl shadow-lg shadow-slate-950/10"
-          />
-          <h1 className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text pb-1 text-5xl font-bold leading-[1.2] text-transparent dark:from-sky-300 dark:to-violet-300">
-            Music Manager
-          </h1>
-        </div>
-
-        <p className="relative mb-10 max-w-2xl text-center text-xl leading-relaxed text-muted-foreground">
-          A modern platform for Ice Skaters to upload, organize, and manage
-          music files for competitions with ease
-        </p>
-
-        <div className="relative mb-12 grid w-full max-w-4xl grid-cols-1 gap-8 md:grid-cols-3">
-          <div className="rounded-3xl border border-slate-200/70 bg-white/75 p-6 shadow-lg shadow-slate-950/5 transition-transform transition-shadow hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-white/5 dark:shadow-black/20">
-            <Upload className="mb-4 h-8 w-8 text-sky-600 dark:text-sky-300" />
-            <h3 className="mb-2 text-lg font-medium">Easy Uploads</h3>
-            <p className="text-sm text-muted-foreground text-center">
-              Upload and store your music files securely
-            </p>
-          </div>
-
-          <div className="rounded-3xl border border-slate-200/70 bg-white/75 p-6 shadow-lg shadow-slate-950/5 transition-transform transition-shadow hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-white/5 dark:shadow-black/20">
-            <Music className="mb-4 h-8 w-8 text-violet-600 dark:text-violet-300" />
-            <h3 className="mb-2 text-lg font-medium">Organize</h3>
-            <p className="text-sm text-muted-foreground text-center">
-              Categorize and manage your music collection
-            </p>
-          </div>
-
-          <div className="rounded-3xl border border-slate-200/70 bg-white/75 p-6 shadow-lg shadow-slate-950/5 transition-transform transition-shadow hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-white/5 dark:shadow-black/20">
-            <Headphones className="mb-4 h-8 w-8 text-emerald-600 dark:text-emerald-300" />
-            <h3 className="mb-2 text-lg font-medium">Preview</h3>
-            <p className="text-sm text-muted-foreground text-center">
-              Listen to your tracks before competitions
-            </p>
-          </div>
-        </div>
-
-        <div className="relative flex flex-col gap-4 sm:flex-row">
-          <Button
-            asChild
-            size="lg"
-            className="rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 px-8 font-medium text-white shadow-lg shadow-blue-900/15 transition-all hover:shadow-xl hover:from-blue-500 hover:to-violet-500 dark:from-sky-500 dark:to-indigo-500 dark:hover:from-sky-400 dark:hover:to-violet-400"
+    <div className="mx-auto w-full max-w-[1400px] px-4 py-8 sm:px-6">
+      <main className="overflow-hidden rounded-lg border bg-card">
+        <section className="relative grid items-center gap-8 border-b px-6 py-14 sm:px-12 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">
+          {/* Faint skating tracks: two loops of a figure eight and long edges */}
+          <svg
+            className="pointer-events-none absolute inset-0 h-full w-full"
+            viewBox="0 0 800 400"
+            preserveAspectRatio="xMidYMid slice"
+            aria-hidden="true"
           >
-            <Link href="/login" className="flex items-center gap-2">
-              <span>Login</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="ml-1"
-              >
-                <path d="m9 18 6-6-6-6" />
-              </svg>
-            </Link>
-          </Button>
-          <Button
-            asChild
-            variant="outline"
-            size="lg"
-            className="rounded-full border-2 border-violet-300/80 bg-white/70 px-8 font-medium text-violet-700 transition-all hover:border-violet-500 hover:bg-violet-50 dark:border-violet-400/50 dark:bg-white/5 dark:text-violet-200 dark:hover:border-violet-300 dark:hover:bg-violet-500/10"
-          >
-            <Link href="/register" className="flex items-center gap-2">
-              <span>Register</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="ml-1"
-              >
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-            </Link>
-          </Button>
-        </div>
-      </div>
-    </main>
+            <g
+              fill="none"
+              stroke="var(--border)"
+              strokeWidth="1.5"
+              opacity=".8"
+            >
+              <path d="M420 200c0-70 80-110 150-80s90 110 20 140-170-30-170-60z" />
+              <path
+                d="M420 200c0 70 80 110 150 80s90-110 20-140-170 30-170 60z"
+                transform="translate(40 -6)"
+              />
+              <path d="M60 330c120-60 260-20 380 20s240 20 380-60" />
+              <path
+                d="M40 360c140-60 280-20 400 20s240 20 380-60"
+                opacity=".6"
+              />
+            </g>
+          </svg>
+
+          <div className="relative">
+            <h1 className="font-display mb-4 text-4xl leading-[1.05] font-extrabold tracking-tight text-balance sm:text-5xl lg:text-6xl">
+              Competition music, <span className="text-primary">sorted</span>{' '}
+              before you hit the ice.
+            </h1>
+            <p className="mb-7 max-w-[46ch] text-lg text-muted-foreground">
+              Upload your programme music for each grade, check it plays
+              cleanly, and let the club admins collect everything in one place.
+            </p>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Button asChild size="lg">
+                <Link href="/login">
+                  Login <ChevronRight />
+                </Link>
+              </Button>
+              <Button asChild size="lg" variant="outline">
+                <Link href="/register">
+                  Register <Plus />
+                </Link>
+              </Button>
+            </div>
+          </div>
+
+          <div className="relative hidden justify-center md:flex">
+            <Logo className="h-auto w-56 drop-shadow-xl" />
+          </div>
+        </section>
+
+        <section className="grid gap-px bg-border sm:grid-cols-3">
+          {features.map(({ icon: Icon, title, text }) => (
+            <div key={title} className="bg-card px-6 py-6 sm:px-8">
+              <Icon className="mb-2 size-6 text-primary" />
+              <h3 className="mb-1 text-lg font-bold">{title}</h3>
+              <p className="text-muted-foreground">{text}</p>
+            </div>
+          ))}
+        </section>
+      </main>
+    </div>
   )
 }

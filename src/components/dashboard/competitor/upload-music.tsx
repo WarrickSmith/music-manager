@@ -1,15 +1,14 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Models } from 'node-appwrite'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { toast } from 'sonner'
 import * as musicMetadata from 'music-metadata'
+import { FileAudio, Upload, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
 import {
   Form,
   FormControl,
@@ -27,18 +26,18 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { ProgressIndicator } from '@/components/ui/progress-indicator'
+import ErrorNotice from '@/components/ui/error-notice'
+import PageHeader from '@/components/layout/page-header'
 import {
   getActiveCompetitions,
   getGradeCategoriesForCompetition,
   getGradesForCompetition,
 } from '@/app/actions/competition-actions'
-import { uploadMusicFile } from '@/app/actions/music-file-actions'
 import { getUserProfile } from '@/app/actions/user-actions'
 import { useUploadProgress } from '@/hooks/useUploadProgress'
-import { formatDuration } from '@/lib/utils'
-import { Upload } from 'lucide-react'
+import { formatDuration, formatFileSize, cn } from '@/lib/utils'
+import { ACCEPTED_AUDIO_TYPES, MAX_UPLOAD_BYTES } from '@/lib/music/constants'
 
-// Form validation schema
 const formSchema = z.object({
   competitionId: z.string({ error: 'Please select a competition' }),
   category: z.string({ error: 'Please select a category' }),
@@ -48,23 +47,15 @@ const formSchema = z.object({
     .refine((value) => value instanceof File, {
       message: 'Please select a file',
     })
-    .refine((value) => {
-      if (!(value instanceof File)) return false
-      return value.size <= 15 * 1024 * 1024
-    }, 'File size must be less than 15MB')
-    .refine((value) => {
-      if (!(value instanceof File)) return false
-      const validTypes = [
-        'audio/mpeg',
-        'audio/wav',
-        'audio/x-wav',
-        'audio/x-m4a',
-        'audio/mp4',
-        'audio/aac',
-        'audio/x-aac',
-      ]
-      return validTypes.includes(value.type)
-    }, 'File must be an audio file (MP3, WAV, M4A, AAC)'),
+    .refine(
+      (value) => value instanceof File && value.size <= MAX_UPLOAD_BYTES,
+      'File size must be less than 15MB',
+    )
+    .refine(
+      (value) =>
+        value instanceof File && ACCEPTED_AUDIO_TYPES.includes(value.type),
+      'File must be an audio file (MP3, WAV, M4A, AAC)',
+    ),
   duration: z.number().nullable().optional(),
 })
 
@@ -85,6 +76,17 @@ interface Grade extends Models.DefaultRow {
   competitionId: string
 }
 
+const describe = (error: unknown) =>
+  error instanceof Error ? error.message : String(error)
+
+function SelectSpinner() {
+  return (
+    <div className="absolute inset-0 flex items-center justify-center rounded-md bg-background/80">
+      <div className="size-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+    </div>
+  )
+}
+
 export default function UploadMusic({ userId }: { userId: string }) {
   const [competitions, setCompetitions] = useState<Competition[]>([])
   const [categories, setCategories] = useState<string[]>([])
@@ -93,23 +95,24 @@ export default function UploadMusic({ userId }: { userId: string }) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [fileDuration, setFileDuration] = useState<number | null>(null)
   const [extractingMetadata, setExtractingMetadata] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const {
-    progress,
     status,
-    startProgress,
-    completeProgress,
-    setProcessing,
-    setError,
+    progress,
+    loaded,
+    total,
+    bytesPerSecond,
+    failure,
+    upload,
     reset: resetProgress,
   } = useUploadProgress()
 
-  // Add separate loading states for each select component
   const [isLoadingCompetitions, setIsLoadingCompetitions] = useState(true)
   const [isLoadingCategories, setIsLoadingCategories] = useState(false)
   const [isLoadingGrades, setIsLoadingGrades] = useState(false)
 
-  // Initialize form with mode = 'onSubmit' to prevent initial validation
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -119,143 +122,115 @@ export default function UploadMusic({ userId }: { userId: string }) {
       file: undefined,
       duration: null,
     },
-    mode: 'onSubmit', // Changed from 'all' to 'onSubmit'
+    mode: 'onSubmit',
     criteriaMode: 'all',
   })
-
-  // Validate form when selectedFile changes
-  useEffect(() => {
-    if (selectedFile) {
-      form.setValue('file', selectedFile)
-      form.trigger('file')
-    }
-  }, [selectedFile, form])
 
   const { watch, setValue, reset } = form
   const competitionId = watch('competitionId')
   const category = watch('category')
+  const gradeId = watch('gradeId')
 
-  // Fetch competitions and user info on component mount
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoadingCompetitions(true)
-        const [competitionsData, userProfile] = await Promise.all([
-          getActiveCompetitions(),
-          getUserProfile(userId),
-        ])
-
-        setCompetitions(competitionsData as Competition[])
-        setUserName(userProfile.name)
-      } catch (error) {
-        toast.error('Failed to load competitions')
-        console.error(error)
-      } finally {
-        setIsLoadingCompetitions(false)
-      }
+  const loadCompetitions = useCallback(async () => {
+    setLoadError(null)
+    setIsLoadingCompetitions(true)
+    try {
+      const [competitionsData, userProfile] = await Promise.all([
+        getActiveCompetitions(),
+        getUserProfile(userId),
+      ])
+      setCompetitions(competitionsData as Competition[])
+      setUserName(userProfile.name)
+    } catch (error) {
+      console.error('Failed to load competitions:', error)
+      setLoadError(describe(error))
+    } finally {
+      setIsLoadingCompetitions(false)
     }
-
-    fetchData()
   }, [userId])
 
-  // Fetch categories when competition changes
+  useEffect(() => {
+    loadCompetitions()
+  }, [loadCompetitions])
+
+  // Categories depend on the competition
   useEffect(() => {
     const fetchCategories = async () => {
       if (!competitionId) {
         setCategories([])
         return
       }
-
       try {
         setIsLoadingCategories(true)
-        const categoriesData = await getGradeCategoriesForCompetition(
-          competitionId
-        )
-        setCategories(categoriesData)
+        setCategories(await getGradeCategoriesForCompetition(competitionId))
         setValue('category', '')
         setValue('gradeId', '')
       } catch (error) {
-        toast.error('Failed to load categories')
-        console.error(error)
+        console.error('Failed to load categories:', error)
+        toast.error('Failed to load categories', {
+          description: describe(error),
+        })
       } finally {
         setIsLoadingCategories(false)
       }
     }
-
     fetchCategories()
   }, [competitionId, setValue])
 
-  // Fetch grades when category changes
+  // Grades depend on the category
   useEffect(() => {
     const fetchGrades = async () => {
       if (!competitionId || !category) {
         setGrades([])
         return
       }
-
       try {
         setIsLoadingGrades(true)
-        const gradesData = await getGradesForCompetition(
-          competitionId,
-          category
+        setGrades(
+          (await getGradesForCompetition(competitionId, category)) as Grade[],
         )
-        setGrades(gradesData as Grade[])
         setValue('gradeId', '')
       } catch (error) {
-        toast.error('Failed to load grades')
-        console.error(error)
+        console.error('Failed to load grades:', error)
+        toast.error('Failed to load grades', { description: describe(error) })
       } finally {
         setIsLoadingGrades(false)
       }
     }
-
     fetchGrades()
   }, [competitionId, category, setValue])
 
-  // Handle form submission
-  const onSubmit = async (values: FormValues) => {
+  const busy = status === 'uploading' || status === 'processing'
+
+  /** Take a chosen or dropped file and read its length in the browser */
+  const handleFile = async (file: File | null) => {
+    setSelectedFile(file)
+    setFileDuration(null)
+    form.setValue('file', file ?? undefined)
+    form.setValue('duration', null)
+    if (!file) return
+
+    setExtractingMetadata(true)
     try {
-      startProgress()
-
-      // Create form data
-      const formData = new FormData()
-      formData.append('file', values.file)
-      formData.append('competitionId', values.competitionId)
-      formData.append('gradeId', values.gradeId)
-      formData.append('userId', userId)
-      formData.append('userName', userName)
-
-      // Add duration if available
-      if (values.duration !== null && values.duration !== undefined) {
-        formData.append('duration', values.duration.toString())
+      const buffer = new Uint8Array(await file.arrayBuffer())
+      let metadata
+      try {
+        metadata = await musicMetadata.parseBuffer(buffer, file.type)
+      } catch {
+        metadata = await musicMetadata.parseBuffer(buffer)
       }
-
-      // After 90% progress, show processing status
-      setTimeout(() => {
-        if (status === 'uploading') {
-          setProcessing()
-        }
-      }, 2000)
-
-      // Upload the file
-      await uploadMusicFile(formData)
-
-      completeProgress()
-      toast.success('File uploaded successfully')
-
-      // Reset form and state after a short delay to show completed state
-      setTimeout(() => {
-        handleReset()
-      }, 2000)
+      if (metadata.format.duration) {
+        const duration = Math.round(metadata.format.duration)
+        setFileDuration(duration)
+        form.setValue('duration', duration)
+      }
     } catch (error) {
-      setError()
-      toast.error(
-        `Upload failed: ${
-          error instanceof Error ? error.message : 'Unknown error'
-        }`
-      )
-      console.error(error)
+      // The server reads the length again if this fails, so this is not fatal
+      console.error('Error extracting audio metadata:', error)
+    } finally {
+      setExtractingMetadata(false)
     }
+    await form.trigger('file')
   }
 
   const handleReset = () => {
@@ -263,389 +238,335 @@ export default function UploadMusic({ userId }: { userId: string }) {
     reset()
     setSelectedFile(null)
     setFileDuration(null)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
 
-    // Reset the file input element directly
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
+  const onSubmit = async (values: FormValues) => {
+    const formData = new FormData()
+    formData.append('file', values.file)
+    formData.append('competitionId', values.competitionId)
+    formData.append('gradeId', values.gradeId)
+    formData.append('userId', userId)
+    formData.append('userName', userName)
+    if (values.duration !== null && values.duration !== undefined) {
+      formData.append('duration', values.duration.toString())
+    }
+
+    try {
+      await upload('/api/music/upload', formData)
+      toast.success('File uploaded successfully')
+      // Leave the finished bar on screen briefly, then clear the form
+      setTimeout(handleReset, 2500)
+    } catch (error) {
+      // The failure is shown in the form; keep the console copy for debugging
+      console.error('Upload failed:', error)
     }
   }
 
-  // Debug state changes
-  useEffect(() => {
-    console.log('Form State Updated:', {
-      competitionId: form.getValues('competitionId'),
-      category: form.getValues('category'),
-      gradeId: form.getValues('gradeId'),
-      file: form.getValues('file'),
-      selectedFile,
-      isValid: form.formState.isValid,
-      errors: form.formState.errors,
-    })
-  }, [form, selectedFile])
+  const canSubmit =
+    !busy &&
+    status !== 'complete' &&
+    !!competitionId &&
+    !!category &&
+    !!gradeId &&
+    !!selectedFile &&
+    !extractingMetadata
 
   return (
-    <div>
-      <h2 className="mb-4 text-2xl font-semibold text-emerald-700 dark:text-emerald-300">
-        Upload Music
-      </h2>
+    <div className="flex flex-col gap-5">
+      <PageHeader
+        title="Upload Music"
+        description="Choose the competition and grade, add your file, and watch it go up byte by byte."
+      />
 
-      <Card className="relative border-emerald-100 bg-emerald-50/20 p-6 dark:border-emerald-500/20 dark:bg-emerald-950/10">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Competition Selection */}
-            <FormField
-              control={form.control}
-              name="competitionId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-emerald-700 dark:text-emerald-200">
-                    Competition
-                  </FormLabel>
-                  <div className="relative">
-                    <Select
-                      disabled={status !== 'idle' || competitions.length === 0}
-                      onValueChange={(value) => {
-                        field.onChange(value)
-                        form.trigger('competitionId')
-                      }}
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="border-emerald-200 bg-background/80 text-emerald-800 dark:border-emerald-500/30 dark:bg-background dark:text-emerald-100">
-                          <SelectValue placeholder="Select a competition" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="border-emerald-200 dark:border-emerald-500/30">
-                        {competitions.map((competition) => (
-                          <SelectItem
-                            key={competition.$id}
-                            value={competition.$id}
-                            className="text-emerald-800 dark:text-emerald-100"
-                          >
-                            {competition.year} - {competition.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {isLoadingCompetitions && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-                        <div className="w-5 h-5 border-2 border-emerald-700 border-t-transparent rounded-full animate-spin" />
-                      </div>
-                    )}
-                  </div>
-                  <FormDescription className="text-emerald-600 dark:text-emerald-200/80">
-                    Only active competitions are shown
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+      {loadError && (
+        <ErrorNotice
+          title="Could not load the competitions"
+          message="The list of competitions could not be loaded, so you cannot upload yet."
+          details={loadError}
+          onRetry={loadCompetitions}
+        />
+      )}
 
-            {/* Category Selection */}
-            <FormField
-              control={form.control}
-              name="category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-emerald-700 dark:text-emerald-200">
-                    Category
-                  </FormLabel>
-                  <div className="relative">
-                    <Select
-                      disabled={
-                        status !== 'idle' ||
-                        !competitionId ||
-                        categories.length === 0
-                      }
-                      onValueChange={(value) => {
-                        field.onChange(value)
-                        form.trigger('category')
-                      }}
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="border-emerald-200 bg-background/80 text-emerald-800 dark:border-emerald-500/30 dark:bg-background dark:text-emerald-100">
-                          <SelectValue placeholder="Select a category" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="border-emerald-200 dark:border-emerald-500/30">
-                        {categories.map((cat) => (
-                          <SelectItem
-                            key={cat}
-                            value={cat}
-                            className="text-emerald-800 dark:text-emerald-100"
-                          >
-                            {cat}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {isLoadingCategories && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-                        <div className="w-5 h-5 border-2 border-emerald-700 border-t-transparent rounded-full animate-spin" />
-                      </div>
-                    )}
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+        <div className="rounded-lg border bg-card p-5">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+              <FormField
+                control={form.control}
+                name="competitionId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="label-mono">Competition</FormLabel>
+                    <div className="relative">
+                      <Select
+                        disabled={busy || competitions.length === 0}
+                        onValueChange={(value) => {
+                          field.onChange(value)
+                          form.trigger('competitionId')
+                        }}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a competition" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {competitions.map((competition) => (
+                            <SelectItem
+                              key={competition.$id}
+                              value={competition.$id}
+                            >
+                              {competition.year} - {competition.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {isLoadingCompetitions && <SelectSpinner />}
+                    </div>
+                    <FormDescription>
+                      Only active competitions are shown
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            {/* Grade Selection */}
-            <FormField
-              control={form.control}
-              name="gradeId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-emerald-700 dark:text-emerald-200">
-                    Grade
-                  </FormLabel>
-                  <div className="relative">
-                    <Select
-                      disabled={
-                        status !== 'idle' || !category || grades.length === 0
-                      }
-                      onValueChange={(value) => {
-                        field.onChange(value)
-                        form.trigger('gradeId')
-                      }}
-                      value={field.value}
-                    >
-                      <FormControl>
-                        <SelectTrigger className="border-emerald-200 bg-background/80 text-emerald-800 dark:border-emerald-500/30 dark:bg-background dark:text-emerald-100">
-                          <SelectValue placeholder="Select a grade" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent className="border-emerald-200 dark:border-emerald-500/30">
-                        {grades.map((grade) => (
-                          <SelectItem
-                            key={grade.$id}
-                            value={grade.$id}
-                            className="text-emerald-800 dark:text-emerald-100"
-                          >
-                            {grade.name} - {grade.segment}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {isLoadingGrades && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-                        <div className="w-5 h-5 border-2 border-emerald-700 border-t-transparent rounded-full animate-spin" />
-                      </div>
-                    )}
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* File Upload */}
-            <FormField
-              control={form.control}
-              name="file"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-emerald-700 dark:text-emerald-200">
-                    Music File
-                  </FormLabel>
-                  <FormControl>
-                    <Input
-                      type="file"
-                      accept="audio/*"
-                      disabled={status !== 'idle' || extractingMetadata}
-                      ref={(e) => {
-                        field.ref(e)
-                        if (fileInputRef) fileInputRef.current = e
-                      }}
-                      name={field.name}
-                      onBlur={field.onBlur}
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0]
-                        setSelectedFile(file || null)
-                        field.onChange(file || null)
-
-                        // Extract metadata when file is selected
-                        if (file) {
-                          try {
-                            setExtractingMetadata(true)
-                            // Convert the File to ArrayBuffer for music-metadata parsing
-                            const buffer = await file.arrayBuffer()
-                            console.log(
-                              'Successfully converted file to ArrayBuffer:',
-                              buffer.byteLength,
-                              'bytes'
-                            )
-
-                            // Use a different parsing approach based on file type
-                            let metadata
-                            try {
-                              console.log(
-                                'Attempting to parse audio metadata...'
-                              )
-                              metadata = await musicMetadata.parseBuffer(
-                                new Uint8Array(buffer),
-                                file.type
-                              )
-                              console.log(
-                                'Metadata parsing successful:',
-                                JSON.stringify(metadata.format, null, 2)
-                              )
-                            } catch (parseError) {
-                              console.error(
-                                'Error during parseBuffer, trying alternate approach:',
-                                parseError
-                              )
-                              // Try without specifying content type as fallback
-                              metadata = await musicMetadata.parseBuffer(
-                                new Uint8Array(buffer)
-                              )
-                              console.log(
-                                'Fallback metadata parsing successful'
-                              )
-                            }
-
-                            // Get duration in seconds and round to nearest second
-                            if (
-                              metadata &&
-                              metadata.format &&
-                              metadata.format.duration
-                            ) {
-                              const duration = Math.round(
-                                metadata.format.duration
-                              )
-                              setFileDuration(duration)
-                              console.log(
-                                `Extracted audio duration: ${duration} seconds (${formatDuration(
-                                  duration
-                                )})`
-                              )
-
-                              // Store duration in a hidden field or form state to be used during submission
-                              form.setValue('duration', duration)
-                            } else {
-                              console.log(
-                                'Could not extract duration from metadata:',
-                                metadata
-                              )
-                              setFileDuration(null)
-                            }
-                          } catch (error) {
-                            console.error(
-                              'Error extracting audio metadata:',
-                              error
-                            )
-                            setFileDuration(null)
-                          } finally {
-                            setExtractingMetadata(false)
+              <div className="grid gap-5 sm:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="label-mono">Category</FormLabel>
+                      <div className="relative">
+                        <Select
+                          disabled={
+                            busy || !competitionId || categories.length === 0
                           }
+                          onValueChange={(value) => {
+                            field.onChange(value)
+                            form.trigger('category')
+                          }}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a category" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {categories.map((cat) => (
+                              <SelectItem key={cat} value={cat}>
+                                {cat}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {isLoadingCategories && <SelectSpinner />}
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                          // Validate file
-                          await form.trigger('file')
-                        } else {
-                          setFileDuration(null)
+                <FormField
+                  control={form.control}
+                  name="gradeId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="label-mono">Grade</FormLabel>
+                      <div className="relative">
+                        <Select
+                          disabled={busy || !category || grades.length === 0}
+                          onValueChange={(value) => {
+                            field.onChange(value)
+                            form.trigger('gradeId')
+                          }}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select a grade" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {grades.map((grade) => (
+                              <SelectItem key={grade.$id} value={grade.$id}>
+                                {grade.name} - {grade.segment}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        {isLoadingGrades && <SelectSpinner />}
+                      </div>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <FormField
+                control={form.control}
+                name="file"
+                render={() => (
+                  <FormItem>
+                    <FormLabel className="label-mono">Music file</FormLabel>
+                    <FormControl>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="audio/*"
+                        className="sr-only"
+                        id="music-file-input"
+                        disabled={busy}
+                        onChange={(e) =>
+                          handleFile(e.target.files?.[0] ?? null)
                         }
-                      }}
-                    />
-                  </FormControl>
-                  <div className="space-y-2">
-                    <FormDescription className="text-emerald-600 dark:text-emerald-200/80">
+                      />
+                    </FormControl>
+
+                    {selectedFile ? (
+                      <div className="flex items-center gap-3 rounded-lg border bg-background p-3">
+                        <span className="grid size-10 shrink-0 place-items-center rounded-md bg-accent text-accent-foreground">
+                          <FileAudio className="size-5" />
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold break-words">
+                            {selectedFile.name}
+                          </p>
+                          <p className="font-mono text-xs text-muted-foreground">
+                            {formatFileSize(selectedFile.size)}
+                            {extractingMetadata && ' · reading length...'}
+                            {fileDuration !== null &&
+                              ` · ${formatDuration(fileDuration)}`}
+                          </p>
+                        </div>
+                        {!busy && status !== 'complete' && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              handleFile(null)
+                              if (fileInputRef.current)
+                                fileInputRef.current.value = ''
+                            }}
+                            aria-label="Remove file"
+                          >
+                            <X />
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
+                      <label
+                        htmlFor="music-file-input"
+                        onDragOver={(e) => {
+                          e.preventDefault()
+                          setIsDragging(true)
+                        }}
+                        onDragLeave={() => setIsDragging(false)}
+                        onDrop={(e) => {
+                          e.preventDefault()
+                          setIsDragging(false)
+                          if (!busy)
+                            handleFile(e.dataTransfer.files?.[0] ?? null)
+                        }}
+                        className={cn(
+                          'flex cursor-pointer flex-col items-center gap-1 rounded-lg border-2 border-dashed bg-background px-4 py-7 text-center text-muted-foreground transition-colors hover:border-primary hover:text-foreground',
+                          isDragging && 'border-primary text-foreground',
+                        )}
+                      >
+                        <Upload className="mb-1 size-7 text-primary" />
+                        <span className="font-display text-base font-bold text-foreground">
+                          Drop your music file here
+                        </span>
+                        <span>or click to browse your device</span>
+                      </label>
+                    )}
+                    <FormDescription>
                       Max file size: 15MB. Supported formats: MP3, WAV, M4A, AAC
                     </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                    {/* Show metadata extraction status and duration */}
-                    {extractingMetadata && (
-                      <div className="text-sm text-amber-500 dark:text-amber-300">
-                        Extracting file metadata...
-                      </div>
-                    )}
-                    {fileDuration !== null && selectedFile && (
-                      <div className="text-sm text-emerald-800 dark:text-emerald-100">
-                        File duration: {formatDuration(fileDuration)}
-                      </div>
-                    )}
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Upload Progress */}
-            {status !== 'idle' && (
-              <div className="space-y-4">
+              {status !== 'idle' && status !== 'error' && (
                 <ProgressIndicator
+                  title={`${status === 'complete' ? 'Uploaded' : 'Uploading'} ${selectedFile?.name ?? ''}`}
                   progress={progress}
                   status={status}
-                  showPercentage={true}
+                  loaded={loaded}
+                  total={total || selectedFile?.size || 0}
+                  bytesPerSecond={bytesPerSecond}
                 />
-                {status === 'error' && (
-                  <div className="flex justify-center">
+              )}
+
+              {status === 'error' && failure && (
+                <div className="space-y-3">
+                  <ProgressIndicator
+                    title={`Upload of ${selectedFile?.name ?? 'file'} stopped`}
+                    progress={progress}
+                    status="error"
+                    loaded={loaded}
+                    total={total || selectedFile?.size || 0}
+                    bytesPerSecond={bytesPerSecond}
+                  />
+                  <ErrorNotice
+                    title="The upload did not finish"
+                    message={failure.message}
+                    details={failure.details}
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      onClick={() => form.handleSubmit(onSubmit)()}
+                    >
+                      <Upload /> Try again
+                    </Button>
                     <Button
                       type="button"
                       variant="outline"
-                      className="w-1/2 bg-black hover:bg-black/90 text-white cursor-pointer"
                       onClick={handleReset}
                     >
-                      Reset Form
+                      Start over
                     </Button>
                   </div>
-                )}
-              </div>
-            )}
-            <div className="flex justify-center">
-              <Button
-                type="submit"
-                disabled={
-                  status !== 'idle' ||
-                  // Only check if the form has been submitted before using isValid
-                  (form.formState.submitCount > 0 && !form.formState.isValid) ||
-                  !form.getValues('competitionId') ||
-                  !form.getValues('category') ||
-                  !form.getValues('gradeId') ||
-                  !selectedFile
-                }
-                onClick={() => {
-                  // Trigger validation on all fields before submission
-                  form.trigger().then((isValid) => {
-                    console.log('Form valid?', isValid)
-                    console.log('Form Values:', {
-                      competitionId: form.getValues('competitionId'),
-                      category: form.getValues('category'),
-                      gradeId: form.getValues('gradeId'),
-                      file: form.getValues('file'),
-                    })
-                    console.log('Form State:', {
-                      isValid: form.formState.isValid,
-                      errors: form.formState.errors,
-                    })
-                  })
-                }}
-                variant="default"
-                className="w-1/2 !bg-emerald-700 hover:!bg-emerald-800 cursor-pointer flex items-center justify-center gap-2"
-              >
-                <Upload className="h-4 w-4" />
-                <span>
-                  {status === 'idle' ? 'Upload Music File' : 'Uploading...'}
-                </span>
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </Card>
+                </div>
+              )}
 
-      <div className="mt-6 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 dark:border-emerald-500/20 dark:bg-emerald-950/20">
-        <h3 className="mb-2 text-lg font-medium text-emerald-700 dark:text-emerald-300">
-          File Naming Convention
-        </h3>
-        <p className="text-sm text-emerald-600 dark:text-emerald-200/80">
-          Your file will be automatically renamed using the following format:
-          <code className="my-2 block rounded border border-emerald-100 bg-white/80 p-2 text-xs text-emerald-900 dark:border-emerald-500/20 dark:bg-slate-950/70 dark:text-emerald-100">
+              {status !== 'error' && (
+                <Button type="submit" disabled={!canSubmit}>
+                  <Upload />
+                  {busy
+                    ? 'Uploading...'
+                    : status === 'complete'
+                      ? 'Uploaded'
+                      : 'Upload music file'}
+                </Button>
+              )}
+            </form>
+          </Form>
+        </div>
+
+        <div className="flex flex-col gap-4 self-start rounded-lg border bg-card p-5">
+          <h3 className="font-display text-lg font-bold">File naming</h3>
+          <p className="text-sm text-muted-foreground">
+            Your file is renamed automatically so organisers can find it:
+          </p>
+          <code className="block rounded-md border bg-background p-2 font-mono text-xs break-words">
             [YEAR]-[COMPETITION]-[CATEGORY]-[SEGMENT]-[FIRSTNAME]-[LASTNAME
             INITIAL]
           </code>
-          For example: 2024-glanburn-club-comp-junior-free-skate-mary-t.mp3 This
-          helps organizers easily identify and manage music files for
-          competitions.
-        </p>
+          <p className="text-sm text-muted-foreground">
+            For example:{' '}
+            <span className="font-mono text-xs break-all text-foreground">
+              2024-glanburn-club-comp-junior-free-skate-mary-t.mp3
+            </span>
+          </p>
+        </div>
       </div>
     </div>
   )
