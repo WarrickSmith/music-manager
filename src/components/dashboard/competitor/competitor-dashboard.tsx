@@ -22,7 +22,7 @@ export default function CompetitorDashboard({
         {
           value: 'my-files',
           label: 'My Music',
-          icon: FileMusic,
+          icon: <FileMusic />,
           content: (
             <Suspense
               fallback={
@@ -36,7 +36,7 @@ export default function CompetitorDashboard({
         {
           value: 'upload',
           label: 'Upload',
-          icon: Upload,
+          icon: <Upload />,
           content: (
             <Suspense
               fallback={
@@ -53,7 +53,7 @@ export default function CompetitorDashboard({
         {
           value: 'profile',
           label: 'My Profile',
-          icon: UserCog,
+          icon: <UserCog />,
           content: (
             <Suspense
               fallback={

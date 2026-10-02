@@ -4,7 +4,6 @@ import {
   createContext,
   useContext,
   useState,
-  type ComponentType,
   type ReactNode,
 } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -19,7 +18,8 @@ export function useDashboardTab() {
 export interface ShellItem {
   value: string
   label: string
-  icon: ComponentType<{ className?: string }>
+  /** A rendered icon element, e.g. <Music />. Components cannot be passed from a server page. */
+  icon: ReactNode
   content: ReactNode
 }
 
@@ -62,13 +62,13 @@ export default function DashboardShell({
             aria-label={heading}
             className="flex h-auto w-full flex-row justify-start gap-1 overflow-x-auto rounded-lg border bg-card p-2 md:flex-col md:items-stretch md:justify-start"
           >
-            {items.map(({ value, label, icon: Icon }) => (
+            {items.map(({ value, label, icon }) => (
               <TabsTrigger
                 key={value}
                 value={value}
                 className="flex-none justify-start px-3 py-2.5 md:w-full"
               >
-                <Icon className="size-[18px]" />
+                {icon}
                 {label}
               </TabsTrigger>
             ))}

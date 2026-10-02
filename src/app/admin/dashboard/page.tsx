@@ -34,31 +34,31 @@ export default async function AdminDashboardPage() {
         {
           value: 'musicfiles',
           label: 'Music Files',
-          icon: Music,
+          icon: <Music />,
           content: <MusicFileManagement />,
         },
         {
           value: 'competitions',
           label: 'Competitions',
-          icon: Trophy,
+          icon: <Trophy />,
           content: <CompetitionManagement />,
         },
         {
           value: 'users',
           label: 'Users',
-          icon: Users,
+          icon: <Users />,
           content: <UserManagement />,
         },
         {
           value: 'profile',
           label: 'My Profile',
-          icon: UserCog,
+          icon: <UserCog />,
           content: <AdminProfileManagement />,
         },
         {
           value: 'appwrite',
           label: 'Setup',
-          icon: Database,
+          icon: <Database />,
           content: (
             <>
               <PageHeader
