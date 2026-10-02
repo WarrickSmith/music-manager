@@ -229,6 +229,28 @@ describe('setup report', () => {
     expect(errors[0]).toContain('teams:')
   })
 
+  it('suggests the databases that do exist when the configured one is missing', async () => {
+    state.databases.add('some-other-db')
+
+    const { report } = await checkAppwriteInitialization()
+
+    expect(report.database.state).toBe('missing')
+    expect(report.otherDatabases).toEqual([
+      { id: 'some-other-db', name: 'some-other-db' },
+    ])
+    expect(report.config.databaseId).toBe('MusicManagerDB')
+    expect(report.config.apiKeySet).toBe(false)
+  })
+
+  it('does not list other databases when the configured one exists', async () => {
+    createAllResources()
+    state.databases.add('some-other-db')
+
+    const { report } = await checkAppwriteInitialization()
+
+    expect(report.otherDatabases).toBeUndefined()
+  })
+
   it('marks every expected item missing when the database is missing', async () => {
     const { report } = await checkAppwriteInitialization()
 

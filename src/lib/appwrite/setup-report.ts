@@ -41,10 +41,24 @@ export function buildSetupReport(
     'Music Manager backend setup report',
     `Time: ${new Date().toISOString()}`,
     '',
-    `Database: ${itemLine(report.database, '').trim()}`,
+    'Settings in use:',
+    `  Endpoint: ${report.config.endpoint}`,
+    `  Project ID: ${report.config.projectId}`,
+    `  Database ID: ${report.config.databaseId}`,
+    `  Storage bucket ID: ${report.config.bucketId}`,
+    `  Table IDs: ${report.config.tableIds.competitions}, ${report.config.tableIds.grades}, ${report.config.tableIds.musicFiles}`,
+    `  API key set: ${report.config.apiKeySet ? 'yes' : 'NO'}`,
     '',
-    'Tables:',
+    `Database: ${itemLine(report.database, '').trim()}`,
   ]
+  if (report.otherDatabases?.length) {
+    lines.push(
+      `  Databases that do exist in this project: ${report.otherDatabases
+        .map((db) => `${db.id} (${db.name})`)
+        .join(', ')}`
+    )
+  }
+  lines.push('', 'Tables:')
 
   for (const table of report.tables) {
     const columns = countReady(table.columns)

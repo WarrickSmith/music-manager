@@ -256,6 +256,75 @@ export default function SetupStatusView({
         />
       )}
 
+      {report.database.state === 'missing' && (
+        <div
+          role="alert"
+          className="flex flex-col gap-1 rounded-lg border border-warning/60 bg-warning/10 p-4 text-sm"
+        >
+          <p className="font-semibold">
+            The app is looking for a database called{' '}
+            <span className="font-mono">{report.config.databaseId}</span>, and
+            Appwrite says it does not exist.
+          </p>
+          {report.otherDatabases && report.otherDatabases.length > 0 ? (
+            <p className="text-muted-foreground">
+              This project does have:{' '}
+              {report.otherDatabases.map((db, i) => (
+                <span key={db.id}>
+                  {i > 0 && ', '}
+                  <span className="font-mono text-foreground">{db.id}</span> (
+                  {db.name})
+                </span>
+              ))}
+              . If one of these is yours, set{' '}
+              <span className="font-mono">APPWRITE_DATABASE_ID</span> to its ID
+              (not its name) in the server settings and restart the app.
+              Otherwise run setup to create it.
+            </p>
+          ) : (
+            <p className="text-muted-foreground">
+              No databases were found in this project. Run setup to create it,
+              or check <span className="font-mono">APPWRITE_PROJECT_ID</span>{' '}
+              points at the right project.
+            </p>
+          )}
+        </div>
+      )}
+
+      <details className="rounded-lg border bg-card text-sm">
+        <summary className="cursor-pointer px-4 py-2 font-medium">
+          Settings in use
+        </summary>
+        <dl className="grid gap-x-6 gap-y-1 border-t px-4 py-3 sm:grid-cols-[auto_minmax(0,1fr)]">
+          {(
+            [
+              ['Endpoint', report.config.endpoint],
+              ['Project ID', report.config.projectId],
+              ['Database ID', report.config.databaseId],
+              ['Storage bucket ID', report.config.bucketId],
+              [
+                'Table IDs',
+                [
+                  report.config.tableIds.competitions,
+                  report.config.tableIds.grades,
+                  report.config.tableIds.musicFiles,
+                ].join(', '),
+              ],
+              ['API key', report.config.apiKeySet ? 'set' : 'NOT SET'],
+            ] as const
+          ).map(([label, value]) => (
+            <div key={label} className="contents">
+              <dt className="label-mono self-center">{label}</dt>
+              <dd className="font-mono break-all">{value}</dd>
+            </div>
+          ))}
+        </dl>
+        <p className="border-t px-4 py-2 text-muted-foreground">
+          These come from the server&apos;s environment settings. The API key is
+          never shown. After changing a setting, restart the app.
+        </p>
+      </details>
+
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <Stat
           label="Database"

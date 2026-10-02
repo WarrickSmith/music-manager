@@ -13,6 +13,7 @@ import {
 import type {
   InitializationResult,
   InitializationStatus,
+  SetupConfig,
   SetupItem,
   SetupReport,
   SetupState,
@@ -273,7 +274,33 @@ export async function checkAppwriteInitialization(): Promise<InitializationStatu
       return { ...item, state: exists ? 'ready' : 'missing' }
     })
 
+    // When the configured database is missing, list what the project does have
+    // so a wrong DATABASE_ID is obvious ("did you mean mm-test?")
+    let otherDatabases: SetupReport['otherDatabases']
+    if (databaseResult.state === 'missing') {
+      try {
+        const { databases: found } = await tablesDB.list()
+        otherDatabases = found.map((db) => ({
+          id: db.$id,
+          name: db.name,
+        }))
+      } catch {
+        // Listing is only a hint; the missing database is already reported
+      }
+    }
+
+    const config: SetupConfig = {
+      endpoint: process.env.APPWRITE_ENDPOINT ?? '(not set)',
+      projectId: process.env.APPWRITE_PROJECT_ID ?? '(not set)',
+      databaseId: databaseId ?? '(not set)',
+      bucketId: bucketId ?? '(not set)',
+      tableIds,
+      apiKeySet: Boolean(process.env.APPWRITE_API_KEY),
+    }
+
     const report: SetupReport = {
+      config,
+      otherDatabases,
       database: {
         id: databaseId,
         label: databaseId,

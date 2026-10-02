@@ -20,7 +20,21 @@ export interface SetupTable extends SetupItem {
   indexes: SetupItem[]
 }
 
+/** The Appwrite settings the app is using. Never includes the API key. */
+export interface SetupConfig {
+  endpoint: string
+  projectId: string
+  databaseId: string
+  bucketId: string
+  tableIds: { competitions: string; grades: string; musicFiles: string }
+  apiKeySet: boolean
+}
+
 export interface SetupReport {
+  /** The settings in use, so a wrong ID in the environment is easy to spot */
+  config: SetupConfig
+  /** Databases found in the project, listed only when the configured one is missing */
+  otherDatabases?: { id: string; name: string }[]
   database: SetupItem
   tables: SetupTable[]
   bucket: SetupItem
