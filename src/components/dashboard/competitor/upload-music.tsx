@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { toast } from 'sonner'
 import * as musicMetadata from 'music-metadata'
-import { FileAudio, Upload, X } from 'lucide-react'
+import { FileAudio, Upload, Wrench, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -155,6 +155,9 @@ export default function UploadMusic({
   // Seconds of silence at the start of the chosen file, once measured
   const [leadingSilence, setLeadingSilence] = useState<number | null>(null)
   const chosenFileRef = useRef<File | null>(null)
+  // Set when the server found a fault that stops the file playing in some
+  // browsers; holds the explanation shown with the offer to fix it
+  const [repairOffer, setRepairOffer] = useState<string | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
   // The skater's current file for the selected grade; tagged with its grade so a
   // stale answer for an earlier grade is never shown
@@ -288,6 +291,7 @@ export default function UploadMusic({
     setSelectedFile(file)
     setFileDuration(null)
     setLeadingSilence(null)
+    setRepairOffer(null)
     chosenFileRef.current = file
     form.setValue('file', file ?? undefined)
     form.setValue('duration', null)
@@ -327,17 +331,21 @@ export default function UploadMusic({
     setSelectedFile(null)
     setFileDuration(null)
     setLeadingSilence(null)
+    setRepairOffer(null)
     chosenFileRef.current = null
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  const onSubmit = async (values: FormValues) => {
+  const submit = async (values: FormValues, repair: boolean) => {
     const formData = new FormData()
     formData.append('file', values.file)
     formData.append('competitionId', values.competitionId)
     formData.append('gradeId', values.gradeId)
     // Tell the server this upload is meant to replace the earlier file
     if (existing) formData.append('replace', 'true')
+    // The skater agreed to have a faulty file fixed before it is stored
+    if (repair) formData.append('repair', 'true')
+    setRepairOffer(null)
 
     try {
       await upload('/api/music/upload', formData)
@@ -356,10 +364,18 @@ export default function UploadMusic({
         toast.info('You already have a file for this grade. Review it below.')
         return
       }
+      // The file would stop part-way through in some browsers. Offer to fix it.
+      if (error instanceof UploadError && error.code === 'needs-repair') {
+        setRepairOffer(error.message)
+        resetProgress()
+        return
+      }
       // The failure is shown in the form; keep the console copy for debugging
       console.error('Upload failed:', error)
     }
   }
+
+  const onSubmit = (values: FormValues) => submit(values, false)
 
   const canSubmit =
     !busy &&
@@ -691,7 +707,42 @@ export default function UploadMusic({
                 </div>
               )}
 
-              {status !== 'error' && (
+              {repairOffer && status !== 'error' && (
+                <div
+                  role="alert"
+                  className="space-y-3 rounded-lg border border-warning/60 bg-card p-4"
+                >
+                  <p className="flex items-center gap-2 font-semibold">
+                    <Wrench className="size-4 text-warning" aria-hidden />
+                    This file needs a quick fix
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {repairOffer} It plays fine in some players, but could stop
+                    part-way through on race day. Fixing takes a few seconds and
+                    the sound stays the same. We keep the fixed copy, not the
+                    original.
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      onClick={() =>
+                        form.handleSubmit((values) => submit(values, true))()
+                      }
+                    >
+                      <Wrench /> Fix and upload
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleReset}
+                    >
+                      Choose a different file
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {status !== 'error' && !repairOffer && (
                 <Button type="submit" disabled={!canSubmit}>
                   <Upload />
                   {busy

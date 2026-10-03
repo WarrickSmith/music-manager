@@ -114,7 +114,7 @@ Admins cannot remove their own admin role, switch off or delete their own accoun
 
 | Route | Auth | Purpose |
 |---|---|---|
-| `POST /api/music/upload` | signed in; same-origin only | Upload with real progress. The owner is the signed-in user (only admins may name another skater). The file's real type, extension and length come from its bytes; non-audio content, empty and oversized files (15MB) are refused |
+| `POST /api/music/upload` | signed in; same-origin only | Upload with real progress. The owner is the signed-in user (only admins may name another skater). The file's real type, extension and length come from its bytes; non-audio content, empty and oversized files (15MB) are refused. If the file would stop part-way through in a browser (a strict decode finds faults), it answers `422` with `code: 'needs-repair'`; repeat the upload with `repair=true` to store a clean re-encoded MP3 instead |
 | `GET /api/music/file/[fileId]` | owner or admin; others get 404 | Streams or downloads (`?download=1`) a stored file, with Range support for seeking |
 | `GET /api/music/export` | admin | Zip of music for a competition |
 
@@ -123,3 +123,9 @@ Unexpected errors from these routes return a short reference code; the details a
 ## Rate limits
 
 In-memory, per server process: sign-in 20 failures per IP and 5 per email per 15 minutes; registration 10 per IP per hour; password change 5 per user per 15 minutes. Behind a reverse proxy the client IP is read from `x-forwarded-for`, so make sure the proxy sets it. Limits reset on restart and are not shared between multiple instances.
+
+## Audio repair
+
+Some MP3 files play in desktop players but are rejected part-way through by Edge and Chrome, whose decoders are stricter. On upload the server decodes the file strictly with `ffmpeg` (`src/lib/music/audio-repair.ts`). A file with 5 or more decode problems gets a `needs-repair` answer, the upload screen explains it, and if the skater agrees the file is re-encoded to MP3 (variable bit rate, quality 2, tags kept, cover picture dropped) and the repaired copy is stored. The original is not kept.
+
+`ffmpeg` must be installed on the server; the Docker image installs it. Without it the check is skipped and uploads behave as before. At most 2 ffmpeg jobs run at once.

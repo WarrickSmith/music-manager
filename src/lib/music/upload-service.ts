@@ -3,6 +3,11 @@ import { toPlainObject } from '@/lib/utils'
 import { ACCEPTED_AUDIO_TYPES, MAX_UPLOAD_BYTES } from '@/lib/music/constants'
 import { formatDeadlineDate, isPastDeadline } from '@/lib/deadline'
 import { NotAudioError, sniffAudio } from '@/lib/music/audio-sniff'
+import {
+  checkPlayable,
+  RepairError,
+  repairToMp3,
+} from '@/lib/music/audio-repair'
 
 export { ACCEPTED_AUDIO_TYPES, MAX_UPLOAD_BYTES }
 
@@ -19,6 +24,19 @@ export class UploadDeadlineError extends Error {
   constructor(message: string) {
     super(message)
     this.name = 'UploadDeadlineError'
+  }
+}
+
+/**
+ * Thrown when the file is real audio but would stop part-way through in some
+ * browsers. The upload can be repeated with repair=true to fix it first.
+ */
+export class UploadNeedsRepairError extends Error {
+  constructor() {
+    super(
+      'This file has an encoding fault that makes it stop playing part-way through in some browsers, such as Edge and Chrome. We can fix it for you.'
+    )
+    this.name = 'UploadNeedsRepairError'
   }
 }
 
@@ -190,6 +208,27 @@ export async function storeMusicFile(formData: FormData, actor: UploadActor) {
     throw new UploadConflictError(summariseExisting(existing[0]))
   }
 
+  // Browsers decode more strictly than desktop players, so a file that plays
+  // on the skater's computer can still stop part-way through here. Offer to
+  // fix it, and store the fixed copy when they agree.
+  let storedBytes: Uint8Array<ArrayBuffer> = bytes
+  let storedAudio = audio
+  let storedName = file.name
+  const health = await checkPlayable(bytes)
+  if (!health.playable) {
+    if (formData.get('repair') !== 'true') throw new UploadNeedsRepairError()
+    try {
+      storedBytes = await repairToMp3(bytes)
+      storedAudio = await sniffAudio(storedBytes)
+    } catch (error) {
+      if (error instanceof RepairError || error instanceof NotAudioError) {
+        throw new UploadValidationError(error.message)
+      }
+      throw error
+    }
+    storedName = storedName.replace(/\.[^./\\]*$/, '') + '.mp3'
+  }
+
   // First name plus last-name initial, e.g. "Mia Kowalski" becomes "Mia-k"
   let formattedUserName = userName
   if (userName.includes(' ')) {
@@ -205,9 +244,9 @@ export async function storeMusicFile(formData: FormData, actor: UploadActor) {
       .slice(0, 200)
 
   const renamedFile = new File(
-    [bytes],
-    `${formattedFileName}.${audio.extension}`,
-    { type: audio.mimeType }
+    [storedBytes],
+    `${formattedFileName}.${storedAudio.extension}`,
+    { type: storedAudio.mimeType }
   )
   const uploadedFile = await storage.createFile(
     bucketId,
@@ -221,7 +260,7 @@ export async function storeMusicFile(formData: FormData, actor: UploadActor) {
     rowId: ID.unique(),
     data: {
       fileId: uploadedFile.$id,
-      originalName: cleanOriginalName(file.name),
+      originalName: cleanOriginalName(storedName),
       fileName: formattedFileName,
       storagePath: `${bucketId}/${uploadedFile.$id}`,
       competitionId,
@@ -234,8 +273,8 @@ export async function storeMusicFile(formData: FormData, actor: UploadActor) {
       userId,
       userName,
       uploadedAt: new Date().toISOString(),
-      duration: audio.durationSeconds,
-      size: file.size,
+      duration: storedAudio.durationSeconds,
+      size: storedBytes.byteLength,
       status: 'ready',
     },
   })

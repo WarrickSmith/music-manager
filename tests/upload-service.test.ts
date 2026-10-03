@@ -33,10 +33,14 @@ vi.stubEnv('APPWRITE_MUSIC_FILES_COLLECTION_ID', 'musicfiles')
 vi.stubEnv('APPWRITE_COMPETITIONS_COLLECTION_ID', 'competitions')
 vi.stubEnv('APPWRITE_GRADES_COLLECTION_ID', 'grades')
 
+const { ffmpegAvailable } = await import('@/lib/music/audio-repair')
+const hasFfmpeg = await ffmpegAvailable()
+
 const {
   storeMusicFile,
   UploadConflictError,
   UploadDeadlineError,
+  UploadNeedsRepairError,
   UploadValidationError,
 } = await import('@/lib/music/upload-service')
 
@@ -285,5 +289,35 @@ describe('storeMusicFile: identity and content', () => {
     setup({ active: false })
     await expect(storeMusicFile(form(), skater)).rejects.toThrow('not open')
     await expect(storeMusicFile(form(), admin)).resolves.toBeDefined()
+  })
+})
+
+describe.skipIf(!hasFfmpeg)('storeMusicFile: browser-unplayable files', () => {
+  const damaged = () =>
+    new File([fixture('damaged.mp3')], 'Song.MP3', { type: 'audio/mpeg' })
+
+  it('stops and offers a repair, storing nothing', async () => {
+    setup()
+    await expect(
+      storeMusicFile(form({}, damaged()), skater)
+    ).rejects.toBeInstanceOf(UploadNeedsRepairError)
+    expect(mocks.createFile).not.toHaveBeenCalled()
+    expect(mocks.createRow).not.toHaveBeenCalled()
+  })
+
+  it('stores the repaired copy once the skater agrees', async () => {
+    setup()
+    await storeMusicFile(form({ repair: 'true' }, damaged()), skater)
+    const stored = mocks.createFile.mock.calls[0][2] as File
+    expect(stored.name.endsWith('.mp3')).toBe(true)
+    const row = mocks.createRow.mock.calls[0][0].data
+    expect(row.originalName).toBe('Song.mp3')
+    expect(row.size).toBe(stored.size)
+    expect(row.size).not.toBe(fixture('damaged.mp3').byteLength)
+  })
+
+  it('does not bother a healthy file', async () => {
+    setup()
+    await expect(storeMusicFile(form(), skater)).resolves.toBeDefined()
   })
 })
