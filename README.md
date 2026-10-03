@@ -74,6 +74,7 @@ The application uses Appwrite for authentication and role-based access control. 
 
 - Every server action and file route checks the signed-in user on the server; see `docs/api-contracts.md` (Access policy).
 - The storage bucket is private. Run Setup once after upgrading to make an existing bucket private.
+- Uploads are decoded strictly with ffmpeg; files that Edge or Chrome would stop playing part-way through are offered a one-click repair.
 - Uploads are checked by content (real MP3, WAV, M4A or AAC), not by file name.
 - Sign-in, registration and password change are rate limited in memory (per process; see the API docs for limits).
 - Not addressed here: registration is open and the first registered user becomes an admin. Review that before exposing a fresh install publicly.

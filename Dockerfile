@@ -30,6 +30,9 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
+# ffmpeg checks uploaded audio and repairs files that browsers cannot play
+RUN apk add --no-cache ffmpeg
+
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 

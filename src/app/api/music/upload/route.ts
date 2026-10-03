@@ -5,6 +5,7 @@ import {
   storeMusicFile,
   UploadConflictError,
   UploadDeadlineError,
+  UploadNeedsRepairError,
   UploadValidationError,
 } from '@/lib/music/upload-service'
 import {
@@ -78,6 +79,12 @@ export async function POST(request: Request) {
       return json(
         { success: false, code: 'deadline', error: error.message },
         403
+      )
+    }
+    if (error instanceof UploadNeedsRepairError) {
+      return json(
+        { success: false, code: 'needs-repair', error: error.message },
+        422
       )
     }
     if (error instanceof UploadValidationError) {

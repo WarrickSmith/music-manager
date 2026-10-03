@@ -37,8 +37,12 @@ vi.stubEnv('APPWRITE_MUSIC_FILES_COLLECTION_ID', 'musicfiles')
 
 const file = await import('@/app/api/music/file/[fileId]/route')
 const upload = await import('@/app/api/music/upload/route')
-const { UploadConflictError, UploadDeadlineError, UploadValidationError } =
-  await import('@/lib/music/upload-service')
+const {
+  UploadConflictError,
+  UploadDeadlineError,
+  UploadNeedsRepairError,
+  UploadValidationError,
+} = await import('@/lib/music/upload-service')
 const { isSameOrigin } = await import('@/lib/security/request')
 
 const mia = { $id: 'u1', name: 'Mia', email: 'm@x.io', labels: ['competitor'] }
@@ -211,6 +215,10 @@ describe('POST /api/music/upload', () => {
     expect((await post()).status).toBe(403)
     m.storeMusicFile.mockRejectedValueOnce(new UploadValidationError('bad'))
     expect((await post()).status).toBe(400)
+    m.storeMusicFile.mockRejectedValueOnce(new UploadNeedsRepairError())
+    const repair = await post()
+    expect(repair.status).toBe(422)
+    expect((await repair.json()).code).toBe('needs-repair')
   })
 
   it('hides unexpected errors behind a reference code', async () => {
