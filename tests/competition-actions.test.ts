@@ -26,7 +26,16 @@ vi.mock('@/lib/appwrite/server', async (importOriginal) => {
   }
 })
 
-vi.mock('@/lib/appwrite/initialization-service', () => ({
+vi.mock('@/lib/auth/auth-service', () => ({
+  getCurrentUser: async () => ({
+    $id: 'u1',
+    name: 'Mia',
+    email: 'm@x.io',
+    labels: ['competitor'],
+  }),
+}))
+
+vi.mock('@/lib/appwrite/initialization-core', () => ({
   checkAppwriteInitialization: async () => ({ isInitialized: true }),
 }))
 

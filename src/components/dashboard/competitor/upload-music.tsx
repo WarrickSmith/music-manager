@@ -33,7 +33,6 @@ import {
   getGradeCategoriesForCompetition,
   getGradesForCompetition,
 } from '@/app/actions/competition-actions'
-import { getUserProfile } from '@/app/actions/user-actions'
 import { findExistingMusicFile } from '@/app/actions/music-file-actions'
 import type { ExistingMusicSummary } from '@/lib/music/upload-service'
 import { deadlineStatus } from '@/lib/deadline'
@@ -140,11 +139,15 @@ function SilenceNote({ seconds }: { seconds: number }) {
   )
 }
 
-export default function UploadMusic({ userId }: { userId: string }) {
+export default function UploadMusic({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  userId,
+}: {
+  userId: string
+}) {
   const [competitions, setCompetitions] = useState<Competition[]>([])
   const [categories, setCategories] = useState<string[]>([])
   const [grades, setGrades] = useState<Grade[]>([])
-  const [userName, setUserName] = useState('')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [fileDuration, setFileDuration] = useState<number | null>(null)
   const [extractingMetadata, setExtractingMetadata] = useState(false)
@@ -197,19 +200,14 @@ export default function UploadMusic({ userId }: { userId: string }) {
     setLoadError(null)
     setIsLoadingCompetitions(true)
     try {
-      const [competitionsData, userProfile] = await Promise.all([
-        getActiveCompetitions(),
-        getUserProfile(userId),
-      ])
-      setCompetitions(competitionsData as Competition[])
-      setUserName(userProfile.name)
+      setCompetitions((await getActiveCompetitions()) as Competition[])
     } catch (error) {
       console.error('Failed to load competitions:', error)
       setLoadError(describe(error))
     } finally {
       setIsLoadingCompetitions(false)
     }
-  }, [userId])
+  }, [])
 
   useEffect(() => {
     loadCompetitions()
@@ -265,8 +263,8 @@ export default function UploadMusic({ userId }: { userId: string }) {
   // Look for a file this skater already uploaded for the chosen grade
   useEffect(() => {
     const checkExisting = async () => {
-      if (!gradeId || !userId) return
-      const result = await findExistingMusicFile(userId, gradeId)
+      if (!gradeId) return
+      const result = await findExistingMusicFile(gradeId)
       if (result.ok) {
         setExistingFor({ gradeId, file: result.data })
       } else {
@@ -276,7 +274,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
       }
     }
     checkExisting()
-  }, [gradeId, userId])
+  }, [gradeId])
 
   const existing = existingFor?.gradeId === gradeId ? existingFor.file : null
   const selectedCompetition = competitions.find((c) => c.$id === competitionId)
@@ -338,13 +336,8 @@ export default function UploadMusic({ userId }: { userId: string }) {
     formData.append('file', values.file)
     formData.append('competitionId', values.competitionId)
     formData.append('gradeId', values.gradeId)
-    formData.append('userId', userId)
-    formData.append('userName', userName)
     // Tell the server this upload is meant to replace the earlier file
     if (existing) formData.append('replace', 'true')
-    if (values.duration !== null && values.duration !== undefined) {
-      formData.append('duration', values.duration.toString())
-    }
 
     try {
       await upload('/api/music/upload', formData)

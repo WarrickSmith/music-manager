@@ -23,6 +23,8 @@ export async function createSession(email: string, password: string) {
       cookieStore.set('mm-session', session.secret, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
+        // Not sent on requests started by other sites, which blocks cross-site forged posts
+        sameSite: 'lax',
         path: '/',
         maxAge: 60 * 60 * 24 * 7, // 1 week
       })

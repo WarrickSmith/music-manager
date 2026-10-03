@@ -41,13 +41,10 @@ All backend operations are implemented as Next.js Server Actions (`'use server'`
 |---|---|---|---|
 | `getUserMusicFiles` | `userId` | `Document[]` | Lists a user's files ordered by upload date (desc) |
 | `getAllMusicFiles` | — | `Document[]` | Lists all files with pagination (admin use) |
-| `uploadMusicFile` | `FormData` (file, competitionId, gradeId, userId, userName, duration?) | `{ success, musicFile }` | Validates file type, extracts metadata, renames file, uploads to storage, creates DB record |
 
 > The upload form does not call this action. It posts the same `FormData` to `POST /api/music/upload` with `XMLHttpRequest` so the browser can show real byte-level progress. The route returns `{ success: true, musicFile }` or `{ success: false, error }` with status 400 (validation) or 500. Both paths share `storeMusicFile` in `src/lib/music/upload-service.ts`.
-| `findExistingMusicFile` | `userId, gradeId` | `ActionResult<summary \| null>` | The skater's current file for a grade, so the upload form can warn about a replace |
-| `deleteMusicFile` | `fileId, musicFileId` | `{ success: true }` or `{ success: false, error }` | Deletes file from storage and DB record. Competitors are refused after the competition's deadline; admins are not |
-| `getMusicFileDownloadUrl` | `fileId` | `{ url }` | Generates authenticated download URL via Appwrite admin mode |
-| `getMusicFileViewUrl` | `fileId` | `{ url }` | Generates public streaming URL with cache-busting |
+| `findExistingMusicFile` | `gradeId` | `ActionResult<summary \| null>` | The signed-in user's current file for a grade, so the upload form can warn about a replace |
+| `deleteMusicFile` | `musicFileId` | `{ success: true }` or `{ success: false, error }` | Owner or admin only. Deletes the stored file (taken from the record) and the DB record. Competitors are refused after the competition's deadline; admins are not |
 
 ## Entry Actions (`entry-actions.ts`)
 
@@ -96,3 +93,33 @@ All actions returning Appwrite documents use `toPlainObject()` (a `JSON.parse(JS
 
 ### Path Revalidation
 Mutation actions call `revalidatePath()` to invalidate Next.js cached pages after data changes.
+
+
+## Access policy
+
+Every server action checks the caller's session on the server before touching Appwrite (`src/lib/auth/guards.ts`). The browser's claims about who it is are never trusted.
+
+| Policy | Meaning | Examples |
+|---|---|---|
+| admin | `requireAdmin()` | competition, grade and entry management, all users, all music, Setup |
+| user | `requireUser()` | active competitions and grades, own profile, own delete |
+| self-or-admin | `requireSelfOrAdmin(userId)` | `getUserMusicFiles`, `getUserProfile`, `getOutstandingMusic` |
+| public | no session needed | `loginAction`, `registerAction`, `logoutAction`, `getServerSession` |
+
+`tests/action-policy.test.ts` lists every exported action with its policy and fails when a new action is added without one.
+
+Admins cannot remove their own admin role, switch off or delete their own account.
+
+## Route handlers
+
+| Route | Auth | Purpose |
+|---|---|---|
+| `POST /api/music/upload` | signed in; same-origin only | Upload with real progress. The owner is the signed-in user (only admins may name another skater). The file's real type, extension and length come from its bytes; non-audio content, empty and oversized files (15MB) are refused |
+| `GET /api/music/file/[fileId]` | owner or admin; others get 404 | Streams or downloads (`?download=1`) a stored file, with Range support for seeking |
+| `GET /api/music/export` | admin | Zip of music for a competition |
+
+Unexpected errors from these routes return a short reference code; the details are written to the server log under that code.
+
+## Rate limits
+
+In-memory, per server process: sign-in 20 failures per IP and 5 per email per 15 minutes; registration 10 per IP per hour; password change 5 per user per 15 minutes. Behind a reverse proxy the client IP is read from `x-forwarded-for`, so make sure the proxy sets it. Limits reset on restart and are not shared between multiple instances.

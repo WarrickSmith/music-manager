@@ -6,10 +6,8 @@ import { FileDown, LayoutGrid, List } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import ErrorNotice from '@/components/ui/error-notice'
-import {
-  deleteMusicFile,
-  getMusicFileDownloadUrl,
-} from '@/app/actions/music-file-actions'
+import { deleteMusicFile } from '@/app/actions/music-file-actions'
+import { musicFileUrl } from '@/lib/music/urls'
 import { formatDuration, cn } from '@/lib/utils'
 import { isPastDeadline } from '@/lib/deadline'
 import MusicFilterBar from './music-filter-bar'
@@ -93,7 +91,7 @@ export default function MusicFilesView({
     setActionError(null)
     setDownloadingIds((prev) => [...prev, file.$id])
     try {
-      const { url } = await getMusicFileDownloadUrl(storageFileId(file))
+      const url = musicFileUrl(storageFileId(file), { download: true })
       triggerDownload(url, file.originalName || file.fileName)
       toast.success('Download started')
     } catch (error) {
@@ -112,7 +110,7 @@ export default function MusicFilesView({
     setActionError(null)
     setDeletingIds((prev) => [...prev, file.$id])
     try {
-      const result = await deleteMusicFile(storageFileId(file), file.$id)
+      const result = await deleteMusicFile(file.$id)
       if (!result.success) {
         setActionError({
           title: 'This file is locked',
@@ -144,7 +142,7 @@ export default function MusicFilesView({
       setBulk({ index: i + 1, total: chosen.length })
       const file = chosen[i]
       try {
-        const { url } = await getMusicFileDownloadUrl(storageFileId(file))
+        const url = musicFileUrl(storageFileId(file), { download: true })
         const ext = file.originalName?.split('.').pop()
         triggerDownload(url, ext ? `${file.fileName}.${ext}` : file.fileName)
       } catch (error) {
@@ -183,6 +181,8 @@ export default function MusicFilesView({
         filters={filters}
         options={options}
         onChange={setFilter}
+        onReset={reset}
+        isFiltered={isFiltered}
         showCompetitor={isAdmin}
       />
 

@@ -555,6 +555,21 @@ async function setupIndexes(
   return success
 }
 
+/**
+ * The storage bucket has no permissions of its own. The app reads and writes
+ * files only on the server with its API key, and serves audio through
+ * /api/music/file/[fileId], which checks who is asking. Nobody needs direct
+ * access to the bucket, so none is granted. In particular the bucket must not
+ * be readable by "any" or "users": that would let anyone with a file ID
+ * download music without signing in.
+ */
+export const BUCKET_PERMISSIONS: string[] = []
+
+/** True when a permission string opens the resource to everyone or every signed-in user */
+export function isBroadPermission(permission: string): boolean {
+  return /\("(any|users)"\)/.test(permission)
+}
+
 // Setup storage
 async function setupStorage(
   { storage }: { storage: Storage },
@@ -567,45 +582,25 @@ async function setupStorage(
       await storage.getBucket(bucketId)
       results.push(`Storage bucket '${bucketId}' already exists`)
 
-      // Update existing bucket permissions to include public read access
+      // Re-apply the private permissions, which also closes buckets created
+      // by earlier versions that allowed public read access
       await storage.updateBucket(
         bucketId,
         STORAGE_BUCKET_NAME,
-        [
-          Permission.read(Role.any()), // Allow public read access for streaming
-          Permission.read(Role.team('admin')),
-          Permission.read(Role.team('competitor')),
-          Permission.write(Role.team('admin')),
-          Permission.write(Role.team('competitor')),
-          Permission.delete(Role.team('admin')),
-          Permission.delete(Role.team('competitor')),
-        ],
+        BUCKET_PERMISSIONS,
         true // fileSecurity
       )
-      results.push(
-        `Updated storage bucket '${bucketId}' with public read permissions`
-      )
+      results.push(`Made storage bucket '${bucketId}' private`)
     } catch (error: unknown) {
       const appwriteError = error as AppwriteError
       if (appwriteError.code === 404) {
-        // Create bucket with public read permissions
         await storage.createBucket(
           bucketId,
           STORAGE_BUCKET_NAME,
-          [
-            Permission.read(Role.any()), // Allow public read access for streaming
-            Permission.read(Role.team('admin')),
-            Permission.read(Role.team('competitor')),
-            Permission.write(Role.team('admin')),
-            Permission.write(Role.team('competitor')),
-            Permission.delete(Role.team('admin')),
-            Permission.delete(Role.team('competitor')),
-          ],
+          BUCKET_PERMISSIONS,
           true // fileSecurity
         )
-        results.push(
-          `Created storage bucket '${bucketId}' with public read permissions`
-        )
+        results.push(`Created private storage bucket '${bucketId}'`)
       } else {
         throw error
       }

@@ -12,17 +12,7 @@ import {
 import { Button } from '@/components/ui/button'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
+import ConfirmByTypingDialog from '@/components/ui/confirm-by-typing-dialog'
 import { Input } from '@/components/ui/input'
 import { Trash, Shield, ShieldAlert, Search } from 'lucide-react'
 import { toast } from 'sonner'
@@ -35,8 +25,6 @@ import {
 import LocalLoadingCard from '@/components/ui/local-loading-card'
 import ErrorNotice from '@/components/ui/error-notice'
 import PageHeader from '@/components/layout/page-header'
-import { buttonVariants } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
 
 // Define interface for user object
 interface User {
@@ -54,7 +42,14 @@ interface User {
   $updatedAt?: string
 }
 
-export default function UserManagement() {
+export default function UserManagement({
+  currentUserId,
+}: {
+  /** The signed-in admin. Their own role, status and account cannot be changed here. */
+  currentUserId?: string
+}) {
+  const isSelf = (user: User) => user.$id === currentUserId
+
   const [users, setUsers] = useState<User[]>([])
   const [filteredUsers, setFilteredUsers] = useState<User[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -78,8 +73,8 @@ export default function UserManagement() {
             user.$id?.toLowerCase().includes(query) ||
             `${user.firstName || ''} ${user.lastName || ''}`
               .toLowerCase()
-              .includes(query),
-        ),
+              .includes(query)
+        )
       )
     }
   }, [searchQuery, users])
@@ -97,7 +92,7 @@ export default function UserManagement() {
       toast.error(
         `Failed to load users: ${
           error instanceof Error ? error.message : 'Unknown error'
-        }`,
+        }`
       )
     } finally {
       setIsLoading(false)
@@ -113,7 +108,7 @@ export default function UserManagement() {
       toast.error(
         `Failed to update user role: ${
           error instanceof Error ? error.message : 'Unknown error'
-        }`,
+        }`
       )
     }
   }
@@ -127,7 +122,7 @@ export default function UserManagement() {
       toast.error(
         `Failed to update user status: ${
           error instanceof Error ? error.message : 'Unknown error'
-        }`,
+        }`
       )
     }
   }
@@ -141,7 +136,7 @@ export default function UserManagement() {
       toast.error(
         `Failed to delete user: ${
           error instanceof Error ? error.message : 'Unknown error'
-        }`,
+        }`
       )
     }
   }
@@ -248,6 +243,7 @@ export default function UserManagement() {
                         size="icon"
                         className="size-8"
                         onClick={() => handleRoleToggle(user.$id, user.isAdmin)}
+                        disabled={isSelf(user)}
                         title={`Change to ${user.isAdmin ? 'competitor' : 'admin'}`}
                         aria-label={`Change to ${user.isAdmin ? 'competitor' : 'admin'}`}
                       >
@@ -261,44 +257,40 @@ export default function UserManagement() {
                       onCheckedChange={() =>
                         handleStatusToggle(user.$id, isActive(user))
                       }
+                      disabled={isSelf(user)}
                       aria-label={`User ${isActive(user) ? 'active' : 'inactive'}`}
                     />
                   </TableCell>
                   <TableCell className="text-right">
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
+                    <ConfirmByTypingDialog
+                      trigger={
                         <Button
                           variant="ghost"
                           size="icon"
                           className="text-muted-foreground hover:text-destructive"
                           aria-label="Delete user"
-                          title="Delete user"
+                          title={
+                            isSelf(user)
+                              ? 'You cannot delete your own account'
+                              : 'Delete user'
+                          }
+                          disabled={isSelf(user)}
                         >
                           <Trash />
                         </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete user</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Delete {displayName(user)}? This permanently removes
-                            the account and every music file they uploaded. It
-                            cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            className={cn(
-                              buttonVariants({ variant: 'destructive' }),
-                            )}
-                            onClick={() => handleDeleteUser(user.$id)}
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                      }
+                      title="Delete user"
+                      description={
+                        <p>
+                          This permanently removes {displayName(user)}&apos;s
+                          account, their entries, and every music file they
+                          uploaded. It cannot be undone.
+                        </p>
+                      }
+                      confirmText={user.email}
+                      confirmLabel="Delete user"
+                      onConfirm={() => handleDeleteUser(user.$id)}
+                    />
                   </TableCell>
                 </TableRow>
               ))

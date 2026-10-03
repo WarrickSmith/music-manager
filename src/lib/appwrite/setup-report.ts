@@ -75,7 +75,13 @@ export function buildSetupReport(
     }
   }
 
-  lines.push('', `Storage bucket: ${itemLine(report.bucket, '').trim()}`, '', 'Teams:')
+  lines.push(
+    '',
+    `Storage bucket: ${itemLine(report.bucket, '').trim()}`,
+    itemLine(report.bucketAccess, '  '),
+    '',
+    'Teams:'
+  )
   for (const team of report.teams) lines.push(itemLine(team, '  '))
 
   if (status.errors.length > 0) {
@@ -84,7 +90,10 @@ export function buildSetupReport(
   }
 
   if (lastRun) {
-    lines.push('', `Last initialisation: ${lastRun.success ? 'succeeded' : 'FAILED'}`)
+    lines.push(
+      '',
+      `Last initialisation: ${lastRun.success ? 'succeeded' : 'FAILED'}`
+    )
     for (const error of lastRun.errors ?? []) lines.push(`  error: ${error}`)
     for (const entry of lastRun.log ?? []) lines.push(`  ${entry}`)
   }

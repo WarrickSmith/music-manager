@@ -37,6 +37,8 @@ export interface FakeState {
   databases: Set<string>
   tables: Map<string, FakeTable>
   buckets: Set<string>
+  /** Permissions last set on each bucket */
+  bucketPermissions: Map<string, string[]>
   teams: { $id: string; name: string }[]
   /** Scopes the fake API key lacks, e.g. ['tables.read'] */
   missingScopes: Set<string>
@@ -52,6 +54,7 @@ export function createFakeState(): FakeState {
     databases: new Set(),
     tables: new Map(),
     buckets: new Set(),
+    bucketPermissions: new Map(),
     teams: [],
     missingScopes: new Set(),
     columnBuildPolls: 1,
@@ -121,7 +124,10 @@ export function createFakeTablesDB(state: FakeState) {
     },
     async list() {
       requireScope(state, 'databases.read')
-      const databases = [...state.databases].map((id) => ({ $id: id, name: id }))
+      const databases = [...state.databases].map((id) => ({
+        $id: id,
+        name: id,
+      }))
       return { total: databases.length, databases }
     },
     async create({ databaseId }: { databaseId: string; name: string }) {
@@ -275,15 +281,28 @@ export function createFakeStorage(state: FakeState) {
     async getBucket(bucketId: string) {
       requireScope(state, 'buckets.read')
       if (!state.buckets.has(bucketId)) throw notFound('Bucket')
-      return { $id: bucketId }
+      return {
+        $id: bucketId,
+        $permissions: state.bucketPermissions.get(bucketId) ?? [],
+      }
     },
-    async createBucket(bucketId: string) {
+    async createBucket(
+      bucketId: string,
+      _name?: string,
+      permissions?: string[]
+    ) {
       requireScope(state, 'buckets.write')
       state.buckets.add(bucketId)
+      state.bucketPermissions.set(bucketId, permissions ?? [])
       return { $id: bucketId }
     },
-    async updateBucket(bucketId: string) {
+    async updateBucket(
+      bucketId: string,
+      _name?: string,
+      permissions?: string[]
+    ) {
       requireScope(state, 'buckets.write')
+      state.bucketPermissions.set(bucketId, permissions ?? [])
       return { $id: bucketId }
     },
   }

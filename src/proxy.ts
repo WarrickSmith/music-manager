@@ -1,35 +1,18 @@
 import { NextResponse, NextRequest } from 'next/server'
 
+/**
+ * Adds caching headers to static images.
+ *
+ * This used to copy the session cookie onto every response, which silently
+ * replaced it with a copy that lost its HttpOnly, Secure and SameSite flags.
+ * The cookie is set once, with the right flags, when the user signs in, and
+ * must be left alone here.
+ */
 export async function proxy(request: NextRequest) {
-  // Add cache control headers for static image files
-  if (request.nextUrl.pathname.match(/\.(png|jpg|jpeg|gif|svg|ico)$/)) {
-    const response = NextResponse.next()
-    response.headers.set('Cache-Control', 'public, max-age=86400, immutable')
-    return response
-  }
-
-  // Your existing middleware logic
   const response = NextResponse.next()
-
-  try {
-    // Check for Appwrite session cookie (mm-session)
-    const authCookieName = 'mm-session'
-    const authCookie = request.cookies.get(authCookieName)
-
-    // If there's an auth cookie, pass it along to the response
-    if (authCookie) {
-      // Spread the cookie properties first, then override specific ones if needed
-      const cookieOptions = {
-        path: '/',
-        ...authCookie,
-      }
-
-      response.cookies.set(authCookieName, authCookie.value, cookieOptions)
-    }
-  } catch (error) {
-    console.error('Middleware auth error:', error)
+  if (request.nextUrl.pathname.match(/\.(png|jpg|jpeg|gif|svg|ico)$/)) {
+    response.headers.set('Cache-Control', 'public, max-age=86400, immutable')
   }
-
   return response
 }
 

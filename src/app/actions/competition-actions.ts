@@ -5,10 +5,16 @@ import { Models } from 'node-appwrite'
 import { revalidatePath } from 'next/cache'
 import { defaultGrades } from '@/lib/appwrite/default-grades'
 import { storage } from '@/lib/appwrite/server'
-import { checkAppwriteInitialization } from '@/lib/appwrite/initialization-service'
+import { checkAppwriteInitialization } from '@/lib/appwrite/initialization-core'
 import { toPlainObject } from '@/lib/utils'
 import { ActionResult, errorMessage, fail, ok } from '@/lib/action-result'
-import { ADMIN_ONLY_MESSAGE, getAdminUser } from '@/lib/auth/guards'
+import {
+  ADMIN_ONLY_MESSAGE,
+  getAdminUser,
+  requireAdmin,
+  requireUser,
+} from '@/lib/auth/guards'
+import { isMissingTableError } from '@/lib/appwrite/rows'
 
 const databaseId = process.env.APPWRITE_DATABASE_ID!
 const competitionsCollectionId =
@@ -61,6 +67,7 @@ async function getAllDocuments(
 }
 
 export async function getCompetitions() {
+  await requireAdmin()
   try {
     // Check if Appwrite resources are initialized
     const { isInitialized } = await checkAppwriteInitialization()
@@ -101,6 +108,17 @@ export async function createCompetition({
   /** ISO timestamp after which competitors cannot upload; omit for none */
   uploadDeadline?: string | null
 }) {
+  await requireAdmin()
+  const cleanName = name.trim()
+  if (!cleanName || cleanName.length > 255) {
+    throw new Error('The competition name must be 1 to 255 characters.')
+  }
+  if (!Number.isInteger(year) || year < 2000 || year > 2100) {
+    throw new Error('The year must be between 2000 and 2100.')
+  }
+  if (uploadDeadline && Number.isNaN(new Date(uploadDeadline).getTime())) {
+    throw new Error('The upload deadline is not a valid date and time.')
+  }
   try {
     // Check if Appwrite resources are initialized
     const { isInitialized } = await checkAppwriteInitialization()
@@ -118,7 +136,7 @@ export async function createCompetition({
       // The deadline column only exists after setup has been run since deadlines
       // were added, so leave the field out entirely when there is no deadline
       data: {
-        name,
+        name: cleanName,
         year,
         active,
         ...(uploadDeadline ? { uploadDeadline } : {}),
@@ -176,6 +194,7 @@ export async function updateCompetitionStatus(
   competitionId: string,
   active: boolean
 ) {
+  await requireAdmin()
   try {
     // Check if Appwrite resources are initialized
     const { isInitialized } = await checkAppwriteInitialization()
@@ -201,6 +220,7 @@ export async function updateCompetitionStatus(
 }
 
 export async function deleteCompetition(competitionId: string) {
+  await requireAdmin()
   try {
     // Check if Appwrite resources are initialized
     const { isInitialized } = await checkAppwriteInitialization()
@@ -232,6 +252,24 @@ export async function deleteCompetition(competitionId: string) {
         console.error(`Error deleting music file ${file.$id}:`, fileError)
         // Continue deleting other files even if one fails
       }
+    }
+
+    // Remove the skater entries for this competition, if entries are set up
+    try {
+      const entryRows = await getAllDocuments(
+        databaseId,
+        process.env.APPWRITE_ENTRIES_COLLECTION_ID || 'entries',
+        [Query.equal('competitionId', competitionId)]
+      )
+      for (const entry of entryRows) {
+        await tablesDB.deleteRow({
+          databaseId,
+          tableId: process.env.APPWRITE_ENTRIES_COLLECTION_ID || 'entries',
+          rowId: entry.$id,
+        })
+      }
+    } catch (entryError) {
+      if (!isMissingTableError(entryError)) throw entryError
     }
 
     // Delete all associated grades using pagination
@@ -267,6 +305,7 @@ export async function deleteCompetition(competitionId: string) {
  * Get all active competitions
  */
 export async function getActiveCompetitions() {
+  await requireUser()
   try {
     // Check if Appwrite resources are initialized
     const { isInitialized } = await checkAppwriteInitialization()
@@ -298,6 +337,7 @@ export async function getGradesForCompetition(
   competitionId: string,
   category?: string
 ) {
+  await requireUser()
   try {
     // Check if Appwrite resources are initialized
     const { isInitialized } = await checkAppwriteInitialization()
@@ -325,6 +365,7 @@ export async function getGradesForCompetition(
  * Get unique grade categories for a competition
  */
 export async function getGradeCategoriesForCompetition(competitionId: string) {
+  await requireUser()
   try {
     // Check if Appwrite resources are initialized
     const { isInitialized } = await checkAppwriteInitialization()
@@ -394,6 +435,7 @@ export async function updateCompetitionDeadline(
 export async function getCompetitionDeadlines(): Promise<
   Record<string, string>
 > {
+  await requireUser()
   try {
     const rows = await getAllDocuments(databaseId, competitionsCollectionId)
     const deadlines: Record<string, string> = {}

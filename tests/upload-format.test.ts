@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  formatBytes,
-  formatSpeed,
-  formatTimeLeft,
-} from '@/lib/upload/format'
+import { formatBytes, formatSpeed, formatTimeLeft } from '@/lib/upload/format'
 
 describe('upload format helpers', () => {
   it('shows small files in KB and larger files in MB', () => {
