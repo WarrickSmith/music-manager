@@ -8,6 +8,7 @@ import ErrorNotice from '@/components/ui/error-notice'
 import { Button } from '@/components/ui/button'
 import PageHeader from '@/components/layout/page-header'
 import MusicFilesView from '@/components/music/music-files-view'
+import ExportDialog from '@/components/music/export-dialog'
 import type { MusicFile } from '@/components/music/types'
 
 export default function MusicFileManagement() {
@@ -39,9 +40,12 @@ export default function MusicFileManagement() {
         title="Music Files"
         description="Every file uploaded across all competitions. Filter, then play, download or remove."
         actions={
-          <Button variant="outline" onClick={load} disabled={isLoading}>
-            <RefreshCw className={isLoading ? 'animate-spin' : ''} /> Refresh
-          </Button>
+          <>
+            <ExportDialog files={files} />
+            <Button variant="outline" onClick={load} disabled={isLoading}>
+              <RefreshCw className={isLoading ? 'animate-spin' : ''} /> Refresh
+            </Button>
+          </>
         }
       />
 

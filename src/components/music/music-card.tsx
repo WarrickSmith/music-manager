@@ -1,6 +1,6 @@
 'use client'
 
-import { Download, Loader2, Trash2 } from 'lucide-react'
+import { Download, Loader2, Lock, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import AudioPlayerButton from '@/components/ui/audio-player-button'
 import { formatDate, formatDuration, formatFileSize, cn } from '@/lib/utils'
@@ -28,6 +28,7 @@ export default function MusicCard({
   showCompetitor,
   selected,
   onSelectChange,
+  locked = false,
   isDeleting,
   isDownloading,
   onDelete,
@@ -37,6 +38,8 @@ export default function MusicCard({
   showCompetitor: boolean
   selected?: boolean
   onSelectChange?: (selected: boolean) => void
+  /** The competition's upload deadline has passed, so a competitor cannot delete this */
+  locked?: boolean
   isDeleting: boolean
   isDownloading: boolean
   onDelete: (file: MusicFile) => void
@@ -58,7 +61,7 @@ export default function MusicCard({
     <article
       className={cn(
         'flex flex-col overflow-hidden rounded-lg border bg-card transition-colors hover:border-muted-foreground/60',
-        selected && 'border-primary',
+        selected && 'border-primary'
       )}
     >
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 px-4 pt-3">
@@ -74,7 +77,7 @@ export default function MusicCard({
         <span
           className={cn(
             'rounded-sm px-2 py-0.5 text-[13px] font-bold whitespace-nowrap',
-            gradeChipClass(file.gradeType),
+            gradeChipClass(file.gradeType)
           )}
         >
           {file.gradeType}
@@ -111,6 +114,14 @@ export default function MusicCard({
         <span className="font-medium text-foreground">
           {file.competitionYear} {file.competitionName}
         </span>
+        {locked && (
+          <span
+            className="inline-flex items-center gap-1 rounded-sm bg-secondary px-1.5 py-0.5 text-[11px] font-semibold text-muted-foreground"
+            title="The upload deadline has passed, so this file is locked"
+          >
+            <Lock className="size-3" aria-hidden /> Locked
+          </span>
+        )}
         <span className="tabular-nums">
           {file.uploadedAt ? formatDate(file.uploadedAt) : 'N/A'} ·{' '}
           {formatFileSize(file.size || 0)}
@@ -120,6 +131,8 @@ export default function MusicCard({
       <div className="mt-auto grid grid-cols-[1fr_46px_46px] gap-px border-t bg-border">
         <AudioPlayerButton
           fileId={storageFileId(file)}
+          title={`${file.gradeCategory} · ${file.gradeSegment}`}
+          subtitle={`${file.userName} · ${file.competitionYear} ${file.competitionName}`}
           size="default"
           showLabel
           className="h-10 rounded-none"
@@ -134,16 +147,28 @@ export default function MusicCard({
         >
           {isDownloading ? <Loader2 className="animate-spin" /> : <Download />}
         </Button>
-        <DeleteFileDialog file={file} onConfirm={() => onDelete(file)}>
+        {locked ? (
           <Button
             variant="secondary"
-            className="h-10 rounded-none hover:text-destructive"
-            title="Delete"
-            aria-label="Delete"
+            className="h-10 rounded-none"
+            disabled
+            title="Locked after the upload deadline"
+            aria-label="Locked after the upload deadline"
           >
-            <Trash2 />
+            <Lock />
           </Button>
-        </DeleteFileDialog>
+        ) : (
+          <DeleteFileDialog file={file} onConfirm={() => onDelete(file)}>
+            <Button
+              variant="secondary"
+              className="h-10 rounded-none hover:text-destructive"
+              title="Delete"
+              aria-label="Delete"
+            >
+              <Trash2 />
+            </Button>
+          </DeleteFileDialog>
+        )}
       </div>
     </article>
   )

@@ -94,6 +94,7 @@ All runtime configuration is provided via environment variables (no build-time e
 | `APPWRITE_COMPETITIONS_COLLECTION_ID` | Yes | Competitions table ID (setup defaults to `competitions`) |
 | `APPWRITE_GRADES_COLLECTION_ID` | Yes | Grades table ID (setup defaults to `grades`) |
 | `APPWRITE_MUSIC_FILES_COLLECTION_ID` | Yes | Music files table ID (setup defaults to `musicfiles`) |
+| `APPWRITE_ENTRIES_COLLECTION_ID` | No | Entries table ID (defaults to `entries`) |
 | `APPWRITE_BUCKET_ID` | Yes | Storage bucket ID |
 
 The `*_COLLECTION_ID` names predate Appwrite's switch from "collections" to "tables" and are kept so existing stack `.env` files keep working.

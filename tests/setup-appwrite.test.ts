@@ -138,6 +138,33 @@ describe('setupAppwrite', () => {
     )
   })
 
+  it('upgrades a project set up before deadlines and entries existed', async () => {
+    await runSetup({ all: true })
+    state.tables
+      .get('MusicManagerDB/competitions')!
+      .columns.delete('uploadDeadline')
+    state.tables.delete('MusicManagerDB/entries')
+
+    const result = await runSetup({ all: true })
+
+    expect(result.success).toBe(true)
+    expect(result.results).toContain(
+      "Created datetime column 'uploadDeadline' in table 'competitions'"
+    )
+    const entries = state.tables.get('MusicManagerDB/entries')!
+    expect([...entries.columns.keys()]).toEqual([
+      'competitionId',
+      'gradeId',
+      'userId',
+      'userName',
+    ])
+    expect(entries.indexes.get('idx_competition_grade_user')?.columns).toEqual([
+      'competitionId',
+      'gradeId',
+      'userId',
+    ])
+  })
+
   it('reports a missing API key scope instead of treating tables as missing', async () => {
     state.databases.add('MusicManagerDB')
     state.missingScopes.add('tables.read')
@@ -146,7 +173,7 @@ describe('setupAppwrite', () => {
 
     expect(result.success).toBe(false)
     expect(state.calls.some((c) => c.startsWith('createTable'))).toBe(false)
-    expect(result.errors).toHaveLength(3)
+    expect(result.errors).toHaveLength(4)
     for (const error of result.errors!) {
       expect(error).toContain('missing scopes (["tables.read"])')
       expect(error).toContain('APPWRITE_API_KEY has the required scopes')

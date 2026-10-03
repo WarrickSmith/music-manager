@@ -20,6 +20,10 @@ export class UploadError extends Error {
     message: string,
     public details: string,
     public status?: number,
+    /** Machine-readable reason from the server, e.g. "exists" or "deadline" */
+    public code?: string,
+    /** Extra data the server sent with the error, e.g. the file being replaced */
+    public payload?: Record<string, unknown>
   ) {
     super(message)
     this.name = 'UploadError'
@@ -39,7 +43,7 @@ const SPEED_SMOOTHING = 0.3
 export function uploadWithProgress<T = unknown>(
   url: string,
   body: FormData,
-  { onProgress, onProcessing, signal }: UploadHandlers = {},
+  { onProgress, onProcessing, signal }: UploadHandlers = {}
 ): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     const xhr = new XMLHttpRequest()
@@ -75,21 +79,26 @@ export function uploadWithProgress<T = unknown>(
       reject(
         new UploadError(
           'The upload could not reach the server. Check your connection and try again.',
-          'Network error while sending the file',
-        ),
+          'Network error while sending the file'
+        )
       )
     xhr.ontimeout = () =>
       reject(
         new UploadError(
           'The upload timed out. Try again, or use a smaller file.',
-          'Request timed out',
-        ),
+          'Request timed out'
+        )
       )
     xhr.onabort = () =>
       reject(new UploadError('The upload was cancelled.', 'Upload aborted'))
 
     xhr.onload = () => {
-      let payload: { success?: boolean; error?: string } | null = null
+      let payload: {
+        success?: boolean
+        error?: string
+        code?: string
+        [key: string]: unknown
+      } | null = null
       try {
         payload = JSON.parse(xhr.responseText)
       } catch {
@@ -111,7 +120,9 @@ export function uploadWithProgress<T = unknown>(
           reason,
           `HTTP ${xhr.status} ${xhr.statusText}: ${xhr.responseText.slice(0, 500)}`,
           xhr.status,
-        ),
+          payload?.code,
+          payload ?? undefined
+        )
       )
     }
 

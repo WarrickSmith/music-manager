@@ -17,6 +17,8 @@ export interface UploadFailure {
   message: string
   /** Technical detail to include in an error report */
   details: string
+  /** Machine-readable reason from the server, e.g. "exists" or "deadline" */
+  code?: string
 }
 
 /**
@@ -69,11 +71,12 @@ export const useUploadProgress = () => {
             ? error
             : new UploadError(
                 'The upload failed unexpectedly.',
-                error instanceof Error ? error.message : String(error),
+                error instanceof Error ? error.message : String(error)
               )
         setFailure({
           message: uploadError.message,
           details: uploadError.details,
+          code: uploadError.code,
         })
         setStatus('error')
         throw uploadError
@@ -81,7 +84,7 @@ export const useUploadProgress = () => {
         abortRef.current = null
       }
     },
-    [],
+    []
   )
 
   // Stop an in-flight upload if the form is closed

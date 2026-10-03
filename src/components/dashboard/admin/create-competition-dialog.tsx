@@ -22,6 +22,7 @@ import {
 import { toast } from 'sonner'
 import { RefreshCw } from 'lucide-react'
 import { createCompetition } from '@/app/actions/competition-actions'
+import { fromDatetimeLocalValue } from '@/lib/deadline'
 
 interface Competition {
   $id: string
@@ -49,6 +50,7 @@ export default function CreateCompetitionDialog({
     active: true,
     gradeSource: 'default',
     cloneFromCompetitionId: '',
+    uploadDeadline: '',
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -67,6 +69,7 @@ export default function CreateCompetitionDialog({
           formData.gradeSource === 'clone'
             ? formData.cloneFromCompetitionId
             : undefined,
+        uploadDeadline: fromDatetimeLocalValue(formData.uploadDeadline),
       })
 
       toast.success('Competition created successfully')
@@ -90,10 +93,7 @@ export default function CreateCompetitionDialog({
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="grid grid-cols-4 gap-4">
             <div className="col-span-3">
-              <Label
-                htmlFor="competition-name"
-                className="font-medium"
-              >
+              <Label htmlFor="competition-name" className="font-medium">
                 Competition Name
               </Label>
               <Input
@@ -108,10 +108,7 @@ export default function CreateCompetitionDialog({
             </div>
 
             <div>
-              <Label
-                htmlFor="competition-year"
-                className="font-medium"
-              >
+              <Label htmlFor="competition-year" className="font-medium">
                 Year
               </Label>
               <Input
@@ -129,10 +126,7 @@ export default function CreateCompetitionDialog({
           </div>
 
           <div className="flex items-center justify-between space-x-2">
-            <Label
-              htmlFor="competition-active"
-              className="font-medium"
-            >
+            <Label htmlFor="competition-active" className="font-medium">
               Active Competition
             </Label>
             <Switch
@@ -145,6 +139,24 @@ export default function CreateCompetitionDialog({
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="competition-deadline" className="font-medium">
+              Upload deadline (optional)
+            </Label>
+            <Input
+              id="competition-deadline"
+              type="datetime-local"
+              value={formData.uploadDeadline}
+              onChange={(e) =>
+                setFormData({ ...formData, uploadDeadline: e.target.value })
+              }
+            />
+            <p className="text-sm text-muted-foreground">
+              After this time competitors cannot upload, replace or delete their
+              music. Admins always can.
+            </p>
+          </div>
+
+          <div className="space-y-2">
             <Label className="font-medium">Grade Source</Label>
             <RadioGroup
               value={formData.gradeSource}
@@ -154,20 +166,12 @@ export default function CreateCompetitionDialog({
               className="space-y-2"
             >
               <div className="flex items-center space-x-2">
-                <RadioGroupItem
-                  value="default"
-                  id="default-grades"
-                />
-                <Label htmlFor="default-grades">
-                  Use default grades
-                </Label>
+                <RadioGroupItem value="default" id="default-grades" />
+                <Label htmlFor="default-grades">Use default grades</Label>
               </div>
 
               <div className="flex items-center space-x-2">
-                <RadioGroupItem
-                  value="clone"
-                  id="clone-grades"
-                />
+                <RadioGroupItem value="clone" id="clone-grades" />
                 <Label htmlFor="clone-grades">
                   Clone from existing competition
                 </Label>
@@ -188,10 +192,7 @@ export default function CreateCompetitionDialog({
                   </SelectTrigger>
                   <SelectContent>
                     {competitions.map((comp) => (
-                      <SelectItem
-                        key={comp.$id}
-                        value={comp.$id}
-                      >
+                      <SelectItem key={comp.$id} value={comp.$id}>
                         {comp.name} ({comp.year})
                       </SelectItem>
                     ))}

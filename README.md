@@ -60,7 +60,12 @@ The application uses Appwrite for authentication and role-based access control. 
 - Competition lifecycle management (create, activate/deactivate, cascade delete)
 - Grade management with default NZ ice skating templates and competition cloning
 - Music file upload with automatic metadata extraction and standardised naming
-- In-browser audio playback and file download
+- In-browser audio playback with a shared mini player (seek bar, one track at a time) and file download
+- Upload deadlines per competition: competitors are locked out of upload, replace and delete afterwards, admins are not
+- One music file per skater per grade, with a confirmed replace that only removes the old file once the new one is saved
+- Entries per grade and a missing-music view for admins, with a copyable list; competitors see music still needed
+- Admin zip export of a competition's music, numbered in running order with a manifest
+- Advice on silence at the start of a track when uploading
 - Dark/light theme with cookie persistence
 - Appwrite resource initialisation from admin dashboard
 - Responsive mobile-first design

@@ -33,6 +33,8 @@ const TABLE_PURPOSES: Record<string, string> = {
   competitions: 'Each competition, its year and whether uploads are open',
   grades: 'The categories and segments skaters can enter in a competition',
   musicfiles: 'One record for every uploaded music file',
+  entries:
+    'Which skater is entered in which grade, to show whose music is missing',
 }
 
 function columnDetail(column: {

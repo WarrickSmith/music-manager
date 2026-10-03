@@ -34,8 +34,16 @@ import {
   getGradesForCompetition,
 } from '@/app/actions/competition-actions'
 import { getUserProfile } from '@/app/actions/user-actions'
+import { findExistingMusicFile } from '@/app/actions/music-file-actions'
+import type { ExistingMusicSummary } from '@/lib/music/upload-service'
+import { deadlineStatus } from '@/lib/deadline'
+import {
+  analyseLeadingSilence,
+  silenceVerdict,
+} from '@/lib/audio/leading-silence'
 import { useUploadProgress } from '@/hooks/useUploadProgress'
-import { formatDuration, formatFileSize, cn } from '@/lib/utils'
+import { UploadError } from '@/lib/upload/xhr-upload'
+import { formatDate, formatDuration, formatFileSize, cn } from '@/lib/utils'
 import { ACCEPTED_AUDIO_TYPES, MAX_UPLOAD_BYTES } from '@/lib/music/constants'
 
 const formSchema = z.object({
@@ -49,12 +57,12 @@ const formSchema = z.object({
     })
     .refine(
       (value) => value instanceof File && value.size <= MAX_UPLOAD_BYTES,
-      'File size must be less than 15MB',
+      'File size must be less than 15MB'
     )
     .refine(
       (value) =>
         value instanceof File && ACCEPTED_AUDIO_TYPES.includes(value.type),
-      'File must be an audio file (MP3, WAV, M4A, AAC)',
+      'File must be an audio file (MP3, WAV, M4A, AAC)'
     ),
   duration: z.number().nullable().optional(),
 })
@@ -66,6 +74,7 @@ interface Competition extends Models.DefaultRow {
   name: string
   year: number
   active: boolean
+  uploadDeadline?: string | null
 }
 
 interface Grade extends Models.DefaultRow {
@@ -87,6 +96,50 @@ function SelectSpinner() {
   )
 }
 
+/** Advice on how the track starts. Never blocks the upload. */
+function SilenceNote({ seconds }: { seconds: number }) {
+  const verdict = silenceVerdict(seconds)
+  const rounded = seconds.toFixed(1)
+  return (
+    <p
+      className={cn(
+        'rounded-md border px-3 py-2 text-sm',
+        verdict === 'good'
+          ? 'border-success/50 bg-success/10'
+          : 'border-warning/60 bg-warning/10'
+      )}
+      role="status"
+    >
+      {verdict === 'good' && (
+        <>
+          <span className="font-semibold">
+            Starts with {rounded} s of silence.
+          </span>{' '}
+          That leaves a clear cue for the rink operator.
+        </>
+      )}
+      {verdict === 'too-short' && (
+        <>
+          <span className="font-semibold">
+            This track starts almost straight away ({rounded} s of silence).
+          </span>{' '}
+          Clubs usually ask for about 1 second of silence at the start so the
+          operator can cue it cleanly. You can still upload it.
+        </>
+      )}
+      {verdict === 'too-long' && (
+        <>
+          <span className="font-semibold">
+            This track starts with {rounded} s of silence.
+          </span>{' '}
+          That is a long wait on the ice. Check it is intended. You can still
+          upload it.
+        </>
+      )}
+    </p>
+  )
+}
+
 export default function UploadMusic({ userId }: { userId: string }) {
   const [competitions, setCompetitions] = useState<Competition[]>([])
   const [categories, setCategories] = useState<string[]>([])
@@ -96,7 +149,16 @@ export default function UploadMusic({ userId }: { userId: string }) {
   const [fileDuration, setFileDuration] = useState<number | null>(null)
   const [extractingMetadata, setExtractingMetadata] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
+  // Seconds of silence at the start of the chosen file, once measured
+  const [leadingSilence, setLeadingSilence] = useState<number | null>(null)
+  const chosenFileRef = useRef<File | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
+  // The skater's current file for the selected grade; tagged with its grade so a
+  // stale answer for an earlier grade is never shown
+  const [existingFor, setExistingFor] = useState<{
+    gradeId: string
+    file: ExistingMusicSummary | null
+  } | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const {
     status,
@@ -187,7 +249,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
       try {
         setIsLoadingGrades(true)
         setGrades(
-          (await getGradesForCompetition(competitionId, category)) as Grade[],
+          (await getGradesForCompetition(competitionId, category)) as Grade[]
         )
         setValue('gradeId', '')
       } catch (error) {
@@ -200,15 +262,43 @@ export default function UploadMusic({ userId }: { userId: string }) {
     fetchGrades()
   }, [competitionId, category, setValue])
 
+  // Look for a file this skater already uploaded for the chosen grade
+  useEffect(() => {
+    const checkExisting = async () => {
+      if (!gradeId || !userId) return
+      const result = await findExistingMusicFile(userId, gradeId)
+      if (result.ok) {
+        setExistingFor({ gradeId, file: result.data })
+      } else {
+        // The server still blocks an accidental overwrite, so this is a warning only
+        console.error('Could not check for an existing file:', result.error)
+        setExistingFor({ gradeId, file: null })
+      }
+    }
+    checkExisting()
+  }, [gradeId, userId])
+
+  const existing = existingFor?.gradeId === gradeId ? existingFor.file : null
+  const selectedCompetition = competitions.find((c) => c.$id === competitionId)
+  const deadline = deadlineStatus(selectedCompetition?.uploadDeadline)
+  const closed = deadline.state === 'closed'
+
   const busy = status === 'uploading' || status === 'processing'
 
   /** Take a chosen or dropped file and read its length in the browser */
   const handleFile = async (file: File | null) => {
     setSelectedFile(file)
     setFileDuration(null)
+    setLeadingSilence(null)
+    chosenFileRef.current = file
     form.setValue('file', file ?? undefined)
     form.setValue('duration', null)
     if (!file) return
+
+    // Measured in the background; the advice appears when it is ready
+    analyseLeadingSilence(file).then((seconds) => {
+      if (chosenFileRef.current === file) setLeadingSilence(seconds)
+    })
 
     setExtractingMetadata(true)
     try {
@@ -238,6 +328,8 @@ export default function UploadMusic({ userId }: { userId: string }) {
     reset()
     setSelectedFile(null)
     setFileDuration(null)
+    setLeadingSilence(null)
+    chosenFileRef.current = null
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
@@ -248,16 +340,29 @@ export default function UploadMusic({ userId }: { userId: string }) {
     formData.append('gradeId', values.gradeId)
     formData.append('userId', userId)
     formData.append('userName', userName)
+    // Tell the server this upload is meant to replace the earlier file
+    if (existing) formData.append('replace', 'true')
     if (values.duration !== null && values.duration !== undefined) {
       formData.append('duration', values.duration.toString())
     }
 
     try {
       await upload('/api/music/upload', formData)
-      toast.success('File uploaded successfully')
+      toast.success(existing ? 'Music replaced' : 'File uploaded successfully')
       // Leave the finished bar on screen briefly, then clear the form
       setTimeout(handleReset, 2500)
     } catch (error) {
+      // Someone (or another tab) uploaded to this grade since we looked.
+      // Show the replace warning and let the skater confirm.
+      if (error instanceof UploadError && error.code === 'exists') {
+        const found = error.payload?.existing as
+          | ExistingMusicSummary
+          | undefined
+        if (found) setExistingFor({ gradeId: values.gradeId, file: found })
+        resetProgress()
+        toast.info('You already have a file for this grade. Review it below.')
+        return
+      }
       // The failure is shown in the form; keep the console copy for debugging
       console.error('Upload failed:', error)
     }
@@ -270,6 +375,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
     !!category &&
     !!gradeId &&
     !!selectedFile &&
+    !closed &&
     !extractingMetadata
 
   return (
@@ -317,8 +423,14 @@ export default function UploadMusic({ userId }: { userId: string }) {
                             <SelectItem
                               key={competition.$id}
                               value={competition.$id}
+                              disabled={
+                                deadlineStatus(competition.uploadDeadline)
+                                  .state === 'closed'
+                              }
                             >
                               {competition.year} - {competition.name}
+                              {deadlineStatus(competition.uploadDeadline)
+                                .state === 'closed' && ' (uploads closed)'}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -328,6 +440,26 @@ export default function UploadMusic({ userId }: { userId: string }) {
                     <FormDescription>
                       Only active competitions are shown
                     </FormDescription>
+                    {selectedCompetition && deadline.state !== 'none' && (
+                      <p
+                        className={cn(
+                          'rounded-md border px-3 py-2 text-sm',
+                          deadline.state === 'closed'
+                            ? 'border-destructive/50 bg-destructive/10'
+                            : deadline.state === 'closing-soon'
+                              ? 'border-warning/60 bg-warning/10'
+                              : 'bg-background text-muted-foreground'
+                        )}
+                        role={deadline.state === 'closed' ? 'alert' : undefined}
+                      >
+                        <span className="font-semibold">{deadline.label}.</span>{' '}
+                        {deadline.state === 'closed'
+                          ? 'You can no longer upload or change music for this competition. Ask a club admin if something needs to change.'
+                          : deadline.state === 'closing-soon'
+                            ? 'After this you will not be able to upload, replace or delete your music.'
+                            : 'After that you will not be able to upload, replace or delete your music.'}
+                      </p>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -407,6 +539,30 @@ export default function UploadMusic({ userId }: { userId: string }) {
                 />
               </div>
 
+              {existing && (
+                <div
+                  className="rounded-md border border-warning/60 bg-warning/10 px-3 py-2 text-sm"
+                  role="status"
+                >
+                  <p className="font-semibold">
+                    You already have a file for this grade.
+                  </p>
+                  <p className="text-muted-foreground">
+                    <span className="font-mono text-foreground">
+                      {existing.originalName}
+                    </span>
+                    {existing.duration
+                      ? ` (${formatDuration(existing.duration)})`
+                      : ''}
+                    {existing.uploadedAt
+                      ? `, uploaded ${formatDate(existing.uploadedAt)}`
+                      : ''}
+                    . Uploading a new file replaces it. The old file is only
+                    removed once the new one is saved.
+                  </p>
+                </div>
+              )}
+
               <FormField
                 control={form.control}
                 name="file"
@@ -475,7 +631,7 @@ export default function UploadMusic({ userId }: { userId: string }) {
                         }}
                         className={cn(
                           'flex cursor-pointer flex-col items-center gap-1 rounded-lg border-2 border-dashed bg-background px-4 py-7 text-center text-muted-foreground transition-colors hover:border-primary hover:text-foreground',
-                          isDragging && 'border-primary text-foreground',
+                          isDragging && 'border-primary text-foreground'
                         )}
                       >
                         <Upload className="mb-1 size-7 text-primary" />
@@ -484,6 +640,9 @@ export default function UploadMusic({ userId }: { userId: string }) {
                         </span>
                         <span>or click to browse your device</span>
                       </label>
+                    )}
+                    {selectedFile && leadingSilence !== null && (
+                      <SilenceNote seconds={leadingSilence} />
                     )}
                     <FormDescription>
                       Max file size: 15MB. Supported formats: MP3, WAV, M4A, AAC
@@ -520,12 +679,14 @@ export default function UploadMusic({ userId }: { userId: string }) {
                     details={failure.details}
                   />
                   <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      onClick={() => form.handleSubmit(onSubmit)()}
-                    >
-                      <Upload /> Try again
-                    </Button>
+                    {failure.code !== 'deadline' && (
+                      <Button
+                        type="button"
+                        onClick={() => form.handleSubmit(onSubmit)()}
+                      >
+                        <Upload /> Try again
+                      </Button>
+                    )}
                     <Button
                       type="button"
                       variant="outline"
@@ -544,7 +705,9 @@ export default function UploadMusic({ userId }: { userId: string }) {
                     ? 'Uploading...'
                     : status === 'complete'
                       ? 'Uploaded'
-                      : 'Upload music file'}
+                      : existing
+                        ? 'Replace music file'
+                        : 'Upload music file'}
                 </Button>
               )}
             </form>
