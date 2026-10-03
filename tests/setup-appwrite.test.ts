@@ -84,6 +84,25 @@ describe('setupAppwrite', () => {
     }
   })
 
+  it('creates the storage bucket private, with no read access for anyone', async () => {
+    await runSetup({ all: true })
+    expect(state.bucketPermissions.get('mmfiles')).toEqual([])
+  })
+
+  it('closes a bucket that an earlier version left open to the public', async () => {
+    state.buckets.add('mmfiles')
+    state.bucketPermissions.set('mmfiles', [
+      'read("any")',
+      'read("team:admin")',
+    ])
+
+    const result = await runSetup({ all: true })
+
+    expect(result.success).toBe(true)
+    expect(state.bucketPermissions.get('mmfiles')).toEqual([])
+    expect(result.results).toContain("Made storage bucket 'mmfiles' private")
+  })
+
   it('uses varchar columns instead of the deprecated string type', async () => {
     await runSetup({ all: true })
 

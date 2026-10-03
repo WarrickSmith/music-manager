@@ -1,6 +1,7 @@
 'use client'
 
-import { Search } from 'lucide-react'
+import { RotateCcw, Search } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import {
   Select,
   SelectContent,
@@ -58,11 +59,15 @@ export default function MusicFilterBar({
   filters,
   options,
   onChange,
+  onReset,
+  isFiltered,
   showCompetitor,
 }: {
   filters: MusicFilters
   options: Options
   onChange: (key: keyof MusicFilters, value: string) => void
+  onReset: () => void
+  isFiltered: boolean
   showCompetitor: boolean
 }) {
   return (
@@ -128,6 +133,16 @@ export default function MusicFilterBar({
           onChange={(v) => onChange('competitor', v)}
         />
       )}
+      <Button
+        type="button"
+        variant="outline"
+        onClick={onReset}
+        disabled={!isFiltered}
+        className="w-full"
+      >
+        <RotateCcw className="size-4" aria-hidden />
+        Reset filters
+      </Button>
     </div>
   )
 }

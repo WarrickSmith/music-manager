@@ -51,7 +51,7 @@ vi.stubEnv('APPWRITE_DATABASE_ID', 'MusicManagerDB')
 vi.stubEnv('APPWRITE_BUCKET_ID', 'mmfiles')
 
 const { checkAppwriteInitialization, initializeAppwrite } =
-  await import('@/lib/appwrite/initialization-service')
+  await import('@/lib/appwrite/initialization-core')
 const { getIndexDefinitions, getTableDefinitions, getTeamDefinitions } =
   await import('../scripts/setup-appwrite')
 
@@ -145,6 +145,41 @@ describe('checkAppwriteInitialization', () => {
     expect(status.isInitialized).toBe(false)
     expect(status.errors).toHaveLength(4)
     expect(status.errors[0]).toContain('missing scopes (["tables.read"])')
+  })
+})
+
+describe('bucket access check', () => {
+  it('is ready when the bucket has no broad permissions', async () => {
+    createAllResources()
+    const { report } = await checkAppwriteInitialization()
+    expect(report.bucketAccess.state).toBe('ready')
+  })
+
+  it.each(['read("any")', 'read("users")', 'create("any")'])(
+    'flags a bucket with %s as open to the public',
+    async (permission) => {
+      createAllResources()
+      state.bucketPermissions.set('mmfiles', [permission, 'read("team:admin")'])
+
+      const { report } = await checkAppwriteInitialization()
+
+      expect(report.bucketAccess.state).toBe('missing')
+      expect(report.bucketAccess.error).toContain('open to the public')
+      expect(report.bucketAccess.error).toContain(permission)
+    }
+  )
+
+  it('ignores team permissions', async () => {
+    createAllResources()
+    state.bucketPermissions.set('mmfiles', ['read("team:competitor")'])
+    const { report } = await checkAppwriteInitialization()
+    expect(report.bucketAccess.state).toBe('ready')
+  })
+
+  it('does not report the bucket as readable when it does not exist', async () => {
+    const { report } = await checkAppwriteInitialization()
+    expect(report.bucketAccess.state).toBe('missing')
+    expect(report.bucketAccess.error).toBeUndefined()
   })
 })
 

@@ -11,7 +11,7 @@ import {
   type ReactNode,
 } from 'react'
 import { AlertTriangle, Loader2, Pause, Play, X } from 'lucide-react'
-import { getMusicFileViewUrl } from '@/app/actions/music-file-actions'
+import { musicFileUrl } from '@/lib/music/urls'
 import { Button } from '@/components/ui/button'
 import { formatDuration } from '@/lib/utils'
 
@@ -129,7 +129,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       setCurrentTime(0)
       setDuration(0)
       try {
-        const { url } = await getMusicFileViewUrl(next.fileId)
+        const url = musicFileUrl(next.fileId)
         if (request !== requestRef.current) return
         audio.src = url
         await audio.play()

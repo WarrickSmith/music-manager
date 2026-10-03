@@ -1,8 +1,8 @@
 import { tablesDB, storage, ID, Query } from '@/lib/appwrite/server'
-import * as musicMetadata from 'music-metadata'
 import { toPlainObject } from '@/lib/utils'
 import { ACCEPTED_AUDIO_TYPES, MAX_UPLOAD_BYTES } from '@/lib/music/constants'
 import { formatDeadlineDate, isPastDeadline } from '@/lib/deadline'
+import { NotAudioError, sniffAudio } from '@/lib/music/audio-sniff'
 
 export { ACCEPTED_AUDIO_TYPES, MAX_UPLOAD_BYTES }
 
@@ -44,8 +44,15 @@ export class UploadConflictError extends Error {
   }
 }
 
+/**
+ * Who is uploading. The identity always comes from the signed-in session, never
+ * from the form, so a competitor cannot upload as someone else.
+ */
 export interface UploadActor {
-  /** Admins can upload and replace after a deadline; competitors cannot */
+  id: string
+  /** The name stored on the file and used in its file name */
+  name: string
+  /** Admins can upload after a deadline, to any competition, and for another skater */
   isAdmin: boolean
 }
 
@@ -82,61 +89,71 @@ export function summariseExisting(row: {
   }
 }
 
-async function readDuration(file: File): Promise<number | null> {
-  try {
-    const buffer = new Uint8Array(await file.arrayBuffer())
-    let metadata
-    try {
-      metadata = await musicMetadata.parseBuffer(buffer, file.type)
-    } catch {
-      metadata = await musicMetadata.parseBuffer(buffer)
-    }
-    return metadata.format.duration
-      ? Math.round(metadata.format.duration)
-      : null
-  } catch (error) {
-    // A missing duration is not fatal; the file can still be stored
-    console.error('Could not read audio duration:', error)
-    return null
-  }
+/** The name the skater's file had, with path and control characters removed */
+function cleanOriginalName(name: string): string {
+  return (
+    name
+      .replace(/[\u0000-\u001f\u007f/\\]/g, '')
+      .trim()
+      .slice(0, 255) || 'audio'
+  )
 }
 
 /**
  * Store an uploaded music file and create its database record.
- * Shared by the upload route (which reports real byte progress) and the
- * uploadMusicFile server action.
+ * Called by the upload route, which reports real byte progress.
  */
-export async function storeMusicFile(
-  formData: FormData,
-  actor: UploadActor = { isAdmin: false }
-) {
+export async function storeMusicFile(formData: FormData, actor: UploadActor) {
   const databaseId = process.env.APPWRITE_DATABASE_ID!
   const bucketId = process.env.APPWRITE_BUCKET_ID!
   const musicFilesTableId = process.env.APPWRITE_MUSIC_FILES_COLLECTION_ID!
 
-  const file = formData.get('file') as File | null
-  const competitionId = formData.get('competitionId') as string | null
-  const gradeId = formData.get('gradeId') as string | null
-  const userId = formData.get('userId') as string | null
-  const userName = (formData.get('userName') as string | null)?.trim()
-
-  if (!file || !competitionId || !gradeId || !userId || !userName) {
+  const file = formData.get('file')
+  const competitionId = formData.get('competitionId')
+  const gradeId = formData.get('gradeId')
+  if (
+    !(file instanceof File) ||
+    typeof competitionId !== 'string' ||
+    typeof gradeId !== 'string' ||
+    !competitionId ||
+    !gradeId
+  ) {
     throw new UploadValidationError('Some required details are missing.')
   }
-  if (!ACCEPTED_AUDIO_TYPES.includes(file.type)) {
-    throw new UploadValidationError(
-      'Invalid file type. Only MP3, WAV, M4A or AAC audio files are accepted.'
-    )
+
+  // Whose music this is: the signed-in user. Only an admin may upload for
+  // another skater, by naming them in the form.
+  let userId = actor.id
+  let userName = actor.name.trim() || 'Skater'
+  if (actor.isAdmin) {
+    const onBehalfId = formData.get('userId')
+    const onBehalfName = formData.get('userName')
+    if (typeof onBehalfId === 'string' && onBehalfId) {
+      userId = onBehalfId
+      userName =
+        (typeof onBehalfName === 'string' && onBehalfName.trim()) || userName
+    }
+  }
+
+  if (file.size === 0) {
+    throw new UploadValidationError('This file is empty.')
   }
   if (file.size > MAX_UPLOAD_BYTES) {
     throw new UploadValidationError('File size must be less than 15MB.')
   }
 
-  const durationFromForm = formData.get('duration')
-  const duration =
-    durationFromForm && !isNaN(Number(durationFromForm))
-      ? Number(durationFromForm)
-      : await readDuration(file)
+  // Check what the file really is from its bytes. The name and the type the
+  // browser reported are not trusted, and the length comes from the file.
+  const bytes = new Uint8Array(await file.arrayBuffer())
+  let audio
+  try {
+    audio = await sniffAudio(bytes)
+  } catch (error) {
+    if (error instanceof NotAudioError) {
+      throw new UploadValidationError(error.message)
+    }
+    throw error
+  }
 
   const competition = await tablesDB.getRow({
     databaseId,
@@ -148,6 +165,17 @@ export async function storeMusicFile(
     tableId: process.env.APPWRITE_GRADES_COLLECTION_ID!,
     rowId: gradeId,
   })
+
+  if (grade.competitionId !== competitionId) {
+    throw new UploadValidationError(
+      'That grade does not belong to the chosen competition.'
+    )
+  }
+  if (!actor.isAdmin && competition.active === false) {
+    throw new UploadValidationError(
+      `${competition.name} is not open for uploads.`
+    )
+  }
 
   if (!actor.isAdmin && isPastDeadline(competition.uploadDeadline)) {
     throw new UploadDeadlineError(
@@ -169,15 +197,18 @@ export async function storeMusicFile(
     formattedUserName = `${parts[0]}-${parts[parts.length - 1].charAt(0).toLowerCase()}`
   }
 
-  const extension = file.name.split('.').pop()
+  // Standardised name. The extension comes from the content, not the original name.
   const formattedFileName =
     `${competition.year}-${competition.name}-${grade.category}-${grade.segment}-${formattedUserName}`
       .replace(/[^a-zA-Z0-9-]/g, '-')
       .toLowerCase()
+      .slice(0, 200)
 
-  const renamedFile = new File([file], `${formattedFileName}.${extension}`, {
-    type: file.type,
-  })
+  const renamedFile = new File(
+    [bytes],
+    `${formattedFileName}.${audio.extension}`,
+    { type: audio.mimeType }
+  )
   const uploadedFile = await storage.createFile(
     bucketId,
     ID.unique(),
@@ -190,7 +221,7 @@ export async function storeMusicFile(
     rowId: ID.unique(),
     data: {
       fileId: uploadedFile.$id,
-      originalName: file.name,
+      originalName: cleanOriginalName(file.name),
       fileName: formattedFileName,
       storagePath: `${bucketId}/${uploadedFile.$id}`,
       competitionId,
@@ -203,7 +234,7 @@ export async function storeMusicFile(
       userId,
       userName,
       uploadedAt: new Date().toISOString(),
-      duration,
+      duration: audio.durationSeconds,
       size: file.size,
       status: 'ready',
     },

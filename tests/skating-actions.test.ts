@@ -1,7 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const m = vi.hoisted(() => ({
-  session: null as null | { $id: string; labels: string[] },
+  session: null as null | {
+    $id: string
+    name: string
+    email: string
+    labels: string[]
+  },
   getRow: vi.fn(),
   updateRow: vi.fn(),
   createRow: vi.fn(),
@@ -12,22 +17,13 @@ const m = vi.hoisted(() => ({
 }))
 
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
-vi.mock('@/lib/appwrite/initialization-service', () => ({
+vi.mock('@/lib/appwrite/initialization-core', () => ({
   checkAppwriteInitialization: async () => ({ isInitialized: true }),
 }))
 vi.mock('@/lib/appwrite/default-grades', () => ({ defaultGrades: [] }))
-vi.mock('@/lib/auth/guards', async () => {
-  const actual =
-    await vi.importActual<typeof import('@/lib/auth/guards')>(
-      '@/lib/auth/guards'
-    )
-  return {
-    ...actual,
-    getSessionUser: async () => m.session,
-    getAdminUser: async () =>
-      m.session && m.session.labels.includes('admin') ? m.session : null,
-  }
-})
+vi.mock('@/lib/auth/auth-service', () => ({
+  getCurrentUser: async () => m.session,
+}))
 vi.mock('@/lib/appwrite/server', () => ({
   tablesDB: {
     getRow: m.getRow,
@@ -61,8 +57,13 @@ const { deleteMusicFile, findExistingMusicFile } =
   await import('@/app/actions/music-file-actions')
 const entries = await import('@/app/actions/entry-actions')
 
-const admin = { $id: 'admin1', labels: ['admin'] }
-const mia = { $id: 'u1', labels: ['competitor'] }
+const admin = {
+  $id: 'admin1',
+  name: 'Admin',
+  email: 'a@x.io',
+  labels: ['admin'],
+}
+const mia = { $id: 'u1', name: 'Mia', email: 'm@x.io', labels: ['competitor'] }
 const FUTURE = new Date(Date.now() + 7 * 864e5).toISOString()
 const PAST = new Date(Date.now() - 864e5).toISOString()
 
@@ -127,6 +128,7 @@ describe('getCompetitionDeadlines', () => {
         { $id: 'c3', uploadDeadline: null },
       ],
     })
+    m.session = mia
     expect(await getCompetitionDeadlines()).toEqual({ c1: FUTURE })
   })
 })
@@ -136,7 +138,7 @@ describe('deleteMusicFile and the deadline', () => {
     m.getRow.mockImplementation(async ({ tableId }: { tableId: string }) =>
       tableId === 'competitions'
         ? { $id: 'c1', name: 'Winter Cup', uploadDeadline: deadline }
-        : { $id: 'row1', competitionId: 'c1' }
+        : { $id: 'row1', competitionId: 'c1', userId: 'u1', fileId: 'file1' }
     )
     m.deleteFile.mockResolvedValue({})
     m.deleteRow.mockResolvedValue({})
@@ -145,7 +147,7 @@ describe('deleteMusicFile and the deadline', () => {
   it('locks a competitor out after the deadline and deletes nothing', async () => {
     m.session = mia
     setup(PAST)
-    const result = await deleteMusicFile('file1', 'row1')
+    const result = await deleteMusicFile('row1')
     expect(result.success).toBe(false)
     expect((result as { error: string }).error).toContain('locked')
     expect(m.deleteFile).not.toHaveBeenCalled()
@@ -155,30 +157,44 @@ describe('deleteMusicFile and the deadline', () => {
   it('lets a competitor delete before the deadline or when there is none', async () => {
     m.session = mia
     setup(FUTURE)
-    expect(await deleteMusicFile('file1', 'row1')).toEqual({ success: true })
+    expect(await deleteMusicFile('row1')).toEqual({ success: true })
     setup(undefined)
-    expect(await deleteMusicFile('file1', 'row1')).toEqual({ success: true })
+    expect(await deleteMusicFile('row1')).toEqual({ success: true })
+  })
+
+  it('refuses other skaters and signed-out callers, deleting nothing', async () => {
+    setup()
+    m.session = { ...mia, $id: 'u2' }
+    expect((await deleteMusicFile('row1')).success).toBe(false)
+    m.session = null
+    await expect(deleteMusicFile('row1')).rejects.toThrow('sign in')
+    expect(m.deleteFile).not.toHaveBeenCalled()
+    expect(m.deleteRow).not.toHaveBeenCalled()
   })
 
   it('lets an admin delete after the deadline', async () => {
     m.session = admin
     setup(PAST)
-    expect(await deleteMusicFile('file1', 'row1')).toEqual({ success: true })
+    expect(await deleteMusicFile('row1')).toEqual({ success: true })
     expect(m.deleteFile).toHaveBeenCalledWith('bucket', 'file1')
   })
 })
 
 describe('findExistingMusicFile', () => {
+  beforeEach(() => {
+    m.session = mia
+  })
+
   it('returns null when there is none, or a summary when there is', async () => {
     m.listRows.mockResolvedValueOnce({ rows: [] })
-    expect(await findExistingMusicFile('u1', 'g1')).toEqual({
+    expect(await findExistingMusicFile('g1')).toEqual({
       ok: true,
       data: null,
     })
     m.listRows.mockResolvedValueOnce({
       rows: [{ $id: 'r1', originalName: 'a.mp3', uploadedAt: 'x', size: 5 }],
     })
-    expect(await findExistingMusicFile('u1', 'g1')).toEqual({
+    expect(await findExistingMusicFile('g1')).toEqual({
       ok: true,
       data: {
         id: 'r1',

@@ -12,19 +12,8 @@ import { toast } from 'sonner'
 import { Trash, Loader2, CalendarClock } from 'lucide-react'
 import DeadlineDialog from './deadline-dialog'
 import { deadlineStatus } from '@/lib/deadline'
-import { buttonVariants } from '@/components/ui/button'
+import ConfirmByTypingDialog from '@/components/ui/confirm-by-typing-dialog'
 import { cn } from '@/lib/utils'
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog'
 
 interface CompetitionCardProps {
   competition: {
@@ -165,37 +154,31 @@ export default function CompetitionCard({
               }`}
             />
           </div>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
+          <ConfirmByTypingDialog
+            trigger={
               <Button
                 variant="ghost"
                 size="icon"
                 className="text-muted-foreground hover:text-destructive"
                 onClick={(e: React.MouseEvent) => e.stopPropagation()}
+                aria-label={`Delete ${competition.name}`}
+                title="Delete competition"
               >
                 <Trash className="h-4 w-4" />
               </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete Competition</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Are you sure you want to delete &quot;{competition.name}
-                  &quot;? This action cannot be undone and will also delete all
-                  associated grades.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  className={cn(buttonVariants({ variant: 'destructive' }))}
-                  onClick={handleDeleteCompetition}
-                >
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+            }
+            title="Delete competition"
+            description={
+              <p>
+                This permanently deletes &quot;{competition.name}&quot; with all
+                its grades, entries and every music file uploaded to it. This
+                cannot be undone.
+              </p>
+            }
+            confirmText={competition.name}
+            confirmLabel="Delete competition"
+            onConfirm={handleDeleteCompetition}
+          />
         </div>
       </CardContent>
       <DeadlineDialog

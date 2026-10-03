@@ -11,6 +11,14 @@ import {
   createProjectClient,
 } from '@/lib/appwrite/server'
 import { toPlainObject } from '@/lib/utils'
+import {
+  requireAdmin,
+  requireSelfOrAdmin,
+  requireUser,
+} from '@/lib/auth/guards'
+import { describeWait, passwordLimiter } from '@/lib/security/rate-limit'
+import { isMissingTableError } from '@/lib/appwrite/rows'
+
 const databaseId = process.env.APPWRITE_DATABASE_ID!
 const musicFilesCollectionId = process.env.APPWRITE_MUSIC_FILES_COLLECTION_ID!
 const bucketId = process.env.APPWRITE_BUCKET_ID!
@@ -59,8 +67,16 @@ async function getAllDocuments(
 }
 
 export async function getAllUsers() {
+  await requireAdmin()
   try {
-    const usersList = await users.list()
+    // Appwrite returns 25 users by default, so page through all of them
+    const allUsers: Models.User<Models.Preferences>[] = []
+    for (let offset = 0; ; offset += 100) {
+      const page = await users.list([Query.limit(100), Query.offset(offset)])
+      allUsers.push(...page.users)
+      if (page.users.length < 100) break
+    }
+    const usersList = { users: allUsers }
 
     // Enhance user objects with additional info like role
     const enhancedUsers = await Promise.all(
@@ -107,6 +123,14 @@ export async function updateUserRole(
   userId: string,
   role: 'admin' | 'competitor'
 ) {
+  const admin = await requireAdmin()
+  if (role !== 'admin' && role !== 'competitor') {
+    throw new Error('The role must be admin or competitor.')
+  }
+  // An admin who removes their own role could lock everyone out of admin tools
+  if (admin.$id === userId && role !== 'admin') {
+    throw new Error('You cannot remove your own admin role. Ask another admin.')
+  }
   try {
     // Get current user data
     const user = await users.get(userId)
@@ -130,6 +154,10 @@ export async function updateUserRole(
 }
 
 export async function updateUserStatus(userId: string, active: boolean) {
+  const admin = await requireAdmin()
+  if (admin.$id === userId && !active) {
+    throw new Error('You cannot switch off your own account.')
+  }
   try {
     // The Appwrite SDK expects a boolean for updateStatus
     // true = active, false = blocked
@@ -144,6 +172,10 @@ export async function updateUserStatus(userId: string, active: boolean) {
 }
 
 export async function deleteUser(userId: string) {
+  const admin = await requireAdmin()
+  if (admin.$id === userId) {
+    throw new Error('You cannot delete your own account.')
+  }
   try {
     // First, delete all music files associated with this user
     const musicFiles = await getAllDocuments(
@@ -169,6 +201,24 @@ export async function deleteUser(userId: string) {
       }
     }
 
+    // Remove the skater's entries, if entries are set up
+    try {
+      const entriesTable =
+        process.env.APPWRITE_ENTRIES_COLLECTION_ID || 'entries'
+      const entryRows = await getAllDocuments(databaseId, entriesTable, [
+        Query.equal('userId', userId),
+      ])
+      for (const entry of entryRows) {
+        await tablesDB.deleteRow({
+          databaseId,
+          tableId: entriesTable,
+          rowId: entry.$id,
+        })
+      }
+    } catch (entryError) {
+      if (!isMissingTableError(entryError)) throw entryError
+    }
+
     // Delete the user account
     await users.delete(userId)
 
@@ -181,6 +231,7 @@ export async function deleteUser(userId: string) {
 }
 
 export async function getCurrentUserProfile() {
+  await requireUser()
   try {
     // Get the current user session
     const { userId } = await getServerSession()
@@ -234,6 +285,12 @@ export async function updateUserProfile({
   lastName: string
   phone: string
 }) {
+  await requireUser()
+  if (
+    [firstName, lastName].some((v) => typeof v !== 'string' || v.length > 100)
+  ) {
+    throw new Error('Names can be at most 100 characters.')
+  }
   try {
     // Get the current user session
     const { userId } = await getServerSession()
@@ -321,6 +378,7 @@ export async function updateUserProfile({
  * Get user profile information
  */
 export async function getUserProfile(userId: string) {
+  await requireSelfOrAdmin(userId)
   try {
     const user = await users.get(userId)
     const prefs = await users.getPrefs(userId)
@@ -347,6 +405,21 @@ export async function updateCompetitorProfile(
     prefs?: Record<string, unknown>
   }
 ) {
+  await requireSelfOrAdmin(userId)
+  // Only the name fields may be stored. Anything else a caller sends is dropped.
+  if (data.prefs) {
+    const { firstName, lastName } = data.prefs as {
+      firstName?: unknown
+      lastName?: unknown
+    }
+    data = {
+      ...data,
+      prefs: {
+        ...(typeof firstName === 'string' ? { firstName } : {}),
+        ...(typeof lastName === 'string' ? { lastName } : {}),
+      },
+    }
+  }
   try {
     const updates: Promise<unknown>[] = []
 
@@ -390,37 +463,45 @@ export async function changePassword({
   currentPassword: string
   newPassword: string
 }) {
+  const user = await requireUser()
+  if (typeof newPassword !== 'string' || newPassword.length < 8) {
+    throw new Error('The new password must be at least 8 characters.')
+  }
+
+  // Checking the current password is a password-guessing opportunity, so limit it
+  const limiter = passwordLimiter()
+  const blocked = limiter.status(user.$id)
+  if (blocked.blocked) {
+    throw new Error(
+      `Too many attempts. Try again in ${describeWait(blocked.retryAfterSeconds)}.`
+    )
+  }
+
   try {
-    // Get the current user session
-    const { userId } = await getServerSession()
+    const account = await users.get(user.$id)
 
-    if (!userId) {
-      throw new Error('Not authenticated')
-    }
-
-    // Verify the current password first
+    // Verify the current password by trying to sign in with it
+    const tempAccount = new Account(createProjectClient())
+    let session: Models.Session
     try {
-      // Get the user's email
-      const user = await users.get(userId)
-
-      // Create a temporary client and account instance for verification
-      const tempClient = createProjectClient()
-
-      const account = new Account(tempClient)
-
-      // Try to create a session with the current password to verify it
-      await account.createEmailPasswordSession(user.email, currentPassword)
-
-      // If we get here, the password is correct, so we can update it
-      // Use the Users API to update the password (which has the proper permissions)
-      await users.updatePassword(userId, newPassword)
-
-      revalidatePath('/admin/dashboard')
-      return true
-    } catch (error) {
-      console.error('Error during password verification:', error)
+      session = await tempAccount.createEmailPasswordSession(
+        account.email,
+        currentPassword
+      )
+    } catch {
+      limiter.hit(user.$id)
       throw new Error('Current password is incorrect')
     }
+
+    // The check session is not needed; do not leave it open
+    await users.deleteSession(user.$id, session.$id).catch((error) => {
+      console.error('Could not remove the password check session:', error)
+    })
+
+    await users.updatePassword(user.$id, newPassword)
+    limiter.reset(user.$id)
+    revalidatePath('/admin/dashboard')
+    return true
   } catch (error) {
     console.error('Error changing password:', error)
     throw new Error(

@@ -120,6 +120,8 @@ On first deployment, the Appwrite database/collections/storage may not exist yet
 3. Clicking "Initialize" runs the `setup-appwrite.ts` script within the app runtime
 4. This creates the database, tables (with columns and permissions), storage bucket, teams and indexes. It waits for Appwrite to finish building columns before creating indexes, and is safe to run again.
 
+   The storage bucket is **private**: it has no read permission for anyone, and music is only served through the app's signed-in file route (`/api/music/file/<id>`). After upgrading from a version with a public bucket, run Setup again (Setup tab, "Run setup"); the Storage "Access" row shows Ready once the bucket is private. Old direct Appwrite file links stop working.
+
 If initialisation fails, the error toast and the setup page show Appwrite's message. A `missing scopes` error means the API key needs the scopes listed above.
 
 Alternatively, run the setup scripts manually before deployment:

@@ -3,11 +3,13 @@
 import { tablesDB, ID, Query } from '@/lib/appwrite/server'
 import { revalidatePath } from 'next/cache'
 import { toPlainObject } from '@/lib/utils'
+import { requireAdmin } from '@/lib/auth/guards'
 
 const databaseId = process.env.APPWRITE_DATABASE_ID!
 const gradesCollectionId = process.env.APPWRITE_GRADES_COLLECTION_ID!
 
 export async function getGradesByCompetition(competitionId: string) {
+  await requireAdmin()
   try {
     const response = await tablesDB.listRows({
       databaseId,
@@ -33,6 +35,13 @@ export async function createGrade({
   segment: string
   competitionId: string
 }) {
+  await requireAdmin()
+  const fields = [name, category, segment].map((v) => v.trim())
+  if (fields.some((v) => !v || v.length > 255)) {
+    throw new Error(
+      'Name, category and segment must each be 1 to 255 characters.'
+    )
+  }
   try {
     const result = await tablesDB.createRow({
       databaseId,
@@ -62,6 +71,14 @@ export async function updateGrade(
     segment?: string
   }
 ) {
+  await requireAdmin()
+  for (const value of [data.name, data.category, data.segment]) {
+    if (value !== undefined && (!value.trim() || value.length > 255)) {
+      throw new Error(
+        'Name, category and segment must each be 1 to 255 characters.'
+      )
+    }
+  }
   try {
     const result = await tablesDB.updateRow({
       databaseId,
@@ -79,6 +96,7 @@ export async function updateGrade(
 }
 
 export async function deleteGrade(gradeId: string) {
+  await requireAdmin()
   try {
     await tablesDB.deleteRow({
       databaseId,

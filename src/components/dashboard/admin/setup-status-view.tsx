@@ -187,7 +187,7 @@ function Stat({
       className={cn(
         'rounded-lg border bg-card px-4 py-3',
         state === 'error' && 'border-destructive/60',
-        state === 'missing' && 'border-warning/60',
+        state === 'missing' && 'border-warning/60'
       )}
     >
       <p className="font-display text-2xl leading-tight font-bold tabular-nums">
@@ -237,6 +237,7 @@ export default function SetupStatusView({
     ...allColumns,
     ...allIndexes,
     report.bucket,
+    report.bucketAccess,
     ...report.teams,
   ]
   const overall = rollup(everything)
@@ -361,7 +362,7 @@ export default function SetupStatusView({
       <div
         className={cn(
           'flex flex-wrap items-center justify-between gap-3 rounded-lg border p-4',
-          overall === 'ready' ? 'border-success/50' : 'border-warning/60',
+          overall === 'ready' ? 'border-success/50' : 'border-warning/60'
         )}
       >
         <div className="flex items-center gap-3">
@@ -486,6 +487,7 @@ export default function SetupStatusView({
       <Section title="Storage" hint="Where uploaded music files are kept.">
         <div className="overflow-hidden rounded-lg border bg-card">
           <ObjectRow item={report.bucket} kind="Storage bucket ID" />
+          <ObjectRow item={report.bucketAccess} kind="Access" />
         </div>
       </Section>
 

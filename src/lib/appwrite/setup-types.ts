@@ -38,6 +38,8 @@ export interface SetupReport {
   database: SetupItem
   tables: SetupTable[]
   bucket: SetupItem
+  /** Whether the bucket is private. Missing means it is open to the public. */
+  bucketAccess: SetupItem
   teams: SetupItem[]
 }
 

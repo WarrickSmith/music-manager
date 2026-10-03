@@ -58,6 +58,12 @@ const status: InitializationStatus = {
       },
     ],
     bucket: { id: 'mmfiles', label: 'mmfiles', state: 'ready' },
+    bucketAccess: {
+      id: 'mmfiles-access',
+      label: 'Bucket access',
+      state: 'missing',
+      error: 'The bucket is open to the public',
+    },
     teams: [
       {
         id: 'admin',
@@ -92,6 +98,7 @@ describe('buildSetupReport', () => {
     expect(text).toContain('index idx_competition: ERROR - Index failed')
     expect(text).toContain('Administrators: ERROR - missing scopes')
     expect(text).toContain('Errors from Appwrite:')
+    expect(text).toContain('Bucket access: MISSING')
   })
 
   it('includes the last initialisation outcome and log', () => {

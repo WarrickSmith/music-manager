@@ -15,7 +15,7 @@ import UserManagement from '@/components/dashboard/admin/user-management'
 import AdminProfileManagement from '@/components/dashboard/admin/profile-management'
 import MusicFileManagement from '@/components/dashboard/admin/music-file-management'
 import AppwriteInitializationWrapper from '@/components/dashboard/admin/appwrite-initialization-wrapper'
-import { checkAppwriteInitialization } from '@/lib/appwrite/initialization-service'
+import { checkAppwriteInitialization } from '@/lib/appwrite/initialization-core'
 
 export default async function AdminDashboardPage() {
   const user = await getCurrentUser()
@@ -61,7 +61,7 @@ export default async function AdminDashboardPage() {
           value: 'users',
           label: 'Users',
           icon: <Users />,
-          content: <UserManagement />,
+          content: <UserManagement currentUserId={user?.$id} />,
         },
         {
           value: 'profile',
